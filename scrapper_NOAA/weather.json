@@ -1,0 +1,1561 @@
+[{
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1900-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.89
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1901-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.34
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1902-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.05
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1903-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.96
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1904-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.88
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1905-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.5
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1906-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.63
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1907-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.41
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1908-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.36
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1909-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.31
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1910-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.45
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1911-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.59
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1912-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.08
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1913-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.41
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1914-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.64
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1915-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.97
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1916-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.28
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1917-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.91
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1918-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.1
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1919-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.42
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1920-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.77
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1921-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.38
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1922-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.95
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1923-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.93
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1924-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.21
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1925-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.98
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1926-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.81
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1927-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.06
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1928-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.97
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1929-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.21
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1930-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.26
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1931-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.28
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1932-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.06
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1933-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.73
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1934-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.77
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1935-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.51
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1936-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.3
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1937-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.51
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1938-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.91
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1939-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.11
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1940-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.58
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1941-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.48
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1942-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.36
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1943-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.54
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1944-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.45
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1945-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.65
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1946-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.74
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1947-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.62
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1948-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.99
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1949-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.59
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1950-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.56
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1951-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.77
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1952-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.87
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1953-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.19
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1954-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.46
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1955-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.13
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1956-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.2
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1957-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.26
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1958-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.58
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1959-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.69
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1960-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.03
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1961-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.76
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1962-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.5
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1963-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.19
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1964-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.05
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1965-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.16
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1966-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.89
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1967-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.73
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1968-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.34
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1969-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.59
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1970-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.84
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1971-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.2
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1972-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.27
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1973-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.65
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1974-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.64
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1975-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.52
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1976-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.44
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1977-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.92
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1978-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.29
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1979-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.08
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1980-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.35
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1981-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.03
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1982-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.88
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1983-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.99
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1984-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.89
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1985-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.37
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1986-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.42
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1987-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 19.12
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1988-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.84
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1989-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.2
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1990-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.53
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1991-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.78
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1992-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.81
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1993-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.87
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1994-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.69
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1995-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 17.79
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1996-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 16.93
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1997-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.73
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1998-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.72
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "1999-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.43
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "2000-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 18.39
+    }]
+}, {}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "2002-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 20.27
+    }]
+}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "2003-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 21.46
+    }]
+}, {}, {}, {
+    "metadata": {
+        "resultset": {
+            "offset": 1,
+            "count": 1,
+            "limit": 25
+        }
+    },
+    "results": [{
+        "date": "2006-01-01T00:00:00",
+        "datatype": "TMAX",
+        "station": "GHCND:ITE00100554",
+        "attributes": "E",
+        "value": 21.98
+    }]
+}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]

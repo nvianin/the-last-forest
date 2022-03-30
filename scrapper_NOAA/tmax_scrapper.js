@@ -14,15 +14,17 @@ const r = new snoowrap({
 
 let GSOY;
 let dataset;
-let year = 1763;
+let year = 1900;
 let years = [];
+let currentYear = new Date().getYear() + 1900;
+log("Starting year: " + year + ", current year: " + currentYear)
 
 let baseUrl = "https://www.ncdc.noaa.gov/cdo-web/api/v2/"
 
 getYear(year);
 
-function getYear(year) {
-    let address = baseUrl + "data?datasetid=GSOY" + "&startdate=" + year + "-01-01" + "&enddate=" + year + "-01-01" + "&datatypeid=TMAX";
+function getYear() {
+    let address = baseUrl + "data?datasetid=GSOY" + "&startdate=" + year + "-01-01" + "&enddate=" + year + "-01-01" + "&datatypeid=TMAX" + "&stationid=GHCND:ITE00100554";
     year++;
     log(address)
     https.get(address, {
@@ -43,8 +45,10 @@ function getYear(year) {
                     console.error(e);
                 }
                 if (year < 2022) {
+                    log(year)
                     setTimeout(year => {
-                        getYear(year)
+                        log(year)
+                        getYear()
                     }, 500);
 
                 } else {
