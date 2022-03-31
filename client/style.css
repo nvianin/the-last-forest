@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Helvetica;
+}
+
+.text-input {
+  visibility: hidden;
+  position: fixed;
+  bottom: 2%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 40%;
+  height: 10%;
+  resize: none;
+  user-select: none;
+  color: white;
+  background-color: #111;
+
+  text-align: center;
+}
+
+#text-translation {
+  bottom: 14%;
+}
+
+#rule-set {
+  top: 2%;
+}
+
+.data-display {
+  position: fixed;
+  visibility: hidden;
+
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 60%;
+  height: auto;
+  resize: none;
+  user-select: none;
+  color: white;
+  text-align: center;
+}

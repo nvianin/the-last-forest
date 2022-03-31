@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L-systems test</title>
+
+    <script src="./resources/classes/Utils.js"></script>
+
+    <script src="./resources/classes/socket.io.js"></script>
+
+    <script src="./node_modules/three/build/three.js"></script>
+    <script src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineSegments2.js"></script>
+    <script src="./node_modules/three/examples/js/lines/Line2.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineSegmentsGeometry.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineGeometry.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineMaterial.js"></script>
+
+    <script src="./node_modules/three/examples/js/shaders/CopyShader.js"></script>
+    <script src="./node_modules/three/examples/js/shaders/BokehShader.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/Pass.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/BokehPass.js"></script>
+    <script src="./node_modules/three/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+    <script src="./resources/classes/InstanceManager.js"></script>
+    <script src="./resources/classes/Turtle.js"></script>
+    <script src="./resources/classes/Tree.js"></script>
+    <script src="./client.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <textarea value="" id="text-input" class="text-input"></textarea>
+    <textarea id="rule-set" class="text-input"></textarea>
+    <div id="text-translation" class="data-display"></div>
+</body>
+
+</html>
