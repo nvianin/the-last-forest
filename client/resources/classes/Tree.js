@@ -29,7 +29,7 @@ const parseRules = (seed) => {
 
 
 const lineMat = new THREE.LineBasicMaterial()
-class Tree {
+class TreeManager {
     constructor(seed, position) {
         this.message = seed;
         this.seed = alphConv(seed);

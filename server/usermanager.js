@@ -1,12 +1,17 @@
 const log = console.log;
 const fs = require("fs");
-const crypto = require("crypto")
+const crypto = require("crypto");
 
 
 class UserManager {
-    constructor() {
-        this.users = {}
+    constructor(posts, temperature_data) {
+        this.users = {};
+        this.posts = posts;
+        this.temperature_data = temperature_data;
+        this.init();
+    };
 
+    init() {
         this.server = require("http").createServer((req, res) => {
             if (req.url == "/") req.url += "index.html";
             req.url = __dirname + "/../client" + req.url;
@@ -25,18 +30,25 @@ class UserManager {
         this.io.on("connection", client => {
             client.user = new User(client);
             this.users[client.user.id] = client;
-            log("-->" + client.user.id)
+            log("-->" + client.user.id);
+            client.emit("posts", this.posts);
+            client.emit("temperature_data", this.temperature_data);
             client.on("disconnect", () => {
-                log("<--" + client.user.id)
+                log("<--" + client.user.id);
                 delete this.users[client.user.id];
-            })
-        })
-        this.server.listen(80)
+            });
+        });
+        this.server.listen(80);
 
 
-        log("User manager online")
-    }
-}
+        log("User manager online");
+    };
+
+    broadcastPosts(posts) {
+        this.io.sockets.emit("posts", posts);
+        this.posts = posts;
+    };
+};
 
 class User {
     constructor(socket) {
