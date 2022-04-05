@@ -39,7 +39,6 @@ class App {
 
         this.trees = [];
 
-
         // Ground generation & displacement
         this.ground = new THREE.Mesh(
             new THREE.PlaneGeometry(1024, 1024, 1024, 1024),
@@ -48,7 +47,23 @@ class App {
                 wireframe: true
             })
         )
+
+        for (let i = 0; i < this.ground.geometry.attributes.position.array.length; i += 3) {
+            let disp = this.getDisplacementAt(
+                this.ground.geometry.attributes.position.array[i],
+                this.ground.geometry.attributes.position.array[i + 1],
+                this.ground.geometry.attributes.position.array[i + 2]
+            )
+            if (i % 3000 == 0) log(disp);
+            this.ground.geometry.attributes.position.array[i] += disp.x
+            this.ground.geometry.attributes.position.array[i + 1] += disp.y
+            this.ground.geometry.attributes.position.array[i + 2] += disp.z
+        }
+
         this.ground.rotation.x = Math.PI / 2
+        this.ground.geometry.applyMatrix4(this.ground.matrix);
+        this.ground.rotation.x = 0;
+        this.ground.updateMatrix()
         this.scene.add(this.ground)
         let spires = 8
 
@@ -56,11 +71,7 @@ class App {
         for (let t = 0; t < Math.PI * 2 * spires; t += .1) {
             let r = t / (Math.PI * 2 * spires);
             log(r, t)
-            let pos = new THREE.Vector3(
-                Math.cos(t) * r,
-                1 - r,
-                Math.sin(t) * r,
-            )
+            let pos = this.generateSpiral(r, t);
             let helper = new THREE.AxesHelper(.05);
             this.helpers.push(helper)
             helper.position.copy(pos);
@@ -232,8 +243,8 @@ class App {
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
         this.composer.addPass(this.renderScene);
         this.composer.addPass(this.fxaaPass);
-        /* this.composer.addPass(this.bloomPass); */
-        this.composer.addPass(this.bokehPass);
+        this.composer.addPass(this.bloomPass);
+        /* this.composer.addPass(this.bokehPass); */
     }
 
     initSocket() {
@@ -308,6 +319,29 @@ class App {
         this.autoRotateTimeout = setTimeout(() => {
             this.orbitControls.autoRotate = true;
         }, 2000);
+    }
+
+    generateSpiral(r, t) {
+        return new THREE.Vector3(
+            Math.cos(t) * r,
+            1 - r,
+            Math.sin(t) * r,
+        )
+    }
+
+    getDisplacementAt(x, y, z) {
+        /* let r = Math.sqrt(this.ground.geometry.attributes.position.array[i] ** 2 + this.ground.geometry.attributes.position.array[i + 2] ** 2);
+        let t = Math.atan(this.ground.geometry.attributes.position.array[i + 2] / this.ground.geometry.attributes.position.array[i]);
+        return new THREE.Vector3(
+            Math.cos(t) * r,
+            1 - r,
+            Math.sin(t) * r,
+            ) */
+        let disp = new THREE.Vector3();
+        disp.y += Math.random();
+
+
+        return disp;
     }
 }
 
