@@ -48,6 +48,13 @@ class App {
             })
         )
 
+
+        this.ground.rotation.x = Math.PI / 2
+        this.ground.updateMatrix();
+        this.ground.geometry.applyMatrix4(this.ground.matrix);
+        this.ground.rotation.x = 0;
+        this.ground.updateMatrix()
+        this.scene.add(this.ground)
         for (let i = 0; i < this.ground.geometry.attributes.position.array.length; i += 3) {
             let disp = this.getDisplacementAt(
                 this.ground.geometry.attributes.position.array[i],
@@ -60,13 +67,7 @@ class App {
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
         }
 
-        this.ground.rotation.x = Math.PI / 2
-        this.ground.geometry.applyMatrix4(this.ground.matrix);
-        this.ground.rotation.x = 0;
-        this.ground.updateMatrix()
-        this.scene.add(this.ground)
         let spires = 8
-
         this.helpers = []
         for (let t = 0; t < Math.PI * 2 * spires; t += .1) {
             let r = t / (Math.PI * 2 * spires);
