@@ -27,6 +27,7 @@ class Server {
 
         this.settings = {
             getDailyTopInterval: 1, //hours
+            recentCommentThreshold: 12 //hours
         }
 
         this.client = new MongoClient("mongodb://localhost:27017");
@@ -34,9 +35,11 @@ class Server {
             this.db = this.client.db("last-forest");
             this.reddit_db = this.db.collection("reddit");
             for (let p of await this.reddit_db.find().toArray()) {
-                this.posts[p.id] = p;
+                this.posts[p.permalink] = p;
             };
             this.control_db = this.db.collection("control");
+            // DEBUG: REMOVES THE WHOLE REDDIT DB
+            /* this.reddit_db.deleteMany({}); */
             this.getRedditControl();
             this.load_temperature_data();
             this.userman = new UserManager(this.posts, this.temperature_data);
@@ -51,6 +54,7 @@ class Server {
         log("Server online")
     }
 
+    /** Fetches the control document. */
     getRedditControl() {
         this.control_db.findOne({
             "name": "reddit"
@@ -60,6 +64,7 @@ class Server {
             log("Last temperature get: " + this.reddit_control.last_tempMonth);
         })
     }
+    /** Updates the control document. */
     setRedditControl() {
         this.control_db.replaceOne({
             "name": "reddit"
@@ -68,6 +73,7 @@ class Server {
         })
     }
 
+    /** Gets and stores the daily top posts from r/collapse. */
     getDailyTop() {
         this.sub.getTop({
             time: "day"
@@ -76,25 +82,28 @@ class Server {
             data.forEach(post => {
                 log("-----------------")
                 log(post.title + ", by " + post.author.name)
+                log(post.permalink)
                 log(post.url)
                 log(post.score + " upvotes")
                 log(post.id)
+                log(post.created_utc)
                 post.uuid = crypto.randomUUID();
                 log(post.uuid)
                 log(post.media)
-                log(post.comments)
+                /* log(post.comments) */
                 if (post.score > 300) {
                     this.reddit_db.updateOne({
-                        uuid: post.uuid
+                        permalink: post.permalink
                     }, {
                         $set: {
                             title: post.title,
                             url: post.url,
+                            permalink: post.permalink,
                             score: post.score,
                             id: post.id,
+                            date: post.created_utc,
                             uuid: post.uuid,
-                            media: post.media,
-                            comments: post.comments
+                            media: post.media
                         }
                     }, {
                         upsert: true
@@ -103,18 +112,74 @@ class Server {
                     let p = {
                         title: post.title,
                         url: post.url,
+                        permalink: post.permalink,
                         score: post.score,
                         id: post.id,
+                        date: post.created_utc,
                         uuid: post.uuid,
                         media: post.media,
-                        comments: post.comments
+                        comments: post.comments,
                     }
-                    this.posts[post.id] = p;
+                    this.posts[post.permalink] = p;
                 }
             })
             log(data.length);
-            this.userman.broadcastPosts(this.posts)
+            log(Object.values(this.posts)[0])
+            this.getCommentsFromRecentPosts();
+            this.userman.broadcastPosts(this.posts);
         })
+    }
+
+    getCommentsFromRecentPosts() {
+        log("FETCHING RECENT COMMENTS")
+        for (let [key, post] of Object.entries(this.posts)) {
+            log(key)
+            if (post.date * 1000 < Date.now() - 1000 * 60 * 60 * this.settings.recentCommentThreshold) {
+                log(post.comments)
+                post.comments.fetchAll().then(comments => {
+                    let post_comments = []
+                    for (let com of comments) {
+                        com.replies.fetchAll().then(replies => {
+                            /* log(replies) */
+                            let comment_replies = [];
+                            replies.forEach(r => {
+                                comment_replies.push(this.parseComment(r))
+                            })
+                            let c = {
+                                user: com.author.name,
+                                body: com.body,
+                                score: com.ups - com.downs,
+                                date: com.created_utc,
+                                replies: comment_replies,
+                            }
+                            post_comments.push(c)
+                            this.posts[key].comments = post_comments
+                            log(post_comments)
+                            this.reddit_db.updateOne({
+                                permalink: this.posts[key].permalink
+                            }, {
+                                "$set": {
+                                    comments: post_comments
+                                }
+                            })
+                            /* log("replies:", comment_replies);
+                            log(c) */
+                        })
+                    }
+                })
+            }
+        }
+    }
+
+    parseComment(comment) {
+        let c = {
+            user: comment.author.name,
+            body: comment.body,
+            score: comment.ups - comment.downs,
+            date: comment.created_utc,
+            /* replies: comment.replies, */
+        }
+        return c;
     }
     /**
     Downloads, then loads temperature data.
@@ -123,10 +188,8 @@ class Server {
         download("https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv", "temperature_data")
             .then(e => {
                 log("file downloaded ", e);
-                handle_temperature_data()
+                this.load_temperature_data();
             })
-        this.load_temperature_data()
-
     }
 
     /** Loads temperature data from cached file. */

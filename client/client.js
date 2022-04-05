@@ -1,7 +1,9 @@
 let loader = new THREE.GLTFLoader();
-let loadList = [{
-    name: "terrain"
-}]
+let loadList = [
+    /* {
+        name: "terrain"
+    } */
+]
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
@@ -36,15 +38,36 @@ class App {
         window.addEventListener("resize", this.setSize.bind(this))
 
         this.trees = [];
-        /* this.ground = new THREE.Mesh(
-            new THREE.PlaneGeometry(2, 2, 3, 3),
+
+
+        // Ground generation & displacement
+        this.ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(1024, 1024, 1024, 1024),
             new THREE.MeshBasicMaterial({
                 color: 0x444444,
                 wireframe: true
             })
         )
         this.ground.rotation.x = Math.PI / 2
-        this.scene.add(this.ground) */
+        this.scene.add(this.ground)
+        let spires = 8
+
+        this.helpers = []
+        for (let t = 0; t < Math.PI * 2 * spires; t += .1) {
+            let r = t / (Math.PI * 2 * spires);
+            log(r, t)
+            let pos = new THREE.Vector3(
+                Math.cos(t) * r,
+                1 - r,
+                Math.sin(t) * r,
+            )
+            let helper = new THREE.AxesHelper(.05);
+            this.helpers.push(helper)
+            helper.position.copy(pos);
+            this.scene.add(helper);
+        }
+
+
         this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 14)
         this.sun.position.set(30, 30, 10);
         this.sun.lookAt(0, 0, 0)
@@ -152,9 +175,11 @@ class App {
                 case "r":
                     /* this.ruleset.randomize();
                     this.lastInstructions = this.tree.turtle.evolve(
-                        this.tree.turtle.alphConv(this.sentence),
+                        this.tree.turtl
+                        e.alphConv(this.sentence),
                         this.ruleset
-                    )
+                    
+                        )
                     this.tree.build_instructions(
                         this.lastInstructions
                     ) */
@@ -199,15 +224,15 @@ class App {
         this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1, 2, .3); // strength, radius, threshold
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
             focus: 2.0,
-            aperture: .00001,
-            maxblur: .01,
+            aperture: .000005,
+            maxblur: .1,
             width: innerWidth,
             height: innerHeight,
         });
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
         this.composer.addPass(this.renderScene);
         this.composer.addPass(this.fxaaPass);
-        this.composer.addPass(this.bloomPass);
+        /* this.composer.addPass(this.bloomPass); */
         this.composer.addPass(this.bokehPass);
     }
 

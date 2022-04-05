@@ -45,6 +45,7 @@ class UserManager {
     };
 
     broadcastPosts(posts) {
+        log("BROADCASTING POSTS TO USERS")
         this.io.sockets.emit("posts", posts);
         this.posts = posts;
     };
