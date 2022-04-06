@@ -4,20 +4,27 @@ let loadList = [
         name: "terrain"
     } */
 ]
+
+let debug = true;
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
 
         });
+
+        this.settings = {
+            ground_side: 512
+        }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
         this.camera = new THREE.PerspectiveCamera(90, innerWidth / innerHeight, .01, 1000);
         this.camera.position.set(0, .5, 1);
+        if (debug) this.camera.position.set(10, 10, 10)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
         let bgCol = new THREE.Color(0x111522);
-        this.fog = new THREE.Fog(bgCol, 0, 100);
-        this.scene.fog = this.fog;
+        this.fog = new THREE.Fog(bgCol, 0, 500);
+        if (!debug) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
 
         this.loadResources();
@@ -25,6 +32,22 @@ class App {
         this.initPostprocess()
 
         this.initSocket();
+
+        /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
+        this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
+        this.scene.add(this.skylight);
+        this.sun = new THREE.DirectionalLight(0xffaa44, 1);
+        this.sun.position.set(50, 100, 50);
+        this.sun.lookAt(0, 0, 0);
+        this.sun.add(new THREE.DirectionalLightHelper(this.sun))
+        this.scene.add(this.sun)
+
+        this.test = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+        this.test.castShadow = true;
+        this.test.position.y = 5;
+        this.scene.add(this.test)
+
+        this.initShadows();
 
         this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.autoRotate = true;
@@ -41,12 +64,22 @@ class App {
 
         // Ground generation & displacement
         this.ground = new THREE.Mesh(
-            new THREE.PlaneGeometry(1024, 1024, 1024, 1024),
-            new THREE.MeshBasicMaterial({
+            new THREE.PlaneGeometry(
+                this.settings.ground_side,
+                this.settings.ground_side,
+                this.settings.ground_side,
+                this.settings.ground_side),
+            new THREE.MeshStandardMaterial({
                 color: 0x444444,
-                wireframe: true
+                wireframe: false,
+                side: 2,
             })
         )
+
+        this.csm.setupMaterial(this.ground.material);
+
+        this.ground.castShadow = true;
+        this.ground.receiveShadow = true;
 
 
         this.ground.rotation.x = Math.PI / 2
@@ -61,7 +94,7 @@ class App {
                 this.ground.geometry.attributes.position.array[i + 1],
                 this.ground.geometry.attributes.position.array[i + 2]
             )
-            if (i % 3000 == 0) log(disp);
+            /* if (i % 3000 == 0) log(disp); */
             this.ground.geometry.attributes.position.array[i] += disp.x
             this.ground.geometry.attributes.position.array[i + 1] += disp.y
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
@@ -71,7 +104,7 @@ class App {
         this.helpers = []
         for (let t = 0; t < Math.PI * 2 * spires; t += .1) {
             let r = t / (Math.PI * 2 * spires);
-            log(r, t)
+            /* log(r, t) */
             let pos = this.generateSpiral(r, t);
             let helper = new THREE.AxesHelper(.05);
             this.helpers.push(helper)
@@ -79,11 +112,6 @@ class App {
             this.scene.add(helper);
         }
 
-
-        this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 14)
-        this.sun.position.set(30, 30, 10);
-        this.sun.lookAt(0, 0, 0)
-        this.scene.add(this.sun)
 
         /* this.pearlPalette = [
             0x4acdff,
@@ -233,7 +261,17 @@ class App {
     initPostprocess() {
         this.renderScene = new THREE.RenderPass(this.scene, this.camera);
         this.composer = new THREE.EffectComposer(this.renderer);
-        this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1, 2, .3); // strength, radius, threshold
+
+        this.bloomPass = new THREE.UnrealBloomPass(
+            new THREE.Vector2(
+                innerWidth,
+                innerHeight
+            ),
+            1, // strength
+            2, // radius
+            1. // threshold
+        );
+
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
             focus: 2.0,
             aperture: .000005,
@@ -242,10 +280,46 @@ class App {
             height: innerHeight,
         });
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
+
         this.composer.addPass(this.renderScene);
         this.composer.addPass(this.fxaaPass);
         this.composer.addPass(this.bloomPass);
         /* this.composer.addPass(this.bokehPass); */
+    }
+
+    initShadows() {
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        this.sun.castShadow = true;
+        this.sun.shadow.mapSize.width = 2048;
+        this.sun.shadow.mapSize.height = 2048;
+
+        this.sun.shadow.camera.near = .5;
+        this.sun.shadow.camera.far = 512;
+
+        this.sun.shadow.camera.top = 100;
+        this.sun.shadow.camera.bottom = -100;
+        this.sun.shadow.camera.right = 100;
+        this.sun.shadow.camera.left = -100;
+
+        this.sun.shadow.bias = -.0001;
+
+        this.csm = new THREE.CSM({
+            maxFar: 512,
+            cascades: 3,
+            mode: "practical",
+            parent: this.scene,
+            shadowMapSize: 1024,
+            lightDirection: this.sun.position.clone().multiplyScalar(-1),
+            camera: this.camera
+        })
+
+
+        if (debug) {
+            this.shadowCameraHelper = new THREE.CameraHelper(this.sun.shadow.camera);
+            this.scene.add(this.shadowCameraHelper);
+        }
     }
 
     initSocket() {
@@ -293,11 +367,13 @@ class App {
         this.clock.getElapsedTime()
         /* this.renderer.render(this.scene, this.camera); */
         this.composer.render();
+        this.csm.update()
         requestAnimationFrame(this.render.bind(this))
         this.trees.forEach(tree => {
             /* tree.object.rotation.y = this.clock.elapsedTime / 1 */
         })
         this.orbitControls.update()
+
     }
 
     setSize() {
@@ -338,8 +414,23 @@ class App {
             1 - r,
             Math.sin(t) * r,
             ) */
+        let pos = new THREE.Vector3(x, y, z);
+
+        let dis = 1.;
+        let blur = 1.;
+        let width = .1;
+        let uv = new THREE.Vector2(x, z);
+        let angle = Math.atan2(x, z);
+        let l = uv.distanceTo(new THREE.Vector2()) / 40;
+        let offset = l + (angle / (2 * Math.PI)) * dis;
+        let circles = offset % dis;
+
         let disp = new THREE.Vector3();
-        disp.y += Math.random();
+        disp.y = circles * 10;
+        disp.y *= 1 - l;
+        /* let d = 1 - (pos.distanceTo(new THREE.Vector3()) / this.settings.ground_side) - .5;
+        disp.y += d * 50 - 25; */
+        /* disp.y = Math.Smin(disp.y, -20, 80); */
 
 
         return disp;
