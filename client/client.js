@@ -5,27 +5,47 @@ let loadList = [
     } */
 ]
 
-let debug = true;
+let debug = {
+    shadow_helper: false,
+    sun_helper: false,
+    frameRate: false,
+    fog: true,
+    line_markers: true,
+
+    enable: () => {
+        for (let key of Object.keys(debug)) {
+            if (key != "enable" && key != "disable") debug[key] = true;
+        }
+    },
+    disable: () => {
+        for (let key of Object.keys(debug)) {
+            if (key != "enable" && key != "disable") debug[key] = false;
+        }
+    },
+}
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
-
+            /* logarithmicDepthBuffer: true */
         });
 
         this.settings = {
-            ground_side: 512
+            ground_side: 512 + 128
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
         this.camera = new THREE.PerspectiveCamera(90, innerWidth / innerHeight, .01, 1000);
         this.camera.position.set(0, .5, 1);
-        if (debug) this.camera.position.set(10, 10, 10)
+        /* if (debug)  */
+        this.camera.position.set(50, 100, 50)
+        this.camera.position.set(0, 100, 0)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
         let bgCol = new THREE.Color(0x111522);
-        this.fog = new THREE.Fog(bgCol, 0, 500);
-        if (!debug) this.scene.fog = this.fog;
+        this.fog = new THREE.Fog(bgCol, 0, 1000);
+        if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
+
 
         this.loadResources();
 
@@ -33,25 +53,29 @@ class App {
 
         this.initSocket();
 
+        this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        /* this.orbitControls.autoRotate = true; */
+        this.orbitControls.target.set(0, 0, 0);
         /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
-        this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
-        this.scene.add(this.skylight);
-        this.sun = new THREE.DirectionalLight(0xffaa44, 1);
+        /* this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
+        this.scene.add(this.skylight); */
+        this.sun = new THREE.DirectionalLight(0xffffaa, 2);
         this.sun.position.set(50, 100, 50);
-        this.sun.lookAt(0, 0, 0);
-        this.sun.add(new THREE.DirectionalLightHelper(this.sun))
+        this.sun_target_offset = new THREE.Vector3(-20, -10, -40);
+        /* this.sun.lookAt(0, 0, 0); */
+
+        this.sun.rotation.copy(this.sun.rotation)
+        if (debug.sun_helper) this.sun.add(new THREE.DirectionalLightHelper(this.sun))
         this.scene.add(this.sun)
 
-        this.test = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+        this.test = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial());
         this.test.castShadow = true;
-        this.test.position.y = 5;
+        this.test.receiveShadow = true;
+        this.test.position.y = 15;
         this.scene.add(this.test)
 
         this.initShadows();
 
-        this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.orbitControls.autoRotate = true;
-        this.orbitControls.target.set(0, 0, 0);
 
         this.input_timeout = false;
 
@@ -70,19 +94,19 @@ class App {
                 this.settings.ground_side,
                 this.settings.ground_side),
             new THREE.MeshStandardMaterial({
-                color: 0x444444,
+                color: 0xaa4400,
                 wireframe: false,
-                side: 2,
+                side: 0,
             })
         )
 
-        this.csm.setupMaterial(this.ground.material);
+        /* this.csm.setupMaterial(this.ground.material); */
 
         this.ground.castShadow = true;
         this.ground.receiveShadow = true;
 
 
-        this.ground.rotation.x = Math.PI / 2
+        this.ground.rotation.x = -Math.PI / 2
         this.ground.updateMatrix();
         this.ground.geometry.applyMatrix4(this.ground.matrix);
         this.ground.rotation.x = 0;
@@ -99,18 +123,19 @@ class App {
             this.ground.geometry.attributes.position.array[i + 1] += disp.y
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
         }
+        this.ground.geometry.computeVertexNormals();
 
-        let spires = 8
+        /* let spires = 8
         this.helpers = []
         for (let t = 0; t < Math.PI * 2 * spires; t += .1) {
             let r = t / (Math.PI * 2 * spires);
-            /* log(r, t) */
+            log(r, t)
             let pos = this.generateSpiral(r, t);
             let helper = new THREE.AxesHelper(.05);
             this.helpers.push(helper)
             helper.position.copy(pos);
             this.scene.add(helper);
-        }
+        } */
 
 
         /* this.pearlPalette = [
@@ -127,7 +152,20 @@ class App {
             0x21409a
         ]
 
+        if (debug.frameRate) {
+            this.frameRateDom = document.createElement("div");
+            this.frameRateDom.style.zIndex = 9000;
+            this.frameRateDom.style.position = "fixed";
+            this.frameRateDom.style.top = "0px";
+            this.frameRateDom.style.left = "0px";
+            this.frameRateDom.style.color = "white";
+            this.frameRateDom.innerText = "0fps"
+            document.body.appendChild(this.frameRateDom)
+        }
+
+        this.frameCount = 0;
         this.render()
+
     }
 
     init() {
@@ -144,6 +182,8 @@ class App {
             }),
             10000
         );
+
+        this.baseLine = new BaseLine();
 
         /* this.instances = []
         this.instance_id = this.instanceManager.register()
@@ -165,13 +205,22 @@ class App {
             i++
         }) */
         /* this.trees.push(new Tree(sentences[0])) */
+
+
+        this.baseRuleSet = new Ruleset();
+        this.baseRuleSet.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
+        this.baseRuleSet.addRule("[", "[LUFLUF[FFUUF]RUFF");
+
+
         this.tree = new TreeManager("", new THREE.Vector3())
         this.rule_dom = document.querySelector("#rule-set");
-        this.ruleset = new Ruleset(this.rule_dom)
+        this.ruleset = this.baseRuleSet.clone();
         this.ruleset.randomize()
 
-        this.ruleset.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
-        this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF")
+        /* this.ruleset.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
+        this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF") */
+
+
 
         this.rule_dom.addEventListener("input", e => {
             if (this.input_timeout) {
@@ -238,7 +287,7 @@ class App {
         this.rule_dom.addEventListener("keypress", e => {
             e.stopPropagation();
         })
-        let i = 0;
+        /* let i = 0;
         for (let s of sentences) {
             this.tree.build_sentence(s)
             let o = new THREE.Object3D()
@@ -247,7 +296,7 @@ class App {
             this.scene.add(o)
             this.trees.push(o)
             i++
-        }
+        } */
 
         window.addEventListener("pointerup", e => {
             this.preventAutoRotate();
@@ -281,10 +330,27 @@ class App {
         });
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
+        this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
+        this.saoPass.params.saoIntensity = .003;
+        this.saoPass.params.saoBias = 1;
+        this.saoPass.params.saoKernelRadius = 10;
+        this.saoPass.params.saoScale = 3;
+
+        /* this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight); */
+        /* this.ssaoPass. */
+
+
+        /* this.taaPass = new THREE.TAARenderPass(this.scene, this.camera);
+        this.taaPass.unbiased = false;
+        this.taaPass.sampleLevel = 0; */
+
         this.composer.addPass(this.renderScene);
+        /* this.composer.addPass(this.bokehPass); */
+        /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.fxaaPass);
         this.composer.addPass(this.bloomPass);
-        /* this.composer.addPass(this.bokehPass); */
+        /* this.composer.addPass(this.ssaoPass); */
+        this.composer.addPass(this.saoPass);
     }
 
     initShadows() {
@@ -292,31 +358,33 @@ class App {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         this.sun.castShadow = true;
-        this.sun.shadow.mapSize.width = 2048;
-        this.sun.shadow.mapSize.height = 2048;
+        this.sun.shadow.mapSize.width = 1024 * 1;
+        this.sun.shadow.mapSize.height = 1024 * 1;
 
-        this.sun.shadow.camera.near = .5;
-        this.sun.shadow.camera.far = 512;
+        this.sun.shadow.camera.near = 100;
+        this.sun.shadow.camera.far = 200;
 
-        this.sun.shadow.camera.top = 100;
-        this.sun.shadow.camera.bottom = -100;
-        this.sun.shadow.camera.right = 100;
-        this.sun.shadow.camera.left = -100;
+        const shadow_camera_bound = 50;
+
+        this.sun.shadow.camera.top = shadow_camera_bound;
+        this.sun.shadow.camera.bottom = -shadow_camera_bound;
+        this.sun.shadow.camera.right = shadow_camera_bound;
+        this.sun.shadow.camera.left = -shadow_camera_bound;
 
         this.sun.shadow.bias = -.0001;
 
-        this.csm = new THREE.CSM({
-            maxFar: 512,
-            cascades: 3,
+        /* this.csm = new THREE.CSM({
+            maxFar: this.camera.far,
+            cascades: 1,
             mode: "practical",
             parent: this.scene,
             shadowMapSize: 1024,
-            lightDirection: this.sun.position.clone().multiplyScalar(-1),
+            lightDirection: this.sun.position.clone().sub(this.sun.target.position).normalize(),
             camera: this.camera
-        })
+        }) */
 
 
-        if (debug) {
+        if (debug.shadow_helper) {
             this.shadowCameraHelper = new THREE.CameraHelper(this.sun.shadow.camera);
             this.scene.add(this.shadowCameraHelper);
         }
@@ -336,6 +404,8 @@ class App {
         this.socket.on("posts", posts => {
             this.posts = posts;
             log("posts received: ", posts)
+
+            this.buildTreesFromPosts();
         })
         this.socket.on("temperature_data", temperature_data => {
             this.temperature_data = temperature_data;
@@ -363,17 +433,40 @@ class App {
         })
     }
 
+    buildTreesFromPosts() {
+        let i = 0;
+        for (let post of Object.values(this.posts)) {
+            log(post)
+            let rules = this.baseRuleSet.clone();
+            rules.randomize(2, false);
+            this.tree.build_generations(post.title, 10, rules);
+            let tree = this.tree.line.clone();
+            this.trees.push(tree)
+            tree.position.copy(this.baseLine.sample(i / Object.keys(this.posts).length));
+            this.scene.add(tree)
+            i++;
+        }
+    }
+
     render() {
+        this.frame_time = Date.now();
         this.clock.getElapsedTime()
         /* this.renderer.render(this.scene, this.camera); */
         this.composer.render();
-        this.csm.update()
-        requestAnimationFrame(this.render.bind(this))
+        this.sun.position.copy(this.camera.position).add(new THREE.Vector3(50, 100, 50));
+        this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
+        this.sun.target.updateMatrixWorld();
+        /* this.csm.update(this.camera.matrix) */
         this.trees.forEach(tree => {
             /* tree.object.rotation.y = this.clock.elapsedTime / 1 */
         })
         this.orbitControls.update()
-
+        /* this.lastFrame = frame_time; */
+        this.frameRate = 1000 / (Date.now() - this.frame_time)
+        if (debug.frameRate) this.frameRateDom.innerText = Math.floor(this.frameRate) + "fps"
+        /* if (debug.frameRate) this.frameRateDom.innerText = Date.now() - this.frame_time; */
+        requestAnimationFrame(this.render.bind(this))
+        this.frameCount++;
     }
 
     setSize() {
@@ -381,11 +474,6 @@ class App {
         this.composer.setSize(innerWidth, innerHeight);
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
-
-        const pixelRatio = this.renderer.getPixelRatio();
-        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * pixelRatio;
-        this.fxaaPass.material.uniforms.resolution.value.y = 1 / innerHeight * pixelRatio;
-
     }
 
     preventAutoRotate() {
@@ -414,24 +502,27 @@ class App {
             1 - r,
             Math.sin(t) * r,
             ) */
+
         let pos = new THREE.Vector3(x, y, z);
 
         let dis = 1.;
-        let blur = 1.;
-        let width = .1;
+        let blur = .5;
+        let width = .5;
         let uv = new THREE.Vector2(x, z);
         let angle = Math.atan2(x, z);
-        let l = uv.distanceTo(new THREE.Vector2()) / 40;
+        let l = uv.distanceTo(new THREE.Vector2()) / 50;
         let offset = l + (angle / (2 * Math.PI)) * dis;
         let circles = offset % dis;
+
+        circles = Math.smoothStep(circles - blur, circles, width) - Math.smoothStep(circles, circles + blur, width);
 
         let disp = new THREE.Vector3();
         disp.y = circles * 10;
         disp.y *= 1 - l;
+
         /* let d = 1 - (pos.distanceTo(new THREE.Vector3()) / this.settings.ground_side) - .5;
         disp.y += d * 50 - 25; */
         /* disp.y = Math.Smin(disp.y, -20, 80); */
-
 
         return disp;
     }

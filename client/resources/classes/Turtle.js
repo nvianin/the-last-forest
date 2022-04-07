@@ -216,6 +216,12 @@ class Ruleset {
         this.updateDom()
     }
 
+    clone() {
+        const copy = new Ruleset();
+        copy.rules = this.rules;
+        return copy;
+    }
+
     randomize(n = 3, replace = true) {
         this.clear()
         let new_rules = []

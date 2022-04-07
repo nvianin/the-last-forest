@@ -1,16 +1,21 @@
 const log = console.log
 
-Math.Lerp = (x, y, t) => {
+Math.lerp = (x, y, t) => {
     return x * t + y * (1 - t);
 }
 
-Math.Clamp = (value, min, max) => {
+Math.clamp = (value, min, max) => {
     return Math.min(Math.max(value, min), max);
 }
 
-Math.Smin = (x, y, k) => {
-    let h = Math.Clamp(.5 + .5 * (x - y) / k, 0, 1);
-    return Math.Lerp(x, y, h) - k * h * (1 - h);
+Math.sMin = (x, y, k) => {
+    let h = Math.clamp(.5 + .5 * (x - y) / k, 0, 1);
+    return Math.lerp(x, y, h) - k * h * (1 - h);
+}
+
+Math.smoothStep = (edge, edge1, x) => {
+    x = Math.clamp((x - edge) / (edge1 - edge), 0, 1);
+    return x * x * (3 - 2 * x);
 }
 
 //rho = distance, theta = azimuth, phi = elevation

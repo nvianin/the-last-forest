@@ -98,6 +98,7 @@ class TreeManager {
         /* log(points) */
 
     }
+
     build_instructions(instructions) {
         let points = this.turtle.build(instructions);
         this.object.remove(this.line);
@@ -109,6 +110,7 @@ class TreeManager {
         this.setRotationRelativeToCenterOfWeight()
         /* log(points) */
     }
+
     build_generations(sentence, generations, ruleset) {
         let instructions = this.turtle.alphConv(sentence);
         for (let i = 0; i < generations; i++) {
