@@ -1,6 +1,6 @@
 let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
 let alphConvRegister = {}
-let i = 0
+i = 0
 for (let letter of alphabet) {
     i++
     alphConvRegister[letter] = i
