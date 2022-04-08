@@ -10,7 +10,8 @@ let debug = {
     sun_helper: false,
     frameRate: false,
     fog: true,
-    line_markers: true,
+    line_markers: false,
+    line_show: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -77,6 +78,10 @@ class App {
         this.initShadows();
 
 
+        this.mousecast = new THREE.Raycaster();
+        this.pointer = new THREE.Vector2();
+
+
         this.input_timeout = false;
 
         document.body.appendChild(this.renderer.domElement);
@@ -85,6 +90,7 @@ class App {
         window.addEventListener("resize", this.setSize.bind(this))
 
         this.trees = [];
+        this.tree_imposters = [];
 
         // Ground generation & displacement
         this.ground = new THREE.Mesh(
@@ -151,6 +157,13 @@ class App {
             0xffffff,
             0x21409a
         ]
+
+        this.temperature_palette = {
+            start_tone: new THREE.Color(0x00ff00),
+            end_tone: new THREE.Color(0xff0000),
+            start: 0,
+            end: 3.5
+        }
 
         if (debug.frameRate) {
             this.frameRateDom = document.createElement("div");
@@ -254,13 +267,13 @@ class App {
         document.body.addEventListener("keypress", e => {
             switch (e.key.toLowerCase()) {
                 case " ":
-                    if (this.lastInstructions.length < 100000) {
+                    /* if (this.lastInstructions.length < 100000) {
                         this.lastInstructions = this.tree.turtle.evolve(this.lastInstructions, this.ruleset);
                         this.tree.build_instructions(this.lastInstructions);
                     } else {
                         log("Next evolution too big !")
                     }
-                    break;
+                    break; */
                 case "r":
                     /* this.ruleset.randomize();
                     this.lastInstructions = this.tree.turtle.evolve(
@@ -272,14 +285,40 @@ class App {
                     this.tree.build_instructions(
                         this.lastInstructions
                     ) */
-                    this.ruleset.randomize()
-                    this.tree.build_generations(this.sentence, 30, this.ruleset)
+                    /* this.ruleset.randomize()
+                    this.tree.build_generations(this.sentence, 30, this.ruleset) */
 
                     break;
                 case "c":
                     this.orbitControls.reset();
                     break;
             }
+        })
+
+        this.activeTree = 0;
+        document.body.addEventListener("keydown", e => {
+            log(e)
+            switch (e.key) {
+                case "ArrowLeft":
+                    if (this.activeTree == 0) {
+                        this.activeTree = this.trees.length - 1;
+                    } else {
+                        this.activeTree--;
+                    }
+                    break;
+                case "ArrowRight":
+                    if (this.activeTree < this.trees.length - 1) {
+                        this.activeTree++;
+                    } else {
+                        this.activeTree = 0;
+                    }
+                    break;
+            }
+
+            log(this.activeTree);
+
+            this.orbitControls.target.copy(this.trees[this.activeTree].position)
+            this.camera.position.copy(this.orbitControls.target.clone().add(new THREE.Vector3(5, 3, 0)))
         })
         this.input.addEventListener("keypress", e => {
             e.stopPropagation();
@@ -297,6 +336,11 @@ class App {
             this.trees.push(o)
             i++
         } */
+
+        window.addEventListener("pointermove", e => {
+            this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
+            this.pointer.y = (e.clientY / innerHeight) * 2 + 1;
+        })
 
         window.addEventListener("pointerup", e => {
             this.preventAutoRotate();
@@ -336,6 +380,9 @@ class App {
         this.saoPass.params.saoKernelRadius = 10;
         this.saoPass.params.saoScale = 3;
 
+        this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera);
+
+
         /* this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight); */
         /* this.ssaoPass. */
 
@@ -349,6 +396,7 @@ class App {
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.fxaaPass);
         this.composer.addPass(this.bloomPass);
+        this.composer.addPass(this.outlinePass)
         /* this.composer.addPass(this.ssaoPass); */
         this.composer.addPass(this.saoPass);
     }
@@ -405,11 +453,11 @@ class App {
             this.posts = posts;
             log("posts received: ", posts)
 
-            this.buildTreesFromPosts();
         })
         this.socket.on("temperature_data", temperature_data => {
             this.temperature_data = temperature_data;
             log("temperature data received:", this.temperature_data)
+            this.buildTreesFromPosts();
         })
     }
 
@@ -436,31 +484,77 @@ class App {
     buildTreesFromPosts() {
         let i = 0;
         for (let post of Object.values(this.posts)) {
-            log(post)
+            const d = new Date(post.date * 1000);
+            d.year = d.getFullYear();
+            d.month = d.getMonth();
+            while (this.temperature_data[d.year][d.month] == "***") {
+                if (d.month == 0) break;
+                d.month--
+            }
+            log(d.year, d.month, this.temperature_data[d.year][d.month])
             let rules = this.baseRuleSet.clone();
             rules.randomize(2, false);
-            this.tree.build_generations(post.title, 10, rules);
+
+            let color = this.temperature_palette.start_tone.clone()
+                .lerpHSL(this.temperature_palette.end_tone,
+                    Math.map(parseFloat(this.temperature_data[d.year][d.month]),
+                        this.temperature_palette.start,
+                        this.temperature_palette.end,
+                        0,
+                        1
+                    ));
+
+            this.tree.build_generations(post.title, 35, rules, color);
             let tree = this.tree.line.clone();
+            tree.text = post.title;
             this.trees.push(tree)
-            tree.position.copy(this.baseLine.sample(i / Object.keys(this.posts).length));
+            const imposter = new THREE.Mesh(
+                new THREE.SphereGeometry(),
+                new THREE.MeshBasicMaterial({
+                    visible: false
+                })
+            );
+            imposter.position.copy(tree.position);
+            imposter.tree = tree;
+            this.scene.add(imposter)
+            this.tree_imposters.push(imposter)
+            const point = this.baseLine.sampleOnGround(i / Object.keys(this.posts).length)
+            tree.position.copy(point);
+            log(point)
+            /* const sample = this.baseLine.sample(Math.map(i / Object.keys(this.posts).length, 0, 1, .2, .8));
+            const disp = this.getDisplacementAt(sample.x, sample.y, sample.z);
+            tree.position.copy(sample);
+            tree.position.add(disp)
+            log(sample, disp, tree.position); */
             this.scene.add(tree)
             i++;
+            /* break; */
         }
     }
 
     render() {
         this.frame_time = Date.now();
         this.clock.getElapsedTime()
+
         /* this.renderer.render(this.scene, this.camera); */
         this.composer.render();
+
         this.sun.position.copy(this.camera.position).add(new THREE.Vector3(50, 100, 50));
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
         this.sun.target.updateMatrixWorld();
+
+
         /* this.csm.update(this.camera.matrix) */
-        this.trees.forEach(tree => {
-            /* tree.object.rotation.y = this.clock.elapsedTime / 1 */
-        })
+
         this.orbitControls.update()
+        this.mousecast.setFromCamera(this.pointer, this.camera);
+        const intersects = this.mousecast.intersectObjects(this.tree_imposters);
+        if (intersects[0]) {
+            this.outlinePass.selectedObjects = [intersects[0.].object.tree]
+            log("found tree")
+        }
+
+
         /* this.lastFrame = frame_time; */
         this.frameRate = 1000 / (Date.now() - this.frame_time)
         if (debug.frameRate) this.frameRateDom.innerText = Math.floor(this.frameRate) + "fps"
@@ -503,7 +597,7 @@ class App {
             Math.sin(t) * r,
             ) */
 
-        let pos = new THREE.Vector3(x, y, z);
+        /* let pos = new THREE.Vector3(x, y, z); */
 
         let dis = 1.;
         let blur = .5;

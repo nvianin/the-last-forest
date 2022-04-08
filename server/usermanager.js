@@ -15,7 +15,7 @@ class UserManager {
         this.server = require("http").createServer((req, res) => {
             if (req.url == "/") req.url += "index.html";
             req.url = __dirname + "/../client" + req.url;
-            /* log(req.url) */
+            log(req.url)
             fs.readFile(req.url, (err, data) => {
                 if (err || !req.url.includes("client")) {
                     res.writeHead(404);

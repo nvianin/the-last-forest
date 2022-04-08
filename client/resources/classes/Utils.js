@@ -4,6 +4,10 @@ Math.lerp = (x, y, t) => {
     return x * t + y * (1 - t);
 }
 
+Math.map = (v, x1, y1, x2, y2) => {
+    return (v - x1) * (y2 - x2) / (y1 - x1) + x2;
+}
+
 Math.clamp = (value, min, max) => {
     return Math.min(Math.max(value, min), max);
 }

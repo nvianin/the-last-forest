@@ -111,7 +111,7 @@ class TreeManager {
         /* log(points) */
     }
 
-    build_generations(sentence, generations, ruleset) {
+    build_generations(sentence, generations, ruleset, color = 0xff0000) {
         let instructions = this.turtle.alphConv(sentence);
         for (let i = 0; i < generations; i++) {
             instructions = this.turtle.evolve(instructions, ruleset);
@@ -125,14 +125,16 @@ class TreeManager {
         this.object.remove(this.line);
         this.line = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(points),
-            this.line_mat)
+            new THREE.LineBasicMaterial({
+                color: color
+            }))
         this.object.add(this.line);
         this.setSizeRelativeToBoundingSphere()
         this.setRotationRelativeToCenterOfWeight()
     }
 
     setSizeRelativeToBoundingSphere() {
-        /* return false; */
+        return false;
         this.object.children[0].geometry.computeBoundingSphere()
         let r = 1 / this.object.children[0].geometry.boundingSphere.radius;
         /* log(r, 1 / r) */
