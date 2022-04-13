@@ -10,6 +10,9 @@ function sleep(ms) {
 
 let chosen_stations = fs.readFileSync("./chosen_stations.json")
 chosen_stations = JSON.parse(chosen_stations)
+let existing_stations = fs.readdirSync("./stations");
+log(existing_stations);
+process.exit()
 async function download() {
 
     for (let s of chosen_stations) {

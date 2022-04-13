@@ -9,6 +9,7 @@ let stations = {}
 for (let station of Object.values(data)) {
     for (let [year, yearly_data] of Object.entries(station.measurements)) {
         /* log(year, measurement) */
+        let yearly_median = 0;
         for (let [month, monthly_data] of Object.entries(yearly_data)) {
             let median = 0
             for (let daily_data of Object.values(monthly_data)) {
@@ -18,7 +19,10 @@ for (let station of Object.values(data)) {
             /* station.measurements[year][month].median = median; */
             station.measurements[year][month] = median;
             /* log(month + "/" + year, median) */
+            yearly_median += median;
         }
+        station.measurements[year].median = yearly_median / Object.keys(station.measurements[year]).length;
+        log(station.measurements[year].median)
     }
     stations[station.id] = station
 }
