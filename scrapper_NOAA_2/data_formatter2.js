@@ -1,5 +1,8 @@
 const fs = require("fs");
 const csv = require("csv-parser")
+const {
+    pipeline
+} = require("stream/promises")
 const log = console.log;
 
 class Station {
@@ -17,10 +20,14 @@ let stations = {}
 let files = fs.readdirSync("./stations")
 let k = 0;
 let ended = 0;
+let active = 0;
+let streams = []
+
 for (let file of files) {
     let measurements = {}
     let s = new Station();
-    fs.createReadStream("./stations/" + file)
+
+    const stream = fs.createReadStream("./stations/" + file)
         .pipe(csv())
         .on("data", row => {
             /* log(row) */
@@ -43,17 +50,34 @@ for (let file of files) {
         })
         .on("end", () => {
             /* log("end", Object.keys(stations).length) */
-
             /* log(Object.keys(stations)) */
+            active--
             ended++;
             log(ended + "/" + files.length + " stations analyzed")
             if (ended >= files.length) {
                 fs.writeFileSync("./stations_measurements.json", JSON.stringify(stations));
             }
         })
+    stream.pause();
+    streams.push(stream);
     k++
     /* if (k == files.length * 2 + 1) {
         break;
     } */
     log(k + "/" + files.length + " files opened")
 }
+
+log(streams[0].active)
+
+
+let tick = () => {
+    log(active, streams.length)
+    if (active < 10) {
+        active++
+        streams.pop().resume()
+
+    }
+    if (streams.length == 0) clearInterval(tick_interval);
+}
+
+const tick_interval = setInterval(tick, 100);
