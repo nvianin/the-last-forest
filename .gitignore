@@ -1,2 +1,4 @@
 credentials
 *.idlk
+stations_measurements.json
+stations_measurements_formatted.json
