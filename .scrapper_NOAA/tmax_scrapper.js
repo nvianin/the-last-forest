@@ -21,7 +21,7 @@ log("Starting year: " + year + ", current year: " + currentYear)
 
 let baseUrl = "https://www.ncdc.noaa.gov/cdo-web/api/v2/"
 
-getYear(year);
+getYear(2022);
 
 function getYear() {
     let address = baseUrl + "data?datasetid=GSOY" + "&startdate=" + year + "-01-01" + "&enddate=" + year + "-01-01" + "&datatypeid=TMAX" + "&stationid=GHCND:ITE00100554";
