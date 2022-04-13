@@ -48,7 +48,8 @@ stations_inventory.forEach(s => {
     if (s[3] == "TAVG") {
         let c = new Capability(s[3], s[4], s[5]);
         if (!stations[s[0]]) {
-            stations[s[0]] = new Station(s[0]);
+            let station = new Station(s[0]);
+            stations[s[0]] = station;
         }
         stations[s[0]].capabilities.push(c)
     }
@@ -57,9 +58,10 @@ stations_inventory.forEach(s => {
 let chosen_stations = []
 Object.values(stations).forEach(s => {
     /* log(s.capabilities[0].range) */
-    if (s.capabilities[0].range > 100) {
+    if (s.capabilities[0].range > 80) {
         chosen_stations.push(s);
-        log(s.capabilities[0])
+        log(s.id)
+        /* log(s.capabilities[0]) */
     }
 })
 
