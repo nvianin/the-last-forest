@@ -24,7 +24,7 @@ let active = 0;
 let streams = []
 
 for (let file of files) {
-    if (k > 400) break;
+    if (k >= 400) break;
     let measurements = {}
     let s = new Station();
 
