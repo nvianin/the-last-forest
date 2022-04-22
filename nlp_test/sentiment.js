@@ -1,3 +1,4 @@
+const log = console.log
 const language = require("@google-cloud/language");
 const client = new language.LanguageServiceClient();
 
@@ -8,6 +9,10 @@ const doc = {
     type: "PLAIN_TEXT"
 }
 
-const [result] = client.analyzeSentiment({
-    document: document
+client.analyzeSentiment({
+    document: doc
+}).then(res => {
+    log(res);
+    log("score:" + res.documentSentiment.score);
+    log("magnitude:" + res.documentSentiment.magnitude);
 })
