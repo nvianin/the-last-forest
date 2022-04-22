@@ -11,7 +11,7 @@ let debug = {
     frameRate: false,
     fog: true,
     line_markers: false,
-    line_show: true,
+    line_show: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -24,14 +24,16 @@ let debug = {
         }
     },
 }
+const simplex = new THREE.SimplexNoise()
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
             /* logarithmicDepthBuffer: true */
+            antialias: true
         });
 
         this.settings = {
-            ground_side: 512 + 128
+            ground_side: 128
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -42,11 +44,11 @@ class App {
         this.camera.position.set(0, 100, 0)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
+
         let bgCol = new THREE.Color(0x111522);
-        this.fog = new THREE.Fog(bgCol, 0, 1000);
+        this.fog = new THREE.Fog(bgCol, 400, 900);
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
-
 
         this.loadResources();
 
@@ -100,8 +102,8 @@ class App {
                 this.settings.ground_side,
                 this.settings.ground_side),
             new THREE.MeshStandardMaterial({
-                color: 0xaa4400,
-                wireframe: false,
+                color: 0x333355,
+                wireframe: true,
                 side: 0,
             })
         )
@@ -113,9 +115,11 @@ class App {
 
 
         this.ground.rotation.x = -Math.PI / 2
+        this.ground.scale.set(6, 6, 6);
         this.ground.updateMatrix();
         this.ground.geometry.applyMatrix4(this.ground.matrix);
         this.ground.rotation.x = 0;
+        this.ground.scale.set(1, 1, 1);
         this.ground.updateMatrix()
         this.scene.add(this.ground)
         for (let i = 0; i < this.ground.geometry.attributes.position.array.length; i += 3) {
@@ -124,7 +128,7 @@ class App {
                 this.ground.geometry.attributes.position.array[i + 1],
                 this.ground.geometry.attributes.position.array[i + 2]
             )
-            /* if (i % 3000 == 0) log(disp); */
+            if (i % 3000 == 0) log(disp);
             this.ground.geometry.attributes.position.array[i] += disp.x
             this.ground.geometry.attributes.position.array[i + 1] += disp.y
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
@@ -196,7 +200,7 @@ class App {
             10000
         );
 
-        this.baseLine = new BaseLine();
+        /* this.baseLine = new BaseLine(); */
 
         /* this.instances = []
         this.instance_id = this.instanceManager.register()
@@ -297,7 +301,7 @@ class App {
 
         this.activeTree = 0;
         document.body.addEventListener("keydown", e => {
-            log(e)
+            /* log(e) */
             switch (e.key) {
                 case "ArrowLeft":
                     if (this.activeTree == 0) {
@@ -362,7 +366,7 @@ class App {
             ),
             1, // strength
             2, // radius
-            1. // threshold
+            .4 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -457,7 +461,7 @@ class App {
         this.socket.on("temperature_data", temperature_data => {
             this.temperature_data = temperature_data;
             log("temperature data received:", this.temperature_data)
-            this.buildTreesFromPosts();
+            /* this.buildTreesFromPosts(); */
         })
     }
 
@@ -468,7 +472,7 @@ class App {
                     case "terrain":
                         this.ground = gltf.scene;
                         gltf.scene.children[0].material =
-                            new THREE.MeshBasicMaterial({
+                            new THREE.MeshStandardMaterial({
                                 color: 0x444444,
                                 wireframe: true,
                             })
@@ -491,7 +495,7 @@ class App {
                 if (d.month == 0) break;
                 d.month--
             }
-            log(d.year, d.month, this.temperature_data[d.year][d.month])
+            /* log(d.year, d.month, this.temperature_data[d.year][d.month]) */
             let rules = this.baseRuleSet.clone();
             rules.randomize(2, false);
 
@@ -520,7 +524,7 @@ class App {
             this.tree_imposters.push(imposter)
             const point = this.baseLine.sampleOnGround(i / Object.keys(this.posts).length)
             tree.position.copy(point);
-            log(point)
+            /* log(point) */
             /* const sample = this.baseLine.sample(Math.map(i / Object.keys(this.posts).length, 0, 1, .2, .8));
             const disp = this.getDisplacementAt(sample.x, sample.y, sample.z);
             tree.position.copy(sample);
@@ -568,6 +572,9 @@ class App {
         this.composer.setSize(innerWidth, innerHeight);
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
+
+        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
+        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
     }
 
     preventAutoRotate() {
@@ -599,6 +606,22 @@ class App {
 
         /* let pos = new THREE.Vector3(x, y, z); */
 
+        const sc = .005;
+
+        const disp = new THREE.Vector3(
+            0,
+            simplex.noise3d(y * sc, z * sc, x * sc) * 10,
+            0,
+        )
+        disp.y += simplex.noise3d(
+            x * (sc / 4),
+            y * (sc / 4),
+            z * (sc / 4)
+        ) * 30;
+
+        return disp;
+
+
         let dis = 1.;
         let blur = .5;
         let width = .5;
@@ -610,7 +633,6 @@ class App {
 
         circles = Math.smoothStep(circles - blur, circles, width) - Math.smoothStep(circles, circles + blur, width);
 
-        let disp = new THREE.Vector3();
         disp.y = circles * 10;
         disp.y *= 1 - l;
 
