@@ -347,7 +347,8 @@ class App {
 
         window.addEventListener("pointermove", e => {
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
-            this.pointer.y = (e.clientY / innerHeight) * 2 + 1;
+            this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+            /* log(this.pointer) */
         })
 
         window.addEventListener("pointerup", e => {
@@ -404,9 +405,9 @@ class App {
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.fxaaPass);
         this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.outlinePass)
         /* this.composer.addPass(this.ssaoPass); */
         this.composer.addPass(this.saoPass);
+        this.composer.addPass(this.outlinePass)
     }
 
     initShadows() {
@@ -467,6 +468,10 @@ class App {
             log("temperature data received:", this.temperature_data)
             /* this.buildTreesFromPosts(); */
         })
+        this.socket.on("points", points => {
+            log(points)
+            this.points = points;
+        })
     }
 
     loadResources() {
@@ -496,21 +501,24 @@ class App {
     }
 
     buildTreesFromPosts() {
+        let i = 0;
         for (let post of Object.values(this.posts)) {
-
+            const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
             let tree = this.tree_model.clone();
             tree.position.set(
-                Math.random() * 100,
+                this.points[t][0] * 2 - 384,
                 0,
-                Math.random() * 100
+                this.points[t][1] * 2 - 384
             )
             this.scene.add(tree)
+            this.trees.push(tree)
 
-            try {
+            /* try {
                 log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
             } catch {
                 log(post)
-            }
+            } */
+            i++;
         }
     }
 
@@ -581,10 +589,14 @@ class App {
 
         this.orbitControls.update()
         this.mousecast.setFromCamera(this.pointer, this.camera);
-        const intersects = this.mousecast.intersectObjects(this.tree_imposters);
+        const intersects = this.mousecast.intersectObjects(this.trees);
         if (intersects[0]) {
-            this.outlinePass.selectedObjects = [intersects[0.].object.tree]
-            log("found tree")
+            this.outlinePass.selectedObjects = [intersects[0].object.parent]
+            intersects[0].object.parent.active = true;
+            /* log("found tree ", intersects[0].object) */
+        } else {
+            this.outlinePass.selectedObjects[0].active = false;
+            this.outlinePass.selectedObjects = []
         }
 
 
