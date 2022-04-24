@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@google-cloud/language": "^4.3.2",
     "download": "^8.0.0",
     "mongodb": "^4.4.1",
     "snoowrap": "^1.23.0",

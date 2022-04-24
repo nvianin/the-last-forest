@@ -3,6 +3,9 @@ let loadList = [
     /* {
         name: "terrain"
     } */
+    {
+        name: "tree"
+    }
 ]
 
 let debug = {
@@ -479,6 +482,9 @@ class App {
                         gltf.scene.children[0].scale.set(100, 100, 100);
                         gltf.scene.children[0].position.y = -1.5;
                         break;
+                    case "tree":
+                        this.tree_model = gltf.scene;
+                        this.buildTreesFromPosts();
                 }
                 this.scene.add(gltf.scene)
             })
@@ -486,6 +492,12 @@ class App {
     }
 
     buildTreesFromPosts() {
+        for (let post of Object.values(this.posts)) {
+            log(post.title, post.sentiment.score)
+        }
+    }
+
+    buildTreesFromPosts_old() {
         let i = 0;
         for (let post of Object.values(this.posts)) {
             const d = new Date(post.date * 1000);
