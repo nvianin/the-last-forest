@@ -4,7 +4,8 @@ let loadList = [
         name: "terrain"
     } */
     {
-        name: "tree"
+        name: "tree",
+        dontadd: true
     }
 ]
 
@@ -322,10 +323,10 @@ class App {
                     break;
             }
 
-            log(this.activeTree);
+            /* log(this.activeTree); */
 
-            this.orbitControls.target.copy(this.trees[this.activeTree].position)
-            this.camera.position.copy(this.orbitControls.target.clone().add(new THREE.Vector3(5, 3, 0)))
+            /* this.orbitControls.target.copy(this.trees[this.activeTree].position)
+            this.camera.position.copy(this.orbitControls.target.clone().add(new THREE.Vector3(5, 3, 0))) */
         })
         this.input.addEventListener("keypress", e => {
             e.stopPropagation();
@@ -483,21 +484,37 @@ class App {
                         gltf.scene.children[0].position.y = -1.5;
                         break;
                     case "tree":
-                        this.tree_model = gltf.scene;
+                        gltf.scene.children[0]
+                        this.tree_model = gltf.scene.children[0];
                         this.buildTreesFromPosts();
                 }
-                this.scene.add(gltf.scene)
+                if (!loadable.dontadd) {
+                    this.scene.add(gltf.scene)
+                }
             })
         })
     }
 
     buildTreesFromPosts() {
         for (let post of Object.values(this.posts)) {
-            log(post.title, post.sentiment.score)
+
+            let tree = this.tree_model.clone();
+            tree.position.set(
+                Math.random() * 100,
+                0,
+                Math.random() * 100
+            )
+            this.scene.add(tree)
+
+            try {
+                log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
+            } catch {
+                log(post)
+            }
         }
     }
 
-    buildTreesFromPosts_old() {
+    buildTreesFromPosts__old() {
         let i = 0;
         for (let post of Object.values(this.posts)) {
             const d = new Date(post.date * 1000);
