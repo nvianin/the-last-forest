@@ -3,6 +3,10 @@ let loadList = [
     /* {
         name: "terrain"
     } */
+    {
+        name: "tree",
+        dontadd: true
+    }
 ]
 
 let debug = {
@@ -11,7 +15,7 @@ let debug = {
     frameRate: false,
     fog: true,
     line_markers: false,
-    line_show: true,
+    line_show: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -24,14 +28,16 @@ let debug = {
         }
     },
 }
+const simplex = new THREE.SimplexNoise()
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
             /* logarithmicDepthBuffer: true */
+            antialias: true
         });
 
         this.settings = {
-            ground_side: 512 + 128
+            ground_side: 128
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -42,11 +48,11 @@ class App {
         this.camera.position.set(0, 100, 0)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
+
         let bgCol = new THREE.Color(0x111522);
-        this.fog = new THREE.Fog(bgCol, 0, 1000);
+        this.fog = new THREE.Fog(bgCol, 400, 900);
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
-
 
         this.loadResources();
 
@@ -100,8 +106,8 @@ class App {
                 this.settings.ground_side,
                 this.settings.ground_side),
             new THREE.MeshStandardMaterial({
-                color: 0xaa4400,
-                wireframe: false,
+                color: 0x333355,
+                wireframe: true,
                 side: 0,
             })
         )
@@ -113,9 +119,11 @@ class App {
 
 
         this.ground.rotation.x = -Math.PI / 2
+        this.ground.scale.set(6, 6, 6);
         this.ground.updateMatrix();
         this.ground.geometry.applyMatrix4(this.ground.matrix);
         this.ground.rotation.x = 0;
+        this.ground.scale.set(1, 1, 1);
         this.ground.updateMatrix()
         this.scene.add(this.ground)
         for (let i = 0; i < this.ground.geometry.attributes.position.array.length; i += 3) {
@@ -124,7 +132,7 @@ class App {
                 this.ground.geometry.attributes.position.array[i + 1],
                 this.ground.geometry.attributes.position.array[i + 2]
             )
-            /* if (i % 3000 == 0) log(disp); */
+            if (i % 3000 == 0) log(disp);
             this.ground.geometry.attributes.position.array[i] += disp.x
             this.ground.geometry.attributes.position.array[i + 1] += disp.y
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
@@ -196,7 +204,7 @@ class App {
             10000
         );
 
-        this.baseLine = new BaseLine();
+        /* this.baseLine = new BaseLine(); */
 
         /* this.instances = []
         this.instance_id = this.instanceManager.register()
@@ -297,7 +305,7 @@ class App {
 
         this.activeTree = 0;
         document.body.addEventListener("keydown", e => {
-            log(e)
+            /* log(e) */
             switch (e.key) {
                 case "ArrowLeft":
                     if (this.activeTree == 0) {
@@ -315,10 +323,10 @@ class App {
                     break;
             }
 
-            log(this.activeTree);
+            /* log(this.activeTree); */
 
-            this.orbitControls.target.copy(this.trees[this.activeTree].position)
-            this.camera.position.copy(this.orbitControls.target.clone().add(new THREE.Vector3(5, 3, 0)))
+            /* this.orbitControls.target.copy(this.trees[this.activeTree].position)
+            this.camera.position.copy(this.orbitControls.target.clone().add(new THREE.Vector3(5, 3, 0))) */
         })
         this.input.addEventListener("keypress", e => {
             e.stopPropagation();
@@ -339,7 +347,8 @@ class App {
 
         window.addEventListener("pointermove", e => {
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
-            this.pointer.y = (e.clientY / innerHeight) * 2 + 1;
+            this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+            /* log(this.pointer) */
         })
 
         window.addEventListener("pointerup", e => {
@@ -362,7 +371,7 @@ class App {
             ),
             1, // strength
             2, // radius
-            1. // threshold
+            .4 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -396,9 +405,9 @@ class App {
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.fxaaPass);
         this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.outlinePass)
         /* this.composer.addPass(this.ssaoPass); */
         this.composer.addPass(this.saoPass);
+        this.composer.addPass(this.outlinePass)
     }
 
     initShadows() {
@@ -457,7 +466,11 @@ class App {
         this.socket.on("temperature_data", temperature_data => {
             this.temperature_data = temperature_data;
             log("temperature data received:", this.temperature_data)
-            this.buildTreesFromPosts();
+            /* this.buildTreesFromPosts(); */
+        })
+        this.socket.on("points", points => {
+            log(points)
+            this.points = points;
         })
     }
 
@@ -468,20 +481,48 @@ class App {
                     case "terrain":
                         this.ground = gltf.scene;
                         gltf.scene.children[0].material =
-                            new THREE.MeshBasicMaterial({
+                            new THREE.MeshStandardMaterial({
                                 color: 0x444444,
                                 wireframe: true,
                             })
                         gltf.scene.children[0].scale.set(100, 100, 100);
                         gltf.scene.children[0].position.y = -1.5;
                         break;
+                    case "tree":
+                        gltf.scene.children[0]
+                        this.tree_model = gltf.scene.children[0];
+                        this.buildTreesFromPosts();
                 }
-                this.scene.add(gltf.scene)
+                if (!loadable.dontadd) {
+                    this.scene.add(gltf.scene)
+                }
             })
         })
     }
 
     buildTreesFromPosts() {
+        let i = 0;
+        for (let post of Object.values(this.posts)) {
+            const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
+            let tree = this.tree_model.clone();
+            tree.position.set(
+                this.points[t][0] * 2 - 384,
+                0,
+                this.points[t][1] * 2 - 384
+            )
+            this.scene.add(tree)
+            this.trees.push(tree)
+
+            /* try {
+                log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
+            } catch {
+                log(post)
+            } */
+            i++;
+        }
+    }
+
+    buildTreesFromPosts__old() {
         let i = 0;
         for (let post of Object.values(this.posts)) {
             const d = new Date(post.date * 1000);
@@ -491,7 +532,7 @@ class App {
                 if (d.month == 0) break;
                 d.month--
             }
-            log(d.year, d.month, this.temperature_data[d.year][d.month])
+            /* log(d.year, d.month, this.temperature_data[d.year][d.month]) */
             let rules = this.baseRuleSet.clone();
             rules.randomize(2, false);
 
@@ -520,7 +561,7 @@ class App {
             this.tree_imposters.push(imposter)
             const point = this.baseLine.sampleOnGround(i / Object.keys(this.posts).length)
             tree.position.copy(point);
-            log(point)
+            /* log(point) */
             /* const sample = this.baseLine.sample(Math.map(i / Object.keys(this.posts).length, 0, 1, .2, .8));
             const disp = this.getDisplacementAt(sample.x, sample.y, sample.z);
             tree.position.copy(sample);
@@ -548,10 +589,14 @@ class App {
 
         this.orbitControls.update()
         this.mousecast.setFromCamera(this.pointer, this.camera);
-        const intersects = this.mousecast.intersectObjects(this.tree_imposters);
+        const intersects = this.mousecast.intersectObjects(this.trees);
         if (intersects[0]) {
-            this.outlinePass.selectedObjects = [intersects[0.].object.tree]
-            log("found tree")
+            this.outlinePass.selectedObjects = [intersects[0].object.parent]
+            intersects[0].object.parent.active = true;
+            /* log("found tree ", intersects[0].object) */
+        } else {
+            this.outlinePass.selectedObjects[0].active = false;
+            this.outlinePass.selectedObjects = []
         }
 
 
@@ -568,6 +613,9 @@ class App {
         this.composer.setSize(innerWidth, innerHeight);
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
+
+        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
+        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
     }
 
     preventAutoRotate() {
@@ -599,6 +647,22 @@ class App {
 
         /* let pos = new THREE.Vector3(x, y, z); */
 
+        const sc = .005;
+
+        const disp = new THREE.Vector3(
+            0,
+            simplex.noise3d(y * sc, z * sc, x * sc) * 10,
+            0,
+        )
+        disp.y += simplex.noise3d(
+            x * (sc / 4),
+            y * (sc / 4),
+            z * (sc / 4)
+        ) * 30;
+
+        return disp;
+
+
         let dis = 1.;
         let blur = .5;
         let width = .5;
@@ -610,7 +674,6 @@ class App {
 
         circles = Math.smoothStep(circles - blur, circles, width) - Math.smoothStep(circles, circles + blur, width);
 
-        let disp = new THREE.Vector3();
         disp.y = circles * 10;
         disp.y *= 1 - l;
 
