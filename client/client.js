@@ -17,6 +17,12 @@ let debug = {
     line_markers: false,
     line_show: false,
     half_res_renderer: true,
+    debug_target_frameRate: {
+        enabled: true,
+        value: 5
+    },
+
+    use_cached_data: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -456,46 +462,54 @@ class App {
         }
     }
 
-    initSocket() {
+    async initSocket() {
 
-        this.connection_conditions_count = 0;
-        this.connection_conditions_threshold = 3;
+        if (debug.use_cached_data) {
+            this.points = JSON.parse(await (await fetch("./sample_points.json")).text());
+            this.posts = JSON.parse(await (await fetch("./sample_posts.json")).text());
+            this.connection_conditions_count = 0;
+            this.connection_conditions_threshold = 1;
+            this.buildTreesFromPosts()
+        } else {
+            this.connection_conditions_count = 0;
+            this.connection_conditions_threshold = 3;
 
-        this.socket = io()
-        this.connectionFailed = false;
-        this.socket.on("connect", () => {
-            log("Connected");
-            if (this.connectionFailed) {
-                window.location.reload()
-            }
-        })
-        this.socket.on("disconnect", () => {
-            log("Disconnected !");
-            this.connectionFailed = true;
-        })
-        this.socket.on("posts", posts => {
-            this.posts = posts;
-            window.localStorage.setItem("posts", JSON.stringify(this.posts))
-            log("posts received " /* , posts */ )
+            this.socket = io()
+            this.connectionFailed = false;
+            this.socket.on("connect", () => {
+                log("Connected");
+                if (this.connectionFailed) {
+                    window.location.reload()
+                }
+            })
+            this.socket.on("disconnect", () => {
+                log("Disconnected !");
+                this.connectionFailed = true;
+            })
+            this.socket.on("posts", posts => {
+                this.posts = posts;
+                window.localStorage.setItem("posts", JSON.stringify(this.posts))
+                log("posts received " /* , posts */ )
 
-            this.connection_conditions_count++;
-            this.buildTreesFromPosts();
+                this.connection_conditions_count++;
+                this.buildTreesFromPosts();
 
-        })
-        this.socket.on("temperature_data", temperature_data => {
-            this.temperature_data = temperature_data;
-            log("temperature data received " /* , this.temperature_data */ )
-            /* this.buildTreesFromPosts(); */
-            this.connection_conditions_count++;
-            this.buildTreesFromPosts();
-        })
-        this.socket.on("points", points => {
-            log("points received ", points)
-            this.points = points;
-            window.localStorage.setItem("points", JSON.stringify(points));
-            this.connection_conditions_count++;
-            this.buildTreesFromPosts();
-        })
+            })
+            this.socket.on("temperature_data", temperature_data => {
+                this.temperature_data = temperature_data;
+                log("temperature data received " /* , this.temperature_data */ )
+                /* this.buildTreesFromPosts(); */
+                this.connection_conditions_count++;
+                this.buildTreesFromPosts();
+            })
+            this.socket.on("points", points => {
+                log("points received ", points)
+                this.points = points;
+                window.localStorage.setItem("points", JSON.stringify(points));
+                this.connection_conditions_count++;
+                this.buildTreesFromPosts();
+            })
+        }
     }
 
     loadResources() {
@@ -543,9 +557,9 @@ class App {
                 let tree = this.tree_model.clone();
                 raycaster.set(
                     new THREE.Vector3(
-                        x, 20, z
+                        x, 100, z
                     ),
-                    new THREE.Vector3(0, -100, 0)
+                    new THREE.Vector3(0, -1, 0)
                 )
                 const intersects = raycaster.intersectObject(this.ground);
                 if (intersects.length) {
@@ -658,7 +672,11 @@ class App {
         this.frameRate = 1000 / (Date.now() - this.frame_time)
         if (debug.frameRate) this.frameRateDom.innerText = Math.floor(this.frameRate) + "fps"
         /* if (debug.frameRate) this.frameRateDom.innerText = Date.now() - this.frame_time; */
-        requestAnimationFrame(this.render.bind(this))
+        if (debug.debug_target_frameRate.enabled) {
+            setTimeout(requestAnimationFrame(this.render.bind(this)), debug.debug_target_frameRate.value)
+        } else {
+            requestAnimationFrame(this.render.bind(this))
+        }
         this.frameCount++;
     }
 
