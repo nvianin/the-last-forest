@@ -36,6 +36,9 @@ class App {
             antialias: true
         });
 
+        const localstorage_posts = localStorage.getItem("posts");
+        if (localstorage_posts) this.posts = localstorage_posts;
+
         this.settings = {
             ground_side: 128
         }
@@ -460,6 +463,7 @@ class App {
         })
         this.socket.on("posts", posts => {
             this.posts = posts;
+            window.localStorage.setItem("posts", JSON.stringify(this.posts))
             log("posts received: ", posts)
 
         })
@@ -588,15 +592,17 @@ class App {
         /* this.csm.update(this.camera.matrix) */
 
         this.orbitControls.update()
-        this.mousecast.setFromCamera(this.pointer, this.camera);
-        const intersects = this.mousecast.intersectObjects(this.trees);
-        if (intersects[0]) {
-            this.outlinePass.selectedObjects = [intersects[0].object.parent]
-            intersects[0].object.parent.active = true;
-            /* log("found tree ", intersects[0].object) */
-        } else {
-            this.outlinePass.selectedObjects[0].active = false;
-            this.outlinePass.selectedObjects = []
+        if (this.posts) {
+            this.mousecast.setFromCamera(this.pointer, this.camera);
+            const intersects = this.mousecast.intersectObjects(this.trees);
+            if (intersects[0]) {
+                this.outlinePass.selectedObjects = [intersects[0].object.parent]
+                intersects[0].object.parent.active = true;
+                /* log("found tree ", intersects[0].object) */
+            } else {
+                this.outlinePass.selectedObjects[0].active = false;
+                this.outlinePass.selectedObjects = []
+            }
         }
 
 
