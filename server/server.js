@@ -12,7 +12,7 @@ const {
 const language = require("@google-cloud/language");
 const PoissonDiskSampling = require("poisson-disk-sampling");
 /* const simpleGit = require("simple-git"); */
-simpleGit().clean(simpleGit.CleanOptions.FORCE);
+/* simpleGit().clean(simpleGit.CleanOptions.FORCE); */
 
 const mediaConditions = ["v.redd.it", ".jpg", ".jpeg", ".webm", ".webp", ".png", "i.redd.it", "imgur"]
 
