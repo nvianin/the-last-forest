@@ -10,11 +10,21 @@ const {
     UserManager
 } = require("./usermanager")
 const language = require("@google-cloud/language");
+const PoissonDiskSampling = require("poisson-disk-sampling");
+
 const mediaConditions = ["v.redd.it", ".jpg", ".jpeg", ".webm", ".webp", ".png", "i.redd.it", "imgur"]
 
 
 class Server {
     constructor() {
+        const poisson = new PoissonDiskSampling({
+            shape: [384, 384],
+            minDistance: 5,
+            maxDistance: 10,
+            tries: 3
+        })
+
+        this.points = poisson.fill();
         this.posts = {}
         this.language_client = new language.LanguageServiceClient();
 
@@ -43,7 +53,7 @@ class Server {
             /* this.reddit_db.deleteMany({}); */
             this.getRedditControl();
             this.load_temperature_data();
-            this.userman = new UserManager(this.posts, this.temperature_data);
+            this.userman = new UserManager(this.posts, this.temperature_data, this.points);
             log(await this.reddit_db.countDocuments())
         });
         this.sub = this.r.getSubreddit("collapse");

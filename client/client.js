@@ -716,6 +716,6 @@ class App {
 let app;
 
 window.addEventListener("load", () => {
-    app = document.app = new App;
+    app = window.app = new App;
     app.init()
 })
