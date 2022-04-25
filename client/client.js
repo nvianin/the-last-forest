@@ -485,7 +485,7 @@ class App {
             this.buildTreesFromPosts();
         })
         this.socket.on("points", points => {
-            log(points)
+            log("points received ", points)
             this.points = points;
             this.connection_conditions_count++;
             this.buildTreesFromPosts();
