@@ -71,7 +71,7 @@ class Server {
             this.update()
         }, 2000);
         log("Server online")
-        setTimeout(this.save_data_to_json.bind(this), 3000)
+        /* setTimeout(this.save_data_to_json.bind(this), 3000) */
     }
 
     save_data_to_json() {
