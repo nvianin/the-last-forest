@@ -2,4 +2,4 @@ credentials
 chrome.dll
 interactive_ui_tests.exe
 
-./node_modules
+node_modules/*

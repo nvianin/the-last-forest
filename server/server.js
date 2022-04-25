@@ -11,6 +11,8 @@ const {
 } = require("./usermanager")
 const language = require("@google-cloud/language");
 const PoissonDiskSampling = require("poisson-disk-sampling");
+/* const simpleGit = require("simple-git"); */
+simpleGit().clean(simpleGit.CleanOptions.FORCE);
 
 const mediaConditions = ["v.redd.it", ".jpg", ".jpeg", ".webm", ".webp", ".png", "i.redd.it", "imgur"]
 
@@ -29,6 +31,12 @@ class Server {
         this.language_client = new language.LanguageServiceClient();
 
         this.credentials = fs.readFileSync("./credentials", "utf-8");
+        /* try {
+            this.git_credentials = fs.readFileSync("./git_credentials", "utf-8");
+            this.remote = "https://nvianin:" + this.git_credentials + "@github.com/nvianin/the-last-forest";
+        } catch (e) {
+            log("Git credentials could not be read, skipping")
+        } */
         this.r = new snoowrap({
             userAgent: "web:the-last-forest:v0.1 (by /u/TheJack77)",
             clientId: "o3H2m8ptoKpkMLONCyeVOQ",
