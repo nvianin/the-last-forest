@@ -41,6 +41,8 @@ class App {
 
         const localstorage_posts = localStorage.getItem("posts");
         if (localstorage_posts) this.posts = localstorage_posts;
+        const localstorage_points = localStorage.getItem("points");
+        if (localstorage_points) this.points = localstorage_points;
 
         this.settings = {
             ground_side: 128
@@ -490,6 +492,7 @@ class App {
         this.socket.on("points", points => {
             log("points received ", points)
             this.points = points;
+            window.localStorage.setItem("points", JSON.stringify(points));
             this.connection_conditions_count++;
             this.buildTreesFromPosts();
         })
