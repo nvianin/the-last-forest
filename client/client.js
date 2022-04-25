@@ -16,6 +16,7 @@ let debug = {
     fog: true,
     line_markers: false,
     line_show: false,
+    half_res_renderer: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -35,6 +36,8 @@ class App {
             /* logarithmicDepthBuffer: true */
             antialias: true
         });
+
+        if (debug.half_res_renderer) this.renderer.pixelRatio = .5;
 
         const localstorage_posts = localStorage.getItem("posts");
         if (localstorage_posts) this.posts = localstorage_posts;
