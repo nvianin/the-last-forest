@@ -4,9 +4,10 @@ const crypto = require("crypto");
 
 
 class UserManager {
-    constructor(posts, temperature_data) {
+    constructor(posts, temperature_data, points) {
         this.users = {};
         this.posts = posts;
+        this.points = points
         this.temperature_data = temperature_data;
         this.init();
     };
@@ -32,7 +33,8 @@ class UserManager {
             this.users[client.user.id] = client;
             log("-->" + client.user.id);
             client.emit("posts", this.posts);
-            client.emit("temperature_data", this.temperature_data);
+            /* client.emit("temperature_data", this.temperature_data); */
+            client.emit("points", this.points)
             client.on("disconnect", () => {
                 log("<--" + client.user.id);
                 delete this.users[client.user.id];
