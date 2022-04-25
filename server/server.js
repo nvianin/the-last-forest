@@ -71,6 +71,13 @@ class Server {
             this.update()
         }, 2000);
         log("Server online")
+        setTimeout(this.save_data_to_json.bind(this), 3000)
+    }
+
+    save_data_to_json() {
+        fs.writeFileSync(JSON.stringify(this.posts), "./sample_posts.json")
+        fs.writeFileSync(JSON.stringify(this.points), "./sample_points.json")
+        log("EXPORTED DB DATA TO JSON")
     }
 
     /** Fetches the control document. */
