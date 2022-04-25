@@ -75,8 +75,8 @@ class Server {
     }
 
     save_data_to_json() {
-        fs.writeFileSync(JSON.stringify(this.posts), "./sample_posts.json")
-        fs.writeFileSync(JSON.stringify(this.points), "./sample_points.json")
+        fs.writeFileSync("./sample_posts.json", JSON.stringify(this.posts))
+        fs.writeFileSync("./sample_points.json", JSON.stringify(this.points))
         log("EXPORTED DB DATA TO JSON")
     }
 
