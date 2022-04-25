@@ -57,11 +57,12 @@ class App {
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
 
+        this.initSocket();
+
         this.loadResources();
 
         this.initPostprocess()
 
-        this.initSocket();
 
         this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         /* this.orbitControls.autoRotate = true; */
@@ -451,11 +452,17 @@ class App {
     }
 
     initSocket() {
+
+        this.connection_conditions_count = 0;
+        this.connection_conditions_threshold = 4;
+
         this.socket = io()
         this.connectionFailed = false;
         this.socket.on("connect", () => {
             log("Connected");
-            if (this.connectionFailed) window.location.reload()
+            if (this.connectionFailed) {
+                window.location.reload()
+            }
         })
         this.socket.on("disconnect", () => {
             log("Disconnected !");
@@ -464,17 +471,24 @@ class App {
         this.socket.on("posts", posts => {
             this.posts = posts;
             window.localStorage.setItem("posts", JSON.stringify(this.posts))
-            log("posts received: ", posts)
+            log("posts received " /* , posts */ )
+
+            this.connection_conditions_count++;
+            this.buildTreesFromPosts();
 
         })
         this.socket.on("temperature_data", temperature_data => {
             this.temperature_data = temperature_data;
-            log("temperature data received:", this.temperature_data)
+            log("temperature data received " /* , this.temperature_data */ )
             /* this.buildTreesFromPosts(); */
+            this.connection_conditions_count++;
+            this.buildTreesFromPosts();
         })
         this.socket.on("points", points => {
             log(points)
             this.points = points;
+            this.connection_conditions_count++;
+            this.buildTreesFromPosts();
         })
     }
 
@@ -494,8 +508,10 @@ class App {
                         break;
                     case "tree":
                         gltf.scene.children[0]
+                        /* log(Object.keys(this.posts).length) */
                         this.tree_model = gltf.scene.children[0];
-                        this.buildTreesFromPosts();
+                        this.connection_conditions_count++;
+                        this.buildTreesFromPosts()
                 }
                 if (!loadable.dontadd) {
                     this.scene.add(gltf.scene)
@@ -505,24 +521,30 @@ class App {
     }
 
     buildTreesFromPosts() {
-        let i = 0;
-        for (let post of Object.values(this.posts)) {
-            const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
-            let tree = this.tree_model.clone();
-            tree.position.set(
-                this.points[t][0] * 2 - 384,
-                0,
-                this.points[t][1] * 2 - 384
-            )
-            this.scene.add(tree)
-            this.trees.push(tree)
+        log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
+        if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
+            let i = 0;
+            /* log(this.posts)
+            log(Object.keys(this.posts).length) */
+            for (let post of Object.values(this.posts)) {
+                const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
+                let tree = this.tree_model.clone();
+                tree.position.set(
+                    this.points[t][0] * 2 - 384,
+                    0,
+                    this.points[t][1] * 2 - 384
+                )
+                this.scene.add(tree)
+                this.trees.push(tree)
 
-            /* try {
-                log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
-            } catch {
-                log(post)
-            } */
-            i++;
+                /* try {
+                    log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
+                } catch {
+                    log(post)
+                } */
+                i++;
+            }
+            this.built_trees = true;
         }
     }
 
@@ -598,9 +620,9 @@ class App {
             if (intersects[0]) {
                 this.outlinePass.selectedObjects = [intersects[0].object.parent]
                 intersects[0].object.parent.active = true;
-                /* log("found tree ", intersects[0].object) */
+                log("found tree ", intersects[0].object)
             } else {
-                this.outlinePass.selectedObjects[0].active = false;
+                if (this.outlinePass.selectedObjects[0]) this.outlinePass.selectedObjects[0].active = false;
                 this.outlinePass.selectedObjects = []
             }
         }
