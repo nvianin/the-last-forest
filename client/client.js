@@ -454,7 +454,7 @@ class App {
     initSocket() {
 
         this.connection_conditions_count = 0;
-        this.connection_conditions_threshold = 4;
+        this.connection_conditions_threshold = 3;
 
         this.socket = io()
         this.connectionFailed = false;
@@ -521,6 +521,8 @@ class App {
     }
 
     buildTreesFromPosts() {
+        log(this.ground)
+        const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
             let i = 0;
@@ -528,12 +530,28 @@ class App {
             log(Object.keys(this.posts).length) */
             for (let post of Object.values(this.posts)) {
                 const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
+                const x = this.points[t][0] * 2 - 384;
+                const z = this.points[t][1] * 2 - 384;
+                let y = -100;
+
                 let tree = this.tree_model.clone();
-                tree.position.set(
-                    this.points[t][0] * 2 - 384,
-                    0,
-                    this.points[t][1] * 2 - 384
+                raycaster.set(
+                    new THREE.Vector3(
+                        x, 20, z
+                    ),
+                    new THREE.Vector3(0, -100, 0)
                 )
+                const intersects = raycaster.intersectObject(this.ground);
+                if (intersects.length) {
+                    y = intersects[0].point.y;
+                    log(intersects[0].point)
+                }
+                tree.position.set(
+                    x,
+                    y,
+                    z
+                )
+                tree.userData.post = post;
                 this.scene.add(tree)
                 this.trees.push(tree)
 
@@ -545,6 +563,7 @@ class App {
                 i++;
             }
             this.built_trees = true;
+            log("Successfully built trees")
         }
     }
 
@@ -614,13 +633,14 @@ class App {
         /* this.csm.update(this.camera.matrix) */
 
         this.orbitControls.update()
-        if (this.posts) {
+        if (this.built_trees) {
             this.mousecast.setFromCamera(this.pointer, this.camera);
             const intersects = this.mousecast.intersectObjects(this.trees);
             if (intersects[0]) {
                 this.outlinePass.selectedObjects = [intersects[0].object.parent]
                 intersects[0].object.parent.active = true;
-                log("found tree ", intersects[0].object)
+                /* log("found tree ", intersects[0].object) */
+                log(intersects[0].object.parent.userData.post)
             } else {
                 if (this.outlinePass.selectedObjects[0]) this.outlinePass.selectedObjects[0].active = false;
                 this.outlinePass.selectedObjects = []
