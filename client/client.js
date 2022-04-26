@@ -545,9 +545,11 @@ class App {
                             })
                         gltf.scene.children[0].scale.set(100, 100, 100);
                         gltf.scene.children[0].position.y = -1.5;
+                        gltf.scene.children[0].material.wireframe = true;
                         break;
                     case "tree":
-                        gltf.scene.children[0]
+                        gltf.scene.children[0].children[0].material.wireframe = true;
+                        gltf.scene.children[0].children[1].material.wireframe = true;
                         /* log(Object.keys(this.posts).length) */
                         this.tree_model = gltf.scene.children[0];
                         this.connection_conditions_count++;
