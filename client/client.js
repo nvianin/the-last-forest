@@ -296,8 +296,8 @@ class App {
         this.input.value = this.sentence
         this.sentence = removeDiacritics(this.sentence)
         this.translation_output = document.querySelector("#text-translation");
-        this.input.dispatchEvent(new Event("input"))
-        this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence)
+        /* this.input.dispatchEvent(new Event("input")) */
+        /* this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence) */
         document.body.addEventListener("keypress", e => {
             switch (e.key.toLowerCase()) {
                 case " ":
