@@ -6,6 +6,10 @@ const loadList = [
     {
         name: "tree",
         dontadd: true
+    },
+    {
+        name: "dead_tree",
+        dontadd: true
     }
 ]
 
@@ -483,11 +487,11 @@ class App {
             this.points = JSON.parse(await (await fetch("./sample_points.json")).text());
             this.posts = JSON.parse(await (await fetch("./sample_posts.json")).text());
             this.connection_conditions_count = 0;
-            this.connection_conditions_threshold = 1;
+            this.connection_conditions_threshold = 2;
             this.buildTreesFromPosts()
         } else {
             this.connection_conditions_count = 0;
-            this.connection_conditions_threshold = 3;
+            this.connection_conditions_threshold = 4;
 
             this.socket = io()
             this.connectionFailed = false;
@@ -547,6 +551,11 @@ class App {
                         this.tree_model = gltf.scene.children[0];
                         this.connection_conditions_count++;
                         this.buildTreesFromPosts()
+                        break;
+                    case "dead_tree":
+                        this.dead_tree_model = gltf.scene.children[0];
+                        this.connection_conditions_count++;
+                        this.buildTreesFromPosts();
                 }
                 if (!loadable.dontadd) {
                     this.scene.add(gltf.scene)
@@ -564,38 +573,40 @@ class App {
             /* log(this.posts)
             log(Object.keys(this.posts).length) */
             for (let post of Object.values(this.posts)) {
-                const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
-                const x = this.points[t][0] * 2 - 384;
-                const z = this.points[t][1] * 2 - 384;
-                let y = -100;
+                if (post.sentiment && post.sentiment.score) {
+                    const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
+                    const x = this.points[t][0] * 2 - 384;
+                    const z = this.points[t][1] * 2 - 384;
+                    let y = -100;
 
-                let tree = this.tree_model.clone();
-                raycaster.set(
-                    new THREE.Vector3(
-                        x, 100, z
-                    ),
-                    new THREE.Vector3(0, -1, 0)
-                )
-                const intersects = raycaster.intersectObject(this.ground);
-                if (intersects.length) {
-                    y = intersects[0].point.y;
-                    log(intersects[0].point)
+                    let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone();
+                    raycaster.set(
+                        new THREE.Vector3(
+                            x, 100, z
+                        ),
+                        new THREE.Vector3(0, -1, 0)
+                    )
+                    const intersects = raycaster.intersectObject(this.ground);
+                    if (intersects.length) {
+                        y = intersects[0].point.y;
+                        log(intersects[0].point)
+                    }
+                    tree.position.set(
+                        x,
+                        y,
+                        z
+                    )
+                    tree.userData.post = post;
+                    this.scene.add(tree)
+                    this.trees.push(tree)
+
+                    /* try {
+                        log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
+                    } catch {
+                        log(post)
+                    } */
+                    i++;
                 }
-                tree.position.set(
-                    x,
-                    y,
-                    z
-                )
-                tree.userData.post = post;
-                this.scene.add(tree)
-                this.trees.push(tree)
-
-                /* try {
-                    log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
-                } catch {
-                    log(post)
-                } */
-                i++;
             }
             this.built_trees = true;
             for (let t of this.trees) {
@@ -603,7 +614,7 @@ class App {
                     this.scene.remove(t);
                 }
             }
-            log("Successfully built trees")
+            log("Successfully built " + i + " trees")
         }
     }
 
