@@ -47,6 +47,7 @@ class App {
             /* logarithmicDepthBuffer: true */
             antialias: true
         });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
 
         if (debug.half_res_renderer) this.renderer.pixelRatio = .5;
 
@@ -158,7 +159,7 @@ class App {
                 this.ground.geometry.attributes.position.array[i + 1],
                 this.ground.geometry.attributes.position.array[i + 2]
             )
-            if (i % 3000 == 0) log(disp);
+            /* if (i % 3000 == 0) log(disp); */
             this.ground.geometry.attributes.position.array[i] += disp.x
             this.ground.geometry.attributes.position.array[i + 1] += disp.y
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
@@ -438,7 +439,7 @@ class App {
         /* this.composer.addPass(this.ssaoPass); */
 
         this.composer.addPass(this.renderScene);
-        this.composer.addPass(this.fxaaPass);
+        /* this.composer.addPass(this.fxaaPass); */
         /* this.composer.addPass(this.bloomPass);
         this.composer.addPass(this.saoPass); */
         this.composer.addPass(this.outlinePass)
@@ -522,7 +523,7 @@ class App {
                 this.buildTreesFromPosts();
             })
             this.socket.on("points", points => {
-                log("points received ", points)
+                log("points received ")
                 this.points = points;
                 window.localStorage.setItem("points", JSON.stringify(points));
                 this.connection_conditions_count++;
@@ -565,7 +566,7 @@ class App {
     }
 
     buildTreesFromPosts() {
-        log(this.ground)
+        /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
@@ -589,7 +590,7 @@ class App {
                     const intersects = raycaster.intersectObject(this.ground);
                     if (intersects.length) {
                         y = intersects[0].point.y;
-                        log(intersects[0].point)
+                        /* log(intersects[0].point) */
                     }
                     tree.position.set(
                         x,
@@ -601,7 +602,7 @@ class App {
                     this.trees.push(tree)
 
                     /* try {
-                        log(post.title, Math.round_to_digit(post.sentiment.score, 1), Math.round_to_digit(post.sentiment.magnitude, 1))
+                        log(post.title, Math.round_to_decimal(post.sentiment.score, 1), Math.round_to_decimal(post.sentiment.magnitude, 1))
                     } catch {
                         log(post)
                     } */
@@ -692,15 +693,18 @@ class App {
             this.mousecast.setFromCamera(this.pointer, this.camera);
             const intersects = this.mousecast.intersectObjects(this.trees);
             if (intersects[0]) {
-                this.outlinePass.selectedObjects = [intersects[0].object.parent]
-                intersects[0].object.parent.active = true;
+                let object = intersects[0].object.name.includes("dead_tree") ? intersects[0].object : intersects[0].object.parent;
+                this.outlinePass.selectedObjects = [object]
+                object.active = true;
+
 
                 /* log("found tree ", intersects[0].object) */
                 /* log(intersects[0].object.parent.userData.post) */
-                const post = intersects[0].object.parent.userData.post;
+                const post = object.userData.post;
                 this.renderer.domElement.style.cursor = "pointer"
                 this.postDom.style.cursor = "pointer"
 
+                log(Math.round_to_decimal(post.sentiment.score))
 
                 this.postDom.innerHTML = post.title;
                 this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>";
@@ -814,7 +818,7 @@ class App {
     }
 
     sentimentToIdiom(sentiment) {
-        return sentiment > .9 ? "Perfect !" : sentiment > .7 ? "Beautiful !" : sentiment > .5 ? "Nice !" : sentiment > .3 ? "I like it." : sentiment > .1 ? "Good." : sentiment == 0 ? "I don't know what this means." : sentiment > -.1 ? "Eh." : sentiment > -.3 ? "Ouch." : sentiment > -.5 ? "That's bad." : sentiment > -.7 ? "That's very bad." : sentiment > -.9 ? "Oh no !" : "Fuck."
+        return sentiment >= .9 ? "Perfect !" : sentiment >= .7 ? "Beautiful !" : sentiment >= .5 ? "Nice !" : sentiment >= .3 ? "I like it." : sentiment >= .1 ? "Good." : sentiment == 0 ? "I don't know what this means." : sentiment >= -.1 ? "Eh." : sentiment >= -.3 ? "Ouch." : sentiment >= -.5 ? "That's bad." : sentiment >= -.7 ? "That's very bad." : sentiment >= -.9 ? "Oh no !" : "Fuck."
     }
 }
 
