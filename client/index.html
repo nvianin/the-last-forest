@@ -58,13 +58,77 @@
     <script src="./resources/classes/Turtle.js"></script>
     <script src="./resources/classes/Tree.js"></script>
     <script src="./client.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Helvetica;
+        }
+
+        .text-input {
+            visibility: hidden;
+            position: fixed;
+            bottom: 2%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 40%;
+            height: 10%;
+            resize: none;
+            user-select: none;
+            color: white;
+            background-color: #111;
+
+            text-align: center;
+        }
+
+        #text-translation {
+            bottom: 14%;
+        }
+
+        #rule-set {
+            top: 2%;
+        }
+
+        .data-display {
+            position: fixed;
+            visibility: hidden;
+
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 60%;
+            height: auto;
+            resize: none;
+            user-select: none;
+            color: white;
+            text-align: center;
+        }
+
+        #post-tooltip {
+            width: auto;
+            height: auto;
+            max-width: 200px;
+            position: fixed;
+            transform: translate(-50%, -100%);
+
+            visibility: hidden;
+            z-index: 1001;
+            background-color: #223;
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+
+            user-select: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
     <textarea value="" id="text-input" class="text-input"></textarea>
     <textarea id="rule-set" class="text-input"></textarea>
     <div id="text-translation" class="data-display"></div>
+    <div id="post-tooltip"></div>
 </body>
 
 </html>

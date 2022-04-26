@@ -1,5 +1,5 @@
-let loader = new THREE.GLTFLoader();
-let loadList = [
+const loader = new THREE.GLTFLoader();
+const loadList = [
     /* {
         name: "terrain"
     } */
@@ -9,20 +9,20 @@ let loadList = [
     }
 ]
 
-let debug = {
+const debug = {
     shadow_helper: false,
     sun_helper: false,
     frameRate: false,
     fog: true,
     line_markers: false,
     line_show: false,
-    half_res_renderer: true,
+    half_res_renderer: false,
     debug_target_frameRate: {
         enabled: true,
         value: 5
     },
 
-    use_cached_data: true,
+    use_cached_data: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -36,6 +36,7 @@ let debug = {
     },
 }
 const simplex = new THREE.SimplexNoise()
+let waiting_to_release_tooltip = false;
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
@@ -74,6 +75,7 @@ class App {
 
         this.initPostprocess()
 
+        this.postDom = document.querySelector("#post-tooltip")
 
         this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         /* this.orbitControls.autoRotate = true; */
@@ -101,14 +103,19 @@ class App {
 
         this.mousecast = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
+        this.mouse = new THREE.Vector2();
 
 
         this.input_timeout = false;
 
+        this.renderer.domElement.id = "three"
         document.body.appendChild(this.renderer.domElement);
 
         this.setSize();
         window.addEventListener("resize", this.setSize.bind(this))
+        window.addEventListener("contextmenu", e => {
+            e.preventDefault();
+        });
 
         this.trees = [];
         this.tree_imposters = [];
@@ -364,13 +371,20 @@ class App {
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
             this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
             /* log(this.pointer) */
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
         })
 
         window.addEventListener("pointerup", e => {
-            this.preventAutoRotate();
+            /* this.preventAutoRotate(); */
+            log(e.button)
+            if (this.postDom.style.visibility == "visible" && e.button == 0) window.open(this.activeUrl)
+        })
+        window.addEventListener("pointerdown", e => {
+
         })
         window.addEventListener("wheel", e => {
-            this.preventAutoRotate();
+            /* this.preventAutoRotate(); */
         })
 
     }
@@ -415,13 +429,14 @@ class App {
         this.taaPass.unbiased = false;
         this.taaPass.sampleLevel = 0; */
 
-        this.composer.addPass(this.renderScene);
         /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
-        this.composer.addPass(this.fxaaPass);
-        this.composer.addPass(this.bloomPass);
         /* this.composer.addPass(this.ssaoPass); */
-        this.composer.addPass(this.saoPass);
+
+        this.composer.addPass(this.renderScene);
+        this.composer.addPass(this.fxaaPass);
+        /* this.composer.addPass(this.bloomPass);
+        this.composer.addPass(this.saoPass); */
         this.composer.addPass(this.outlinePass)
     }
 
@@ -583,6 +598,11 @@ class App {
                 i++;
             }
             this.built_trees = true;
+            for (let t of this.trees) {
+                if (!t.userData.post || !t.userData.post.sentiment || !t.userData.post.sentiment.score) {
+                    this.scene.remove(t);
+                }
+            }
             log("Successfully built trees")
         }
     }
@@ -652,6 +672,10 @@ class App {
 
         /* this.csm.update(this.camera.matrix) */
 
+        this.postDom.style.left = this.mouse.x + "px";
+        this.postDom.style.top = this.mouse.y + "px";
+
+
         this.orbitControls.update()
         if (this.built_trees) {
             this.mousecast.setFromCamera(this.pointer, this.camera);
@@ -659,10 +683,32 @@ class App {
             if (intersects[0]) {
                 this.outlinePass.selectedObjects = [intersects[0].object.parent]
                 intersects[0].object.parent.active = true;
+
                 /* log("found tree ", intersects[0].object) */
-                log(intersects[0].object.parent.userData.post)
+                /* log(intersects[0].object.parent.userData.post) */
+                const post = intersects[0].object.parent.userData.post;
+                this.renderer.domElement.style.cursor = "pointer"
+                this.postDom.style.cursor = "pointer"
+
+
+                this.postDom.innerHTML = post.title;
+                this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>";
+                this.activeUrl = post.url;
+                this.postDom.style.visibility = "visible";
+
             } else {
-                if (this.outlinePass.selectedObjects[0]) this.outlinePass.selectedObjects[0].active = false;
+                this.renderer.domElement.style.cursor = "default";
+                this.postDom.style.cursor = "default";
+                if (this.outlinePass.selectedObjects[0]) {
+                    this.outlinePass.selectedObjects[0].active = false;
+                }
+                if (!waiting_to_release_tooltip) {
+                    waiting_to_release_tooltip = true;
+                    setTimeout(() => {
+                        this.postDom.style.visibility = "hidden";
+                        waiting_to_release_tooltip = false;
+                    }, 200)
+                }
                 this.outlinePass.selectedObjects = []
             }
         }
@@ -754,6 +800,10 @@ class App {
         /* disp.y = Math.Smin(disp.y, -20, 80); */
 
         return disp;
+    }
+
+    sentimentToIdiom(sentiment) {
+        return sentiment > .9 ? "Perfect !" : sentiment > .7 ? "Beautiful !" : sentiment > .5 ? "Nice !" : sentiment > .3 ? "I like it." : sentiment > .1 ? "Good." : sentiment == 0 ? "I don't know what this means." : sentiment > -.1 ? "Eh." : sentiment > -.3 ? "Ouch." : sentiment > -.5 ? "That's bad." : sentiment > -.7 ? "That's very bad." : sentiment > -.9 ? "Oh no !" : "Fuck."
     }
 }
 

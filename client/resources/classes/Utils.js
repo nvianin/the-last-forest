@@ -22,7 +22,7 @@ Math.smoothStep = (edge, edge1, x) => {
     return x * x * (3 - 2 * x);
 }
 
-Math.round_to_digit = (val, digit) => {
+Math.round_to_decimal = (val, digit) => {
     return Math.floor(val * Math.pow(10, digit)) / Math.pow(10, digit)
 }
 
