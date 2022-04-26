@@ -94,7 +94,7 @@ class App {
         this.test.castShadow = true;
         this.test.receiveShadow = true;
         this.test.position.y = 15;
-        this.scene.add(this.test)
+        /* this.scene.add(this.test) */
 
         this.initShadows();
 
@@ -248,7 +248,7 @@ class App {
         this.baseRuleSet.addRule("[", "[LUFLUF[FFUUF]RUFF");
 
 
-        this.tree = new TreeManager("", new THREE.Vector3())
+        /* this.tree = new TreeManager("", new THREE.Vector3()) */
         this.rule_dom = document.querySelector("#rule-set");
         this.ruleset = this.baseRuleSet.clone();
         this.ruleset.randomize()
