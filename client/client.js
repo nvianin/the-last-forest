@@ -610,7 +610,7 @@ class App {
             }
             this.built_trees = true;
             for (let t of this.trees) {
-                if (!t.userData.post || !t.userData.post.sentiment || !t.userData.post.sentiment.score) {
+                if (!t.userData.post || !t.userData.post.sentiment || !t.userData.post.sentiment.score || !t.userData.post.title) {
                     this.scene.remove(t);
                 }
             }
