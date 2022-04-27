@@ -26,7 +26,7 @@ const debug = {
         value: 5
     },
 
-    use_cached_data: false,
+    use_cached_data: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
