@@ -57,8 +57,7 @@ class Server {
                 this.posts[p.permalink] = p;
             };
             this.control_db = this.db.collection("control");
-            // DEBUG: REMOVES THE WHOLE REDDIT DB
-            /* this.reddit_db.deleteMany({}); */
+
             this.getRedditControl();
             this.load_temperature_data();
             this.userman = new UserManager(this.posts, this.temperature_data, this.points);
