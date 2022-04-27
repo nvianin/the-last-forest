@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BERT TSNE</title>
+
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+        }
+    </style>
+
+    <script>
+        const log = console.log;
+        const main = async () => {
+            let tsne = await fetch("./result.json");
+            tsne = await tsne.json()
+            log(tsne)
+
+            const canvas = document.createElement("canvas")
+            document.body.appendChild(canvas)
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            const ctx = canvas.getContext("2d");
+
+            const x_off = 400;
+            const y_off = 400;
+            const sc = 2.5;
+            tsne.forEach(p => {
+                /* log(p) */
+                ctx.beginPath();
+                ctx.arc(
+                    p[0] * sc + x_off,
+                    p[1] * sc + y_off,
+                    3,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+                /* ctx.fill() */
+            })
+        }
+        main()
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
