@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "bert-tokenizer": "^1.1.8"
+    "bert-tokenizer": "^1.1.8",
+    "mongodb": "^4.5.0",
+    "node-nlp": "^4.23.5"
   }
 }
