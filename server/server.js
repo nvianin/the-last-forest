@@ -122,54 +122,80 @@ class Server {
 
                 /* log(post.comments) */
                 if (post.score > 300) {
-                    // Sentiment analysis
-                    let post_sentiment_exists = false;
-                    let existing_post = await this.reddit_db.findOne({
-                            url: post.url
-                        })
-                        .then(res => {
-                            if (res.title) {
-                                post_sentiment_exists = true;
-                            }
-                        }).catch(err => {
-                            /* log(err.message) */
-                        })
-                    log(post_sentiment_exists ? "Sentiment analysis exists, skipping..." : "Analysis post sentiment");
-                    let requests_this_month = (await this.control_db.findOne({
-                        "name": "gapi"
-                    })).requests_this_month
-                    log(requests_this_month)
-                    if (requests_this_month >= 4900) log("skipping due to token limit")
-                    if (!post_sentiment_exists && requests_this_month < 4900) {
-                        /* return false; */
-                        let sentiment = await this.language_client.analyzeSentiment({
-                            document: {
-                                content: post.title,
-                                type: "PLAIN_TEXT"
-                            }
-                        })
-                        this.control_db.updateOne({
-                            name: "gapi"
+                    if (await this.reddit_db.findOne({
+                            date: post.created_utc
+                        }) ? true : false) {
+                        this.reddit_db.updateOne({
+                            date: post.created_utc
                         }, {
-                            $inc: {
-                                requests_this_month: 1
-                            }
+                            score: post.score
                         })
-                        log(sentiment[0].documentSentiment)
+                    } else {
+
+
+                        // Sentiment analysis
+                        let post_sentiment_exists = false;
+                        let existing_post = await this.reddit_db.findOne({
+                                url: post.url
+                            })
+                            .then(res => {
+                                if (res.title) {
+                                    post_sentiment_exists = true;
+                                }
+                            }).catch(err => {
+                                /* log(err.message) */
+                            })
+                        log(post_sentiment_exists ? "Sentiment analysis exists, skipping..." : "Analysis post sentiment");
+                        let requests_this_month = (await this.control_db.findOne({
+                            "name": "gapi"
+                        })).requests_this_month
+                        log(requests_this_month)
+                        if (requests_this_month >= 4900) log("skipping due to token limit")
+                        if (!post_sentiment_exists && requests_this_month < 4900) {
+                            /* return false; */
+                            let sentiment = await this.language_client.analyzeSentiment({
+                                document: {
+                                    content: post.title,
+                                    type: "PLAIN_TEXT"
+                                }
+                            })
+                            this.control_db.updateOne({
+                                name: "gapi"
+                            }, {
+                                $inc: {
+                                    requests_this_month: 1
+                                }
+                            })
+                            log(sentiment[0].documentSentiment)
+                            this.reddit_db.updateOne({
+                                permalink: post.permalink
+                            }, {
+                                $set: {
+                                    sentiment: sentiment[0].documentSentiment
+                                }
+                            }, {
+                                upsert: true
+                            })
+                        }
                         this.reddit_db.updateOne({
                             permalink: post.permalink
                         }, {
                             $set: {
-                                sentiment: sentiment[0].documentSentiment
+                                title: post.title,
+                                url: post.url,
+                                permalink: post.permalink,
+                                score: post.score,
+                                id: post.id,
+                                date: post.created_utc,
+                                uuid: post.uuid,
+                                has_media: hasMedia,
+                                media: post.media
                             }
                         }, {
                             upsert: true
                         })
-                    }
-                    this.reddit_db.updateOne({
-                        permalink: post.permalink
-                    }, {
-                        $set: {
+
+                        let p = {
                             title: post.title,
                             url: post.url,
                             permalink: post.permalink,
@@ -178,23 +204,9 @@ class Server {
                             date: post.created_utc,
                             uuid: post.uuid,
                             has_media: hasMedia,
-                            media: post.media
+                            media: post.media,
+                            comments: post.comments,
                         }
-                    }, {
-                        upsert: true
-                    })
-
-                    let p = {
-                        title: post.title,
-                        url: post.url,
-                        permalink: post.permalink,
-                        score: post.score,
-                        id: post.id,
-                        date: post.created_utc,
-                        uuid: post.uuid,
-                        has_media: hasMedia,
-                        media: post.media,
-                        comments: post.comments,
                     }
                     this.posts[post.permalink] = p;
                 }
