@@ -14,9 +14,13 @@ log(posts.length + " posts fetched from local storage")
 async function main() {
 
     const mongo = await new MongoClient("mongodb://localhost:27017").connect()
-    const posts_db = await mongo.db("last-forest").collection("reddit");
+    const posts_db = mongo.db("last-forest").collection("reddit");
+    const control = mongo.db("last-forest").collection("control");
+    control.insertOne({
+        fuck: 21
+    })
 
-    posts.forEach(post => {
+    posts.forEach(async post => {
         posts_db.updateOne({
             permalink: post.permalink
         }, {
@@ -36,7 +40,11 @@ async function main() {
             }
         }, {
             upsert: true
+        }).then((err, res) => {
+            log(err);
+            log(res)
         })
+        log(result)
     })
 
     log("Successfuly uploaded posts to database")
