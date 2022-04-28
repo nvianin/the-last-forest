@@ -7,8 +7,9 @@ from sentence_transformers import SentenceTransformer """
 from pymongo import MongoClient;
 
 client = MongoClient("mongodb://localhost:27017")
-db = client
-print(client)
+client.connect()
+""" print(client) """
+print("fuck you")
 
 # model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
