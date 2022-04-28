@@ -34,7 +34,7 @@ class UserManager {
             log("-->" + client.user.id);
             client.emit("posts", this.posts);
             /* client.emit("temperature_data", this.temperature_data); */
-            client.emit("points", this.points)
+            /* client.emit("points", this.points) */
             client.on("disconnect", () => {
                 log("<--" + client.user.id);
                 delete this.users[client.user.id];

@@ -57,11 +57,12 @@ class App {
         if (localstorage_points) this.points = localstorage_points;
 
         this.settings = {
-            ground_side: 128
+            ground_side: 128,
+            ground_scale: 20
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
-        this.camera = new THREE.PerspectiveCamera(90, innerWidth / innerHeight, .01, 1000);
+        this.camera = new THREE.PerspectiveCamera(90, innerWidth / innerHeight, .01, 3000);
         this.camera.position.set(0, .5, 1);
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
@@ -70,7 +71,7 @@ class App {
         this.clock = new THREE.Clock();
 
         let bgCol = new THREE.Color(0x111522);
-        this.fog = new THREE.Fog(bgCol, 400, 900);
+        this.fog = new THREE.Fog(bgCol, 2500, 2900);
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
 
@@ -146,7 +147,7 @@ class App {
 
 
         this.ground.rotation.x = -Math.PI / 2
-        this.ground.scale.set(6, 6, 6);
+        this.ground.scale.set(this.settings.ground_scale, this.settings.ground_scale, this.settings.ground_scale);
         this.ground.updateMatrix();
         this.ground.geometry.applyMatrix4(this.ground.matrix);
         this.ground.rotation.x = 0;
@@ -165,6 +166,8 @@ class App {
             this.ground.geometry.attributes.position.array[i + 2] += disp.z
         }
         this.ground.geometry.computeVertexNormals();
+        this.ground.geometry.computeBoundingBox()
+        log("Ground extent: " + this.ground.geometry.boundingBox.max.x * 2)
 
         /* let spires = 8
         this.helpers = []
@@ -372,20 +375,29 @@ class App {
             i++
         } */
 
+        this.pointer_is_down = false;
+        this.pointer_moved_while_down = false;
+
         window.addEventListener("pointermove", e => {
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
             this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
             /* log(this.pointer) */
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
+
+            if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
 
         window.addEventListener("pointerup", e => {
             /* this.preventAutoRotate(); */
-            log(e.button)
-            if (this.postDom.style.visibility == "visible" && e.button == 0) window.open(this.activeUrl)
+            /* log(e.button) */
+            if (this.postDom.style.visibility == "visible" && e.button == 0 && !this.pointer_moved_while_down) window.open(this.activeUrl)
+            /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
+            this.pointer_is_down = false;
+            this.pointer_moved_while_down = false;
         })
         window.addEventListener("pointerdown", e => {
+            this.pointer_is_down = true;
 
         })
         window.addEventListener("wheel", e => {
@@ -492,7 +504,7 @@ class App {
             this.buildTreesFromPosts()
         } else {
             this.connection_conditions_count = 0;
-            this.connection_conditions_threshold = 4;
+            this.connection_conditions_threshold = 3;
 
             this.socket = io()
             this.connectionFailed = false;
@@ -515,20 +527,20 @@ class App {
                 this.buildTreesFromPosts();
 
             })
-            this.socket.on("temperature_data", temperature_data => {
-                this.temperature_data = temperature_data;
-                log("temperature data received " /* , this.temperature_data */ )
-                /* this.buildTreesFromPosts(); */
-                this.connection_conditions_count++;
-                this.buildTreesFromPosts();
-            })
-            this.socket.on("points", points => {
-                log("points received ")
-                this.points = points;
-                window.localStorage.setItem("points", JSON.stringify(points));
-                this.connection_conditions_count++;
-                this.buildTreesFromPosts();
-            })
+            // this.socket.on("temperature_data", temperature_data => {
+            //     this.temperature_data = temperature_data;
+            //     log("temperature data received " /* , this.temperature_data */ )
+            //     /* this.buildTreesFromPosts(); */
+            //     this.connection_conditions_count++;
+            //     this.buildTreesFromPosts();
+            // })
+            // this.socket.on("points", points => {
+            //     log("points received ")
+            //     this.points = points;
+            //     window.localStorage.setItem("points", JSON.stringify(points));
+            //     this.connection_conditions_count++;
+            //     this.buildTreesFromPosts();
+            // })
         }
     }
 
@@ -574,11 +586,15 @@ class App {
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
             let i = 0;
             log("Preparing to build " + Object.values(this.posts).length + " trees")
+
+            const sc = Math.sqrt(Object.keys(this.posts).length);
+            log("Calculated scale: " + sc)
+
             for (let post of Object.values(this.posts)) {
                 if ( /* post.sentiment && post.sentiment.score */ true) {
                     const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
-                    const x = this.points[t][0] * 2 - 384;
-                    const z = this.points[t][1] * 2 - 384;
+                    const x = post.tsne_coordinates.x * sc
+                    const z = post.tsne_coordinates.y * sc
                     let y = -100;
                     post.sentiment = {
                         score: 1
@@ -710,7 +726,7 @@ class App {
                 this.renderer.domElement.style.cursor = "pointer"
                 this.postDom.style.cursor = "pointer"
 
-                log(Math.round_to_decimal(post.sentiment.score))
+                /* log(Math.round_to_decimal(post.sentiment.score)) */
 
                 this.postDom.innerHTML = post.title;
                 this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>";
