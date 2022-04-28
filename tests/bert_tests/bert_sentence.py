@@ -5,7 +5,6 @@ import os
 from sklearn.manifold import TSNE
 
 from sentence_transformers import SentenceTransformer
-from torch import zero_
 model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
 f = open("./posts.json", encoding="utf-8")
