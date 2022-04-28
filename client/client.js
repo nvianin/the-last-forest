@@ -26,7 +26,7 @@ const debug = {
         value: 5
     },
 
-    use_cached_data: true,
+    use_cached_data: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -612,12 +612,14 @@ class App {
                 }
             }
             this.built_trees = true;
+            let removed_trees = 0
             for (let t of this.trees) {
                 if (!t.userData.post || !t.userData.post.sentiment || !t.userData.post.sentiment.score || !t.userData.post.title) {
                     this.scene.remove(t);
+                    removed_trees++;
                 }
             }
-            log("Successfully built " + i + " trees")
+            log("Successfully built " + i + " trees while removing " + removed_trees)
         }
     }
 

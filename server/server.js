@@ -85,8 +85,15 @@ class Server {
             "name": "reddit"
         }).then(reddit_control => {
             this.reddit_control = reddit_control
-            log("Last reddit get: " + this.reddit_control.last_getDailyTop);
+            log("Last reddit get: " + new Date(this.reddit_control.last_getDailyTop));
             log("Last temperature get: " + this.reddit_control.last_tempMonth);
+        })
+
+        this.control_db.findOne({
+            "name": "gapi"
+        }).then(gapi_control => {
+            this.gapi_control = gapi_control;
+            log("Last gapi reset: " + new Date(this.gapi_control.last_reset));
         })
     }
     /** Updates the control document. */
@@ -94,6 +101,12 @@ class Server {
         this.control_db.replaceOne({
             "name": "reddit"
         }, this.reddit_control).then(e => {
+            log(e)
+        })
+
+        this.control_db.replaceOne({
+            "name": "gapi"
+        }, this.gapi_control).then(e => {
             log(e)
         })
     }
@@ -119,6 +132,18 @@ class Server {
                 const hasMedia = mediaConditions.some(i => {
                     return post.url.includes(i);
                 })
+                let p = {
+                    title: post.title,
+                    url: post.url,
+                    permalink: post.permalink,
+                    score: post.score,
+                    id: post.id,
+                    date: post.created_utc,
+                    uuid: post.uuid,
+                    has_media: hasMedia,
+                    media: post.media,
+                    comments: post.comments,
+                }
 
                 /* log(post.comments) */
                 if (post.score > 300) {
@@ -195,18 +220,7 @@ class Server {
                             upsert: true
                         })
 
-                        let p = {
-                            title: post.title,
-                            url: post.url,
-                            permalink: post.permalink,
-                            score: post.score,
-                            id: post.id,
-                            date: post.created_utc,
-                            uuid: post.uuid,
-                            has_media: hasMedia,
-                            media: post.media,
-                            comments: post.comments,
-                        }
+
                     }
                     this.posts[post.permalink] = p;
                 }
@@ -298,6 +312,7 @@ class Server {
 
     update() {
         this.now = Date.now();
+        const last_gapi_reset = (Date.now() - this.gapi_control.last_reset) / 1000 / 60 / 60 / 24;
         log("**************************************")
         log("              SERVER STATUS")
         log("   Posts in db: " + Object.keys(this.posts).length)
@@ -305,6 +320,7 @@ class Server {
         log("   Time since last reddit update: " + (Math.floor((this.now - this.reddit_control.last_getDailyTop) /
                 1000 / 3600 * 1000)) / 1000 +
             " hours out of " + this.settings.getDailyTopInterval);
+        log("   Last gapi reset: " + last_gapi_reset + " out of 31 days")
         log("**************************************")
         if (this.settings.getDailyTopInterval * 1000 * 3600 < this.now - this.reddit_control.last_getDailyTop) {
             log("REDDIT UPDATE")
@@ -320,6 +336,13 @@ class Server {
             this.reddit_control.last_tempMonth = current_month;
             this.setRedditControl();
         }
+
+        if (last_gapi_reset > 31) {
+            this.gapi_control.last_reset = Date.now();
+            this.gapi_control.requests_this_month = 0;
+            this.setRedditControl()
+        }
+
     }
 }
 
