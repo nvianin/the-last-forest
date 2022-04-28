@@ -509,7 +509,7 @@ class App {
             this.socket.on("posts", posts => {
                 this.posts = posts;
                 window.localStorage.setItem("posts", JSON.stringify(this.posts))
-                log(posts.length + " posts received " /* , posts */ )
+                log(Object.keys(posts).length + " posts received " /* , posts */ )
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
@@ -573,14 +573,16 @@ class App {
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
             let i = 0;
-            /* log(this.posts)
-            log(Object.keys(this.posts).length) */
+            log("Preparing to build " + Object.values(this.posts).length + " trees")
             for (let post of Object.values(this.posts)) {
-                if (post.sentiment && post.sentiment.score) {
+                if ( /* post.sentiment && post.sentiment.score */ true) {
                     const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
                     const x = this.points[t][0] * 2 - 384;
                     const z = this.points[t][1] * 2 - 384;
                     let y = -100;
+                    post.sentiment = {
+                        score: 1
+                    }
 
                     let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone();
                     raycaster.set(
