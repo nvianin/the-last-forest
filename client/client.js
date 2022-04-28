@@ -509,7 +509,7 @@ class App {
             this.socket.on("posts", posts => {
                 this.posts = posts;
                 window.localStorage.setItem("posts", JSON.stringify(this.posts))
-                log("posts received " /* , posts */ )
+                log(posts.length + " posts received " /* , posts */ )
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
