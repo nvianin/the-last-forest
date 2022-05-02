@@ -389,3 +389,14 @@ function removeDiacritics(str) {
     }
     return str;
 }
+
+try {
+    if (module) {
+        module.exports = {
+            removeDiacritics,
+            sphericalToCartesian
+        }
+    }
+} catch {
+
+}

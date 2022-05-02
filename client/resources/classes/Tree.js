@@ -27,6 +27,13 @@ const parseRules = (seed) => {
     return rules
 }
 
+const treeTypes = {
+    "": {
+        color: "red",
+        rules: new Ruleset()
+    }
+}
+
 
 const lineMat = new THREE.LineBasicMaterial()
 class TreeManager {
@@ -200,24 +207,27 @@ class TreeManager {
     }
 
     setRotationRelativeToCenterOfWeight() {
-        /* return false */
+        return false
         let verts = this.object.children[0].geometry.attributes.position.array;
         let median = new THREE.Vector3();
         /* log(verts) */
 
-        for (let i = 0; i < verts.length; i += 3) {
-            median.add(new THREE.Vector3(verts[i], verts[i + 1], verts[i + 2]).normalize());
+        for (let i = 3; i < verts.length; i += 3) {
+            const v = new THREE.Vector3(verts[i], verts[i + 1], verts[i + 2])
+            const s = new THREE.Vector3(verts[i - 3], verts[i - 2], verts[i - 1]).sub(v).length()
+
+            median.add(v.normalize().multiplyScalar(s));
         }
 
         median.divideScalar(verts.length);
         median = median.normalize()
 
         let normal = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), this.object.position, 1, new THREE.Color("green"))
-        let arrow = new THREE.ArrowHelper(median, this.object.position, median.length());
+        let arrow = new THREE.ArrowHelper(median.multiplyScalar(-1), this.object.position, median.length());
 
         log(median)
         /* helper.rotation.setFromVector3(dir) */
-        this.object.add(arrow);
+        app.scene.add(arrow);
         this.object.add(normal);
 
         let helper = new THREE.AxesHelper(.1);
@@ -226,9 +236,10 @@ class TreeManager {
         /* const rot = new THREE.Euler().setFromVector3(median) */
         //'YZX', 'ZXY', 'XZY', 'YXZ' and 'ZYX'.
 
-        this.object.lookAt(median)
-        this.object.rotateX(Math.PI)
-
+        /* this.object.lookAt(new THREE.Vector3(0, 1, 0)) */
+        /* this.object.rotateX(Math.PI) */
+        this.object.rotation.copy(arrow.rotation)
+        /* this.object.rotateX(Math.TWO_PI) */
         log(this.object.rotation)
 
 
