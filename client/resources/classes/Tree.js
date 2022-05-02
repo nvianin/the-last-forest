@@ -62,6 +62,11 @@ class TreeManager {
             transparent: true,
 
         })
+        this.line_mat.onBeforeCompile((shader, renderer) => {
+            log("line mat beforecompile")
+            log(shader, renderer)
+        })
+
         this.line = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(points), this.line_mat)
         this.object.add(this.line);
@@ -134,7 +139,7 @@ class TreeManager {
     }
 
     setSizeRelativeToBoundingSphere() {
-        return false;
+        /* return false; */
         this.object.children[0].geometry.computeBoundingSphere()
         let r = 1 / this.object.children[0].geometry.boundingSphere.radius;
         /* log(r, 1 / r) */
@@ -173,7 +178,7 @@ class TreeManager {
     }
 
     setRotationRelativeToCenterOfWeight() {
-        return false
+        /* return false */
         let verts = this.object.children[0].geometry.attributes.position.array;
         let median = new THREE.Vector3();
         for (let i = 0; i < verts.length; i += 3) {

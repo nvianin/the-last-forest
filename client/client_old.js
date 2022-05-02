@@ -22,7 +22,7 @@ class App {
 
         this.initPostprocess()
 
-        this.initSocket();
+        /* this.initSocket(); */
 
         this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.autoRotate = true;
