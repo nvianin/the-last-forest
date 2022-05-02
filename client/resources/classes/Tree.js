@@ -105,6 +105,7 @@ class TreeManager {
 
     build_instructions(instructions) {
         let points = this.turtle.build(instructions);
+
         this.object.remove(this.line);
         this.line = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(points),
@@ -136,10 +137,21 @@ class TreeManager {
     }
 
     postTransform() {
+
+        log(this.object.children, this.object.children.length)
+        let toRemove = []
+        while (this.object.children.length > 1) {
+            this.object.children.forEach(c => {
+                if (c.type != "Line") this.object.remove(c)
+            })
+        }
+        log(this.object.children)
+        if (this.object.children.length > 1) throw new Error("Too many children on tree object")
+
         this.setSizeRelativeToBoundingSphere();
 
         const o = this.object.children[0];
-        log(o.scale)
+        log(o.scale.x)
         o.updateMatrix()
         o.geometry.applyMatrix4(o.matrix);
         o.scale.set(1, 1, 1)
@@ -198,16 +210,28 @@ class TreeManager {
         }
 
         median.divideScalar(verts.length);
+        median = median.normalize()
+
+        let normal = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), this.object.position, 1, new THREE.Color("green"))
+        let arrow = new THREE.ArrowHelper(median, this.object.position, median.length());
+
+        log(median)
+        /* helper.rotation.setFromVector3(dir) */
+        this.object.add(arrow);
+        this.object.add(normal);
+
         let helper = new THREE.AxesHelper(.1);
         helper.position.copy(median);
-        let dir = helper.position.clone().sub(this.object.position)
-        /* dir = this.object.position.clone().sub(median) */
-        let arrow = new THREE.ArrowHelper(dir, this.object.position, dir.length());
-        log(median)
-        log(dir)
-        helper.rotation.setFromVector3(dir)
         app.scene.add(helper);
-        this.object.add(arrow);
+        /* const rot = new THREE.Euler().setFromVector3(median) */
+        //'YZX', 'ZXY', 'XZY', 'YXZ' and 'ZYX'.
+
+        this.object.lookAt(median)
+        this.object.rotateX(Math.PI)
+
+        log(this.object.rotation)
+
+
         /* setTimeout(() => {
             app.scene.remove(arrow)
             app.scene.remove(helper);

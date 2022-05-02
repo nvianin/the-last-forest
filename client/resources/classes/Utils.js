@@ -35,6 +35,9 @@ const sphericalToCartesian = (distance, azimuth, elevation) => {
     )
 }
 
+Math.HALF_PI = Math.PI / 2;
+Math.QUARTER_PI = Math.PI / 4;
+Math.TWO_PI = Math.PI * 2;
 
 
 // Diacritics removal mess
