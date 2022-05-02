@@ -28,10 +28,42 @@ const parseRules = (seed) => {
 }
 
 const treeTypes = {
-    "": {
+    "climate": {
         color: "red",
-        rules: new Ruleset()
-    }
+        rules: new Ruleset().parse(
+            "F->RF[RF[LFRSLF]SRF]"
+        )
+    },
+    "collapse": {
+        color: "red",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    ["u.s, us, american, america, americans"]: {
+        color: "red",
+        rules: new Ruleset().parse(
+            "F->FL[[F]RF]RF[RFF]LF, F->FF"
+        )
+    },
+    "collapse": {
+        color: "red",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "collapse": {
+        color: "red",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "collapse": {
+        color: "red",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
 }
 
 
@@ -63,19 +95,39 @@ class TreeManager {
             })
         );
         this.line.computeLineDistances(); */
-        this.line_mat = new THREE.LineBasicMaterial({
+
+        this.line_mat = new THREE.LineMaterial({
             color: 0xffff33,
             opacity: .3,
             transparent: true,
+            linewidth: .002,
+            vertexColors: false,
+
+            dashed: false,
+            alphaToCoverage: false
 
         })
-        this.line_mat.onBeforeCompile((shader, renderer) => {
+        this.line_mat.uniforms = {
+            "time": {
+                value: 0
+            }
+        }
+        this.line_mat.onBeforeCompile = (shader, renderer) => {
             log("line mat beforecompile")
-            log(shader, renderer)
-        })
-
-        this.line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(points), this.line_mat)
+            log(shader.vertexShader)
+            shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `
+                float theta = sin( time + position.y ) / 1. };
+                float c = cos( theta );
+                float s = sin( theta );
+                mat3 m = mat3( c, 0, s, 0, 1, 0, -s, 0, c );
+                vec3 transformed = vec3( position ) * m;
+                vNormal = vNormal * m;
+            
+            `)
+        }
+        const linegeo = new THREE.LineGeometry().setPositions(points);
+        this.line = new THREE.Line2(
+            linegeo, this.line_mat)
         this.object.add(this.line);
         app.scene.add(this.object)
     }
@@ -136,29 +188,28 @@ class TreeManager {
         this.object.remove(this.line);
         this.line = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(points),
-            new THREE.LineBasicMaterial({
-                color: color
-            }))
+            this.line_mat
+        )
         this.object.add(this.line);
         this.postTransform();
     }
 
     postTransform() {
 
-        log(this.object.children, this.object.children.length)
+        /* log(this.object.children, this.object.children.length) */
         let toRemove = []
         while (this.object.children.length > 1) {
             this.object.children.forEach(c => {
                 if (c.type != "Line") this.object.remove(c)
             })
         }
-        log(this.object.children)
+        /* log(this.object.children) */
         if (this.object.children.length > 1) throw new Error("Too many children on tree object")
 
         this.setSizeRelativeToBoundingSphere();
 
         const o = this.object.children[0];
-        log(o.scale.x)
+        /* log(o.scale.x) */
         o.updateMatrix()
         o.geometry.applyMatrix4(o.matrix);
         o.scale.set(1, 1, 1)

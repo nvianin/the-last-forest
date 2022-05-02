@@ -20,12 +20,65 @@ async function main() {
 
     log("ok")
 
+    const countDict = {}
+
     for (let p of posts) {
-        for (word of Utils.removeDiacritics(p.title).replaceAll((/^[A-Za-z]+$/), "").split(" ")) {
-            log(word)
+        for (word of Utils.removeDiacritics(p.title).split(" ")) {
+            word = word.replaceAll(/W/g, "").toLowerCase()
+            /* log(word) */
+            if (countDict[word]) {
+                countDict[word]++
+            } else {
+                countDict[word] = 1
+            }
         }
     }
 
+    sortedArray = []
+
+    for ([word, count] of Object.entries(countDict)) {
+        sortedArray.push({
+            word,
+            count
+        })
+    }
+
+    sortedArray.sort((a, b) => {
+        return a.count - b.count
+    })
+    sortedArray.forEach(word => log(word))
 }
 
 main()
+
+
+/* 
+significant words
+
+climate
+collapse
+[u.s, americans]
+scientists
+food
+global
+study
+report
+warns
+crisis
+police
+day
+[covid, pandemic]
+earth
+gas
+ice
+record
+
+
+
+
+
+
+
+
+
+*/

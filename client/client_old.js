@@ -64,7 +64,7 @@ class App {
             0x21409a
         ]
 
-        this.render()
+
     }
 
     init() {
@@ -190,6 +190,8 @@ class App {
             this.preventAutoRotate();
         })
 
+        this.render()
+
     }
 
     initPostprocess() {
@@ -260,6 +262,7 @@ class App {
             /* tree.object.rotation.y = this.clock.elapsedTime / 1 */
         })
         this.orbitControls.update()
+        this.tree.line_mat.uniforms.time.value = performance.now()
     }
 
     setSize() {

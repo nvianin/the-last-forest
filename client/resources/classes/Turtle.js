@@ -189,6 +189,8 @@ class Turtle {
     }
 }
 
+
+
 class Ruleset {
     constructor(dom = null) {
         this.rules = {}
@@ -243,7 +245,8 @@ class Ruleset {
 
     parse(string, replace = false) {
         let s = []
-        string.split(", ").forEach(e => {
+        string.replaceAll(" ", "")
+        string.split(",").forEach(e => {
             let rule = e.split("->");
             /* log(rule) */
             if (rule.length > 1) {
@@ -257,6 +260,8 @@ class Ruleset {
             /* log(rule) */
             this.addRule(rule[0], rule[1]);
         }
+
+        return this
     }
 
     randomKey(max = 4) {
