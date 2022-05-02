@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Last Forest</title>
+
+    <script src="./resources/classes/Utils.js"></script>
+
+    <script src="./resources/classes/socket.io.js"></script>
+
+    <script src="./node_modules/three/build/three.js"></script>
+    <script src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
+    <script src="./node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineSegments2.js"></script>
+    <script src="./node_modules/three/examples/js/lines/Line2.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineSegmentsGeometry.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineGeometry.js"></script>
+    <script src="./node_modules/three/examples/js/lines/LineMaterial.js"></script>
+
+    <script src="./node_modules/three/examples/js/shaders/CopyShader.js"></script>
+    <script src="./node_modules/three/examples/js/shaders/BokehShader.js"></script>
+    <script src="./node_modules/three/examples/js/shaders/FXAAShader.js"></script>
+
+    <script src="./node_modules/three/examples/js/postprocessing/Pass.js"></script>
+    <!-- <script src="./node_modules/three/examples/js/postprocessing/SSAARenderPass.js"></script> -->
+    <!-- <script src="./node_modules/three/examples/js/postprocessing/TAARenderPass.js"></script> -->
+    <script src="./node_modules/three/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/RenderPass.js"></script>
+
+    <script src="./node_modules/three/examples/js/postprocessing/BokehPass.js"></script>
+
+    <script src="./node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js"></script>
+    <script src="./node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js"></script>
+    <script src="./node_modules/three/examples/js/shaders/SAOShader.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/SAOPass.js"></script>
+
+    <script src="./node_modules/three/examples/js/postprocessing/OutlinePass.js"></script>
+
+    <script src="./node_modules/three/examples/js/math/SimplexNoise.js"></script>
+
+    <!-- <script src="./node_modules/three/examples/js/shaders/SSAOShader.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/SSAOPass.js"></script> -->
+
+    <script src="./node_modules/three/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="./node_modules/three/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+    <!-- <script src="./node_modules/three/examples/js/csm/CSMShader.js"></script>
+    <script src="./node_modules/three/examples/js/csm/CSMFrustum.js"></script>
+    <script src="./node_modules/three/examples/js/csm/CSM.js"></script> -->
+
+    <script src="./resources/classes/baseLine.js"></script>
+    <script src="./resources/classes/InstanceManager.js"></script>
+    <script src="./resources/classes/Turtle.js"></script>
+    <script src="./resources/classes/Tree.js"></script>
+    <script src="./client_old.js"></script>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Helvetica;
+        }
+
+        .text-input {
+            /* visibility: hidden; */
+            position: fixed;
+            bottom: 2%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 40%;
+            height: 10%;
+            resize: none;
+            user-select: none;
+            color: white;
+            background-color: #111;
+
+            text-align: center;
+        }
+
+        #text-translation {
+            bottom: 14%;
+        }
+
+        #rule-set {
+            top: 2%;
+        }
+
+        .data-display {
+            position: fixed;
+            /* visibility: hidden; */
+
+            left: 50%;
+            transform: translate(-50%, 0);
+            width: 60%;
+            height: auto;
+            resize: none;
+            user-select: none;
+            color: white;
+            text-align: center;
+        }
+
+        #post-tooltip {
+            width: auto;
+            height: auto;
+            max-width: 200px;
+            position: fixed;
+            transform: translate(-50%, -110%);
+
+            visibility: hidden;
+            z-index: 1001;
+            background-color: #223;
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+
+            user-select: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <textarea value="" id="text-input" class="text-input"></textarea>
+    <textarea id="rule-set" class="text-input"></textarea>
+    <div id="text-translation" class="data-display"></div>
+    <div id="post-tooltip">
+        <!--     <div id=triangle-1></div>
+        <div id=triangle-2></div> -->
+    </div>
+</body>
+
+</html>

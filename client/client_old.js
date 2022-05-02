@@ -126,19 +126,21 @@ class App {
 
         this.input = document.querySelector("#text-input");
         this.input.addEventListener("input", e => {
+            e.stopPropagation()
             this.sentence = this.input.value;
             this.sentence = removeDiacritics(this.sentence)
             /* log(this.input.value); */
             this.tree.build_generations(this.sentence, 3, this.ruleset);
             this.lastInstructions = this.tree.turtle.alphConv(this.sentence);
             this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence)
+            /* log("input") */
         })
         this.sentence = "Les arbres sont générés en fonction de la phrase tapée et de règles suivant un système de Lindenmayer. Créé par Aristid Lindenmayer, un biologiste Hongrois en 1968, ce système permet d'encoder un formule décrivant une forme végétale auto-réplicatrice dans une chaîne d'opérations représentées par des lettres."
         this.input.value = this.sentence
         this.sentence = removeDiacritics(this.sentence)
         this.translation_output = document.querySelector("#text-translation");
-        this.input.dispatchEvent(new Event("input"))
         this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence)
+        this.input.dispatchEvent(new Event("input"))
         document.body.addEventListener("keypress", e => {
             switch (e.key.toLowerCase()) {
                 case " ":
@@ -167,13 +169,10 @@ class App {
                     break;
             }
         })
-        this.input.addEventListener("keypress", e => {
-            e.stopPropagation();
-        })
         this.rule_dom.addEventListener("keypress", e => {
             e.stopPropagation();
         })
-        let i = 0;
+        /* let i = 0;
         for (let s of sentences) {
             this.tree.build_sentence(s)
             let o = new THREE.Object3D()
@@ -182,7 +181,7 @@ class App {
             this.scene.add(o)
             this.trees.push(o)
             i++
-        }
+        } */
 
         window.addEventListener("pointerup", e => {
             this.preventAutoRotate();
