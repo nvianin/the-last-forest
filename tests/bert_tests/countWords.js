@@ -21,7 +21,7 @@ async function main() {
     log("ok")
 
     for (let p of posts) {
-        for (word of Utils.removeDiacritics(p.title).replaceAll(",", "").replaceAll(".", "").split(" ")) {
+        for (word of Utils.removeDiacritics(p.title).replaceAll((/^[A-Za-z]+$/), "").split(" ")) {
             log(word)
         }
     }
