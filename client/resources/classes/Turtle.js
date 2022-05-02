@@ -11,7 +11,7 @@ let turtle_operations = [
     "]", // Restore position
     "{", // Increase theta angle
     "}", // Decrease theta angle
-    "S", // Spawn a sphere/fruit
+    "S", // Spawn a sphere/fruit/kandinskinily-jininginilly-dingy-nee-lee-dee-doo
 ]
 
 class Turtle {

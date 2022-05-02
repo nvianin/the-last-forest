@@ -105,7 +105,7 @@ class App {
         this.tree = new TreeManager("", new THREE.Vector3())
         this.rule_dom = document.querySelector("#rule-set");
         this.ruleset = new Ruleset(this.rule_dom)
-        this.ruleset.randomize()
+        /* this.ruleset.randomize() */
 
         this.ruleset.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
         this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF")

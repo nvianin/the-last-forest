@@ -98,8 +98,7 @@ class TreeManager {
             new THREE.BufferGeometry().setFromPoints(points),
             this.line_mat)
         this.object.add(this.line)
-        this.setSizeRelativeToBoundingSphere()
-        this.setRotationRelativeToCenterOfWeight()
+        this.postTransform();
         /* log(points) */
 
     }
@@ -111,8 +110,7 @@ class TreeManager {
             new THREE.BufferGeometry().setFromPoints(points),
             this.line_mat)
         this.object.add(this.line)
-        this.setSizeRelativeToBoundingSphere()
-        this.setRotationRelativeToCenterOfWeight()
+        this.postTransform();
         /* log(points) */
     }
 
@@ -134,8 +132,20 @@ class TreeManager {
                 color: color
             }))
         this.object.add(this.line);
-        this.setSizeRelativeToBoundingSphere()
-        this.setRotationRelativeToCenterOfWeight()
+        this.postTransform();
+    }
+
+    postTransform() {
+        this.setSizeRelativeToBoundingSphere();
+
+        const o = this.object.children[0];
+        log(o.scale)
+        o.updateMatrix()
+        o.geometry.applyMatrix4(o.matrix);
+        o.scale.set(1, 1, 1)
+        o.parent.scale.set(1, 1, 1)
+
+        this.setRotationRelativeToCenterOfWeight();
     }
 
     setSizeRelativeToBoundingSphere() {
@@ -143,7 +153,7 @@ class TreeManager {
         this.object.children[0].geometry.computeBoundingSphere()
         let r = 1 / this.object.children[0].geometry.boundingSphere.radius;
         /* log(r, 1 / r) */
-        this.object.scale.set(r, r, r);
+        this.object.children[0].scale.set(r, r, r);
 
         let instancedStuff = app.instanceManager.get_owned(this.turtle.instance_id);
         /* log(instancedStuff) */
@@ -181,25 +191,30 @@ class TreeManager {
         /* return false */
         let verts = this.object.children[0].geometry.attributes.position.array;
         let median = new THREE.Vector3();
+        /* log(verts) */
+
         for (let i = 0; i < verts.length; i += 3) {
-            median.add(new THREE.Vector3(verts[i], verts[i + 1], verts[i + 2]));
+            median.add(new THREE.Vector3(verts[i], verts[i + 1], verts[i + 2]).normalize());
         }
+
         median.divideScalar(verts.length);
         let helper = new THREE.AxesHelper(.1);
-        log(helper)
         helper.position.copy(median);
         let dir = helper.position.clone().sub(this.object.position)
+        /* dir = this.object.position.clone().sub(median) */
         let arrow = new THREE.ArrowHelper(dir, this.object.position, dir.length());
+        log(median)
         log(dir)
         helper.rotation.setFromVector3(dir)
         app.scene.add(helper);
-        app.scene.add(arrow);
-        setTimeout(() => {
+        this.object.add(arrow);
+        /* setTimeout(() => {
             app.scene.remove(arrow)
             app.scene.remove(helper);
-        }, 1000)
+        }, 1000) */
         /* this.object.lookAt(median) */
         /* this.object.rotate */
+
     }
 
     __DEPRECATED__build() {
