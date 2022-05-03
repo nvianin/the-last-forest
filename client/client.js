@@ -621,12 +621,25 @@ class App {
                     this.scene.add(tree)
                     this.trees.push(tree)
 
+
                     /* try {
                         log(post.title, Math.round_to_decimal(post.sentiment.score, 1), Math.round_to_decimal(post.sentiment.magnitude, 1))
                     } catch {
                         log(post)
                     } */
                     i++;
+                }
+            }
+            this.trees.sort((a, b) => {
+                a.position.x - b.position.x
+            })
+
+            for (let i = 0; i < this.trees.length - 1; i++) {
+                const d = this.trees[i].position.distanceTo(this.trees[i + 1].position);
+                if (d < 10) {
+                    log(d, this.trees[i].userData.post.title, i)
+                    this.trees[i].position.add(this.trees[i + 1].position.clone().sub(this.trees[i].position).normalize().multiplyScalar(7))
+                    this.trees[i].position.y = 30
                 }
             }
             this.built_trees = true;

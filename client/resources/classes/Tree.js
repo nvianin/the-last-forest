@@ -96,23 +96,20 @@ class TreeManager {
         );
         this.line.computeLineDistances(); */
 
-        this.line_mat = new THREE.LineMaterial({
+        this.line_mat = new THREE.LineBasicMaterial({
             color: 0xffff33,
             opacity: .3,
             transparent: true,
             linewidth: .002,
             vertexColors: false,
-
-            dashed: false,
             alphaToCoverage: false
-
         })
-        this.line_mat.uniforms = {
+        /* this.line_mat.uniforms = {
             "time": {
                 value: 0
             }
-        }
-        this.line_mat.onBeforeCompile = (shader, renderer) => {
+        } */
+        /* this.line_mat.onBeforeCompile = (shader, renderer) => {
             log("line mat beforecompile")
             log(shader.vertexShader)
             shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `
@@ -124,12 +121,23 @@ class TreeManager {
                 vNormal = vNormal * m;
             
             `)
-        }
-        const linegeo = new THREE.LineGeometry().setPositions(points);
-        this.line = new THREE.Line2(
-            linegeo, this.line_mat)
+        } */
+        this.line = this.buildLineFromPoints(points)
         this.object.add(this.line);
         app.scene.add(this.object)
+    }
+
+    buildLineFromPoints(points) {
+        /* log("building line from " + points.length + " points")
+        const points_reformatted = []
+        points.forEach(p => {
+            points_reformatted.push(p.x, p.y, p.z)
+        }) */
+        const linegeo = new THREE.BufferGeometry().setFromPoints(points)
+        const line = new THREE.Line(
+            linegeo, this.line_mat)
+        /* log("built line.") */
+        return line
     }
 
     evolve() {
@@ -153,9 +161,7 @@ class TreeManager {
         let instructions = this.turtle.alphConv(sentence);
         let points = this.turtle.build(instructions);
         this.object.remove(this.line);
-        this.line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(points),
-            this.line_mat)
+        this.line = this.buildLineFromPoints(points)
         this.object.add(this.line)
         this.postTransform();
         /* log(points) */
@@ -166,9 +172,7 @@ class TreeManager {
         let points = this.turtle.build(instructions);
 
         this.object.remove(this.line);
-        this.line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(points),
-            this.line_mat)
+        this.line = this.buildLineFromPoints(points)
         this.object.add(this.line)
         this.postTransform();
         /* log(points) */
@@ -186,10 +190,7 @@ class TreeManager {
         app.lastInstructions = instructions;
 
         this.object.remove(this.line);
-        this.line = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(points),
-            this.line_mat
-        )
+        this.line = this.buildLineFromPoints(points)
         this.object.add(this.line);
         this.postTransform();
     }

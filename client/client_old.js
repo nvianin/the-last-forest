@@ -262,7 +262,7 @@ class App {
             /* tree.object.rotation.y = this.clock.elapsedTime / 1 */
         })
         this.orbitControls.update()
-        this.tree.line_mat.uniforms.time.value = performance.now()
+        /* this.tree.line_mat.uniforms.time.value = performance.now() */
     }
 
     setSize() {
