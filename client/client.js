@@ -638,7 +638,10 @@ class App {
                 const d = this.trees[i].position.distanceTo(this.trees[i + 1].position);
                 if (d < 10) {
                     log(d, this.trees[i].userData.post.title, i)
-                    this.trees[i].position.add(this.trees[i + 1].position.clone().sub(this.trees[i].position).normalize().multiplyScalar(7))
+                    const force = this.trees[i + 1].position.clone().sub(this.trees[i].position).normalize().
+                    multiplyScalar(7);
+                    this.scene.add(new THREE.ArrowHelper(force, this.trees[i].position), force.length())
+                    this.trees[i].position.add(force);
                     this.trees[i].position.y = 30
                 }
             }
