@@ -11,6 +11,9 @@ const {
 } = require("./usermanager")
 const language = require("@google-cloud/language");
 const PoissonDiskSampling = require("poisson-disk-sampling");
+const {
+    spawn
+} = require("child_process")
 /* const simpleGit = require("simple-git"); */
 /* simpleGit().clean(simpleGit.CleanOptions.FORCE); */
 
@@ -113,130 +116,140 @@ class Server {
 
     /** Gets and stores the daily top posts from r/collapse. */
     async getDailyTop() {
-        this.sub.getTop({
+        this.top = await this.sub.getTop({
             time: "day"
-        }).then(async data => {
-            this.top = data;
-            for (let post of data) {
-                /* data.forEach(post => { */
-                log("-----------------")
-                log(post.title + ", by " + post.author.name)
-                log(post.permalink)
-                log(post.url)
-                log(post.score + " upvotes")
-                log(post.id)
-                log(post.created_utc)
-                post.uuid = crypto.randomUUID();
-                log(post.uuid)
-                log(post.media)
-                const hasMedia = mediaConditions.some(i => {
-                    return post.url.includes(i);
-                })
-                let p = {
-                    title: post.title,
-                    url: post.url,
-                    permalink: post.permalink,
-                    score: post.score,
-                    id: post.id,
-                    date: post.created_utc,
-                    uuid: post.uuid,
-                    has_media: hasMedia,
-                    media: post.media,
-                    comments: post.comments,
-                }
+        })
+        for (let post of this.top) {
+            /* data.forEach(post => { */
+            log("-----------------")
+            log(post.title + ", by " + post.author.name)
+            log(post.permalink)
+            log(post.url)
+            log(post.score + " upvotes")
+            log(post.id)
+            log(post.created_utc)
+            post.uuid = crypto.randomUUID();
+            log(post.uuid)
+            log(post.media)
+            const hasMedia = mediaConditions.some(i => {
+                return post.url.includes(i);
+            })
+            let p = {
+                title: post.title,
+                url: post.url,
+                permalink: post.permalink,
+                score: post.score,
+                id: post.id,
+                date: post.created_utc,
+                uuid: post.uuid,
+                has_media: hasMedia,
+                media: post.media,
+                comments: post.comments,
+            }
 
-                /* log(post.comments) */
-                if (post.score > 300) {
-                    if (await this.reddit_db.findOne({
-                            date: post.created_utc
-                        }) ? true : false) {
-                        this.reddit_db.updateOne({
-                            date: post.created_utc
-                        }, {
+            /* log(post.comments) */
+            if (post.score > 300) {
+                if (await this.reddit_db.findOne({
+                        date: post.created_utc
+                    }) ? true : false) {
+                    this.reddit_db.updateOne({
+                        date: post.created_utc
+                    }, {
+                        $set: {
                             score: post.score
-                        })
-                    } else {
-
-
-                        // Sentiment analysis
-                        let post_sentiment_exists = false;
-                        let existing_post = await this.reddit_db.findOne({
-                                url: post.url
-                            })
-                            .then(res => {
-                                if (res.title) {
-                                    post_sentiment_exists = true;
-                                }
-                            }).catch(err => {
-                                /* log(err.message) */
-                            })
-                        log(post_sentiment_exists ? "Sentiment analysis exists, skipping..." : "Analysis post sentiment");
-                        let requests_this_month = (await this.control_db.findOne({
-                            "name": "gapi"
-                        })).requests_this_month
-                        log(requests_this_month)
-                        if (requests_this_month >= 4900) log("skipping due to token limit")
-                        if (!post_sentiment_exists && requests_this_month < 4900) {
-                            /* return false; */
-                            let sentiment = await this.language_client.analyzeSentiment({
-                                document: {
-                                    content: post.title,
-                                    type: "PLAIN_TEXT"
-                                }
-                            })
-                            this.control_db.updateOne({
-                                name: "gapi"
-                            }, {
-                                $inc: {
-                                    requests_this_month: 1
-                                }
-                            })
-                            log(sentiment[0].documentSentiment)
-                            this.reddit_db.updateOne({
-                                permalink: post.permalink
-                            }, {
-                                $set: {
-                                    sentiment: sentiment[0].documentSentiment
-                                }
-                            }, {
-                                upsert: true
-                            })
                         }
+                    })
+                } else {
+
+
+                    // Sentiment analysis  ¨!!!!!!!!!!!!!!!!!! SKIPPED !!!!!!!!!!!!!!!!!!!
+                    let post_sentiment_exists = true;
+                    let existing_post = await this.reddit_db.findOne({
+                            url: post.url
+                        })
+                        .then(res => {
+                            if (res.title) {
+                                post_sentiment_exists = true;
+                            }
+                        }).catch(err => {
+                            /* log(err.message) */
+                        })
+                    log(post_sentiment_exists ? "Sentiment analysis exists, skipping..." : "Analysis post sentiment");
+                    let requests_this_month = (await this.control_db.findOne({
+                        "name": "gapi"
+                    })).requests_this_month
+                    log(requests_this_month)
+                    if (requests_this_month >= 4900) log("skipping due to token limit")
+                    if (!post_sentiment_exists && requests_this_month < 4900) {
+                        /* return false; */
+                        let sentiment = await this.language_client.analyzeSentiment({
+                            document: {
+                                content: post.title,
+                                type: "PLAIN_TEXT"
+                            }
+                        })
+                        this.control_db.updateOne({
+                            name: "gapi"
+                        }, {
+                            $inc: {
+                                requests_this_month: 1
+                            }
+                        })
+                        log(sentiment[0].documentSentiment)
                         this.reddit_db.updateOne({
                             permalink: post.permalink
                         }, {
                             $set: {
-                                title: post.title,
-                                url: post.url,
-                                permalink: post.permalink,
-                                score: post.score,
-                                id: post.id,
-                                date: post.created_utc,
-                                uuid: post.uuid,
-                                has_media: hasMedia,
-                                media: post.media
+                                sentiment: sentiment[0].documentSentiment
                             }
                         }, {
                             upsert: true
                         })
-
-
                     }
-                    this.posts[post.permalink] = p;
+                    this.reddit_db.updateOne({
+                        permalink: post.permalink
+                    }, {
+                        $set: {
+                            title: post.title,
+                            url: post.url,
+                            permalink: post.permalink,
+                            score: post.score,
+                            id: post.id,
+                            date: post.created_utc,
+                            uuid: post.uuid,
+                            has_media: hasMedia,
+                            media: post.media
+                        }
+                    }, {
+                        upsert: true
+                    })
+
+
                 }
-            } /* ) */
-            log(data.length);
-            /* log(Object.values(this.posts)[0]) */
-            this.getCommentsFromRecentPosts();
-            this.userman.broadcastPosts(this.posts);
+                this.posts[post.permalink] = p;
+            }
+        } /* ) */
+        log(this.top.length);
+        /* log(Object.values(this.posts)[0]) */
+        this.getCommentsFromRecentPosts();
+        /* this.userman.broadcastPosts(this.posts); */
+
+        const python = spawn("python", ["./bert/build_tsne.py"])
+        python.stdout.on("data", data => {
+            log("[PYTHON]" + data.toString())
         })
+        python.stderr.on("data", error => {
+            console.error(error)
+        })
+
     }
 
     getCommentsFromRecentPosts() {
         log("FETCHING RECENT COMMENTS")
         for (let [key, post] of Object.entries(this.posts)) {
             /* log(key) */
-            if (post.date * 1000 < Date.now() - 1000 * 60 * 60 * this.settings.recentCommentThreshold) {
+            log(post)
+            if (post.date * 1000 < Date.now() - 1000 * 60 * 60 * this.settings.recentCommentThreshold && post.comments && post.comments.fetchAll) {
                 /* log(post.comments) */
                 post.comments.fetchAll().then(comments => {
                     let post_comments = []

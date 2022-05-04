@@ -24,7 +24,7 @@ class Turtle {
         /* log(alphConvRegister) */
         /* this.object.add(new THREE.AxesHelper(.3)) */
         this.helper = new THREE.AxesHelper(.3);
-        app.scene.add(this.helper)
+        /* app.scene.add(this.helper) */
         this.scale = scale;
         this.object.scale.set(this.scale, this.scale, this.scale)
         app.scene.add(this.object)
@@ -32,15 +32,15 @@ class Turtle {
         this.stored_positions = [
             [new THREE.Vector3(), new THREE.Quaternion()]
         ];
-        this.theta = ((Math.PI * 2) / 360) * 3.5;
+        this.theta = ((Math.PI * 2) / 360) * 15;
         this.theta_backup = this.theta;
-        this.theta_offset = ((Math.PI * 2) / 360) * .5;
+        this.theta_offset = ((Math.PI * 2) / 360) * 1;
         this.instance_id = app.instanceManager.register(this);
         this.fruit_scale = .23;
     }
 
     build(instruction) {
-        app.instanceManager.return_all(this.instance_id);
+        /* app.instanceManager.return_all(this.instance_id); */
         this.theta_backup = this.theta;
         this.object.position.copy(new THREE.Vector3());
         this.object.rotation.set(0, 0, 0)
@@ -220,7 +220,7 @@ class Ruleset {
 
     clone() {
         const copy = new Ruleset();
-        copy.rules = this.rules;
+        copy.rules = Object.assign({}, this.rules);
         return copy;
     }
 

@@ -22,10 +22,10 @@ const debug = {
     line_show: false,
     half_res_renderer: false,
     debug_target_frameRate: {
-        enabled: true,
+        enabled: false,
         value: 5
     },
-
+    treeSeparationArrows: false,
     use_cached_data: false,
 
     enable: () => {
@@ -39,6 +39,11 @@ const debug = {
         }
     },
 }
+
+for ([key, debug_parameter] of Object.entries(debug)) {
+    if (debug_parameter && typeof (debug_parameter) == "boolean") log("debug setting " + key + " enabled")
+}
+
 const simplex = new THREE.SimplexNoise()
 let waiting_to_release_tooltip = false;
 class App {
@@ -47,6 +52,7 @@ class App {
             /* logarithmicDepthBuffer: true */
             antialias: true
         });
+        this.renderer.info.autoReset = false;
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
         if (debug.half_res_renderer) this.renderer.pixelRatio = .5;
@@ -58,11 +64,13 @@ class App {
 
         this.settings = {
             ground_side: 128,
-            ground_scale: 20
+            ground_scale: 20,
+            draw_distance: 1000,
+            fog_offset: 500,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
-        this.camera = new THREE.PerspectiveCamera(90, innerWidth / innerHeight, .01, 3000);
+        this.camera = new THREE.PerspectiveCamera(90, innerWidth / innerHeight, .01, debug.fog ? this.settings.draw_distance : 3000);
         this.camera.position.set(0, .5, 1);
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
@@ -70,8 +78,8 @@ class App {
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
 
-        let bgCol = new THREE.Color(0x111522);
-        this.fog = new THREE.Fog(bgCol, 2500, 2900);
+        let bgCol = new THREE.Color(0x00510);
+        this.fog = new THREE.Fog(bgCol, this.settings.draw_distance - this.settings.fog_offset, this.settings.draw_distance);
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
 
@@ -94,9 +102,13 @@ class App {
         this.sun_target_offset = new THREE.Vector3(-20, -10, -40);
         /* this.sun.lookAt(0, 0, 0); */
 
+
         this.sun.rotation.copy(this.sun.rotation)
         if (debug.sun_helper) this.sun.add(new THREE.DirectionalLightHelper(this.sun))
         this.scene.add(this.sun)
+
+        this.ambientLight = new THREE.AmbientLight(0xff0167)
+        this.scene.add(this.ambientLight);
 
         this.test = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial());
         this.test.castShadow = true;
@@ -134,7 +146,7 @@ class App {
                 this.settings.ground_side,
                 this.settings.ground_side),
             new THREE.MeshStandardMaterial({
-                color: 0x333355,
+                color: 0x111133,
                 wireframe: true,
                 side: 0,
             })
@@ -263,7 +275,7 @@ class App {
         this.baseRuleSet.addRule("[", "[LUFLUF[FFUUF]RUFF");
 
 
-        /* this.tree = new TreeManager("", new THREE.Vector3()) */
+        this.tree = new TreeManager("", new THREE.Vector3())
         this.rule_dom = document.querySelector("#rule-set");
         this.ruleset = this.baseRuleSet.clone();
         this.ruleset.randomize()
@@ -521,7 +533,7 @@ class App {
             this.socket.on("posts", posts => {
                 this.posts = posts;
                 window.localStorage.setItem("posts", JSON.stringify(this.posts))
-                log(Object.keys(posts).length + " posts received " /* , posts */ )
+                log(Object.keys(posts).length + " posts received and cached" /* , posts */ )
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
@@ -583,24 +595,47 @@ class App {
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
+        let removed_trees = 0
+        let i = 0;
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
-            let i = 0;
             log("Preparing to build " + Object.values(this.posts).length + " trees")
 
             const sc = Math.sqrt(Object.keys(this.posts).length);
             log("Calculated scale: " + sc)
+            const invisible_mat = new THREE.MeshBasicMaterial({
+                visible: false,
+                wireframe: true
+            })
 
             for (let post of Object.values(this.posts)) {
                 if ( /* post.sentiment && post.sentiment.score */ true) {
                     const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
+                    const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
+                    const scale = 1 * upvote_factor;
+                    const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
+
                     let y = -100;
                     post.sentiment = {
                         score: 1
                     }
+                    let tree;
+                    if (treeTypes[post.flair]) {
+                        tree = this.tree.buildTreeType(post.flair, development)
+                    } else {
+                        tree = this.tree.buildTreeType("Climate", development)
+                        console.warn("Tree type \"" + post.flair + "\" missing!")
+                    }
+                    const imposter = new THREE.Mesh(
+                        new THREE.SphereGeometry(scale, 3, 2),
+                        invisible_mat
+                    )
+                    imposter.userData.tree = tree;
+                    this.scene.add(imposter);
+                    this.tree_imposters.push(imposter)
 
-                    let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone();
+                    /* let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone(); */
                     raycaster.set(
                         new THREE.Vector3(
                             x, 100, z
@@ -617,8 +652,13 @@ class App {
                         y,
                         z
                     )
+                    /* tree.children[0].geometry.calculateBoundingSphere() */
+                    imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position));
+
+
+                    tree.scale.set(scale, scale, scale)
                     tree.userData.post = post;
-                    this.scene.add(tree)
+                    /* this.scene.add(tree) */
                     this.trees.push(tree)
 
 
@@ -630,31 +670,65 @@ class App {
                     i++;
                 }
             }
+
+            // If trees too close, push away
+
             this.trees.sort((a, b) => {
                 a.position.x - b.position.x
             })
 
             for (let i = 0; i < this.trees.length - 1; i++) {
-                const d = this.trees[i].position.distanceTo(this.trees[i + 1].position);
-                if (d < 10) {
-                    log(d, this.trees[i].userData.post.title, i)
-                    const force = this.trees[i + 1].position.clone().sub(this.trees[i].position).normalize().
-                    multiplyScalar(7);
-                    this.scene.add(new THREE.ArrowHelper(force, this.trees[i].position), force.length())
-                    this.trees[i].position.add(force);
-                    this.trees[i].position.y = 30
+                const range = 50;
+                const min = Math.clamp(i - range, 0, this.trees.length);
+                const max = Math.clamp(i + range, 0, this.trees.length)
+                const desired_distance = 10;
+
+                for (let j = min; j < max; j++) {
+                    const d = this.trees[i].position.distanceTo(this.trees[j].position);
+                    if (d < desired_distance) {
+                        /* log(d, this.trees[i].userData.post.title, i) */
+                        const force = this.trees[i + 1].position.clone().sub(this.trees[i].position).normalize().
+                        multiplyScalar(desired_distance);
+                        if (debug.treeSeparationArrows) this.scene.add(new THREE.ArrowHelper(force, this.trees[i].position, force.length() * desired_distance / 2))
+                        this.trees[i].position.add(force);
+                        /* this.trees[i].scale.set(5, 5, 5) */
+                        /* this.trees[i].position.y = 30 */
+                    }
                 }
             }
             this.built_trees = true;
-            let removed_trees = 0
+
             for (let t of this.trees) {
                 if (!t.userData.post || !t.userData.post.sentiment || !t.userData.post.sentiment.score || !t.userData.post.title) {
                     this.scene.remove(t);
                     removed_trees++;
                 }
             }
-            log("Successfully built " + i + " trees while removing " + removed_trees)
+        } else {
+            removed_trees++;
         }
+
+        let aggregated = []
+        let vertCount = 0;
+
+        for (let tree of this.trees) {
+            aggregated.concat(tree.children[0].geometry.attributes.position.array)
+            vertCount += tree.children[0].geometry.attributes.position.count
+        }
+        const aggregated_positions = new THREE.BufferAttribute(new Float32Array(aggregated), 3);
+        const aggregated_geometry = new THREE.BufferGeometry();
+        aggregated_geometry.setAttribute("position", aggregated_positions);
+        aggregated_geometry.computeVertexNormals();
+        this.scene.add(new THREE.Mesh(
+            aggregated_geometry,
+            new THREE.LineBasicMaterial({
+                color: "red"
+            })
+        ))
+
+        log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
+        log("Tree vertex: " + vertCount)
+        log(aggregated_geometry)
     }
 
     buildTreesFromPosts__old() {
@@ -729,9 +803,9 @@ class App {
         this.orbitControls.update()
         if (this.built_trees) {
             this.mousecast.setFromCamera(this.pointer, this.camera);
-            const intersects = this.mousecast.intersectObjects(this.trees);
+            const intersects = this.mousecast.intersectObjects(this.tree_imposters);
             if (intersects[0]) {
-                let object = intersects[0].object.name.includes("dead_tree") ? intersects[0].object : intersects[0].object.parent;
+                let object = intersects[0].object.userData.tree;
                 this.outlinePass.selectedObjects = [object]
                 object.active = true;
 
@@ -745,7 +819,8 @@ class App {
                 /* log(Math.round_to_decimal(post.sentiment.score)) */
 
                 this.postDom.innerHTML = post.title;
-                this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>";
+                /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
+                this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
                 this.activeUrl = post.url;
                 this.postDom.style.visibility = "visible";
 
@@ -777,6 +852,7 @@ class App {
             requestAnimationFrame(this.render.bind(this))
         }
         this.frameCount++;
+        this.renderer.info.reset()
     }
 
     setSize() {

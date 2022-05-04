@@ -21,6 +21,7 @@ class UserManager {
                 if (err || !req.url.includes("client")) {
                     res.writeHead(404);
                     res.end(JSON.stringify(err));
+                    console.error("[404]: " + req.url + " not found!")
                     return
                 }
                 res.writeHead(200);
@@ -47,6 +48,7 @@ class UserManager {
     };
 
     broadcastPosts(posts) {
+        return false;
         log("BROADCASTING POSTS TO USERS")
         this.io.sockets.emit("posts", posts);
         this.posts = posts;

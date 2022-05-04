@@ -28,46 +28,121 @@ const parseRules = (seed) => {
 }
 
 const treeTypes = {
-    "climate": {
-        color: "red",
+    "Climate": {
+        color: "lightblue",
         rules: new Ruleset().parse(
             "F->RF[RF[LFRSLF]SRF]"
         )
     },
-    "collapse": {
-        color: "red",
+    "Casual Friday": {
+        color: "blue",
         rules: new Ruleset().parse(
             "R->FFLS[RRLF[RFLF]LFLF]L"
         )
     },
-    ["u.s, us, american, america, americans"]: {
-        color: "red",
+    "Economic": {
+        color: "yellow",
         rules: new Ruleset().parse(
             "F->FL[[F]RF]RF[RFF]LF, F->FF"
         )
     },
-    "collapse": {
+    "Humor": {
+        color: "teal",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Society": {
+        color: "lightyellow",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Systemic": {
+        color: "darkgreen",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Conflict": {
+        color: 0x8a0303,
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Politics": {
         color: "red",
         rules: new Ruleset().parse(
             "R->FFLS[RRLF[RFLF]LFLF]L"
         )
     },
-    "collapse": {
-        color: "red",
+    "Ecological": {
+        color: "green",
         rules: new Ruleset().parse(
             "R->FFLS[RRLF[RFLF]LFLF]L"
         )
     },
-    "collapse": {
-        color: "red",
+    "COVID-19": {
+        color: "darkgray",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L, LFLF->[LFLF[RRFFS]RRFLF]SLL"
+        )
+    },
+    "Coping": {
+        color: "orange",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Pollution": {
+        color: "black",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Meta": {
+        color: "lightblue",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Low Effort": {
+        color: "darkred",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Food": {
+        color: "brown",
         rules: new Ruleset().parse(
             "R->FFLS[RRLF[RFLF]LFLF]L"
         )
     },
 }
 
+const treeColors = {}
+const load_colors = async () => {
+    const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\r\n")
+    let i = 0;
+    for (key of Object.keys(treeTypes)) {
+        /* log(hexpalette[i]) */
+        treeTypes[key].color = "#" + hexpalette[i]
+        /* log(treeTypes[key]) */
+        i++;
+    }
 
-const lineMat = new THREE.LineBasicMaterial()
+    Object.entries(treeTypes).forEach(([key, val]) => {
+        treeColors[key] = new THREE.LineBasicMaterial({
+            color: new THREE.Color(val.color),
+            opacity: .7,
+            transparent: true,
+            linewidth: .002,
+            vertexColors: false,
+            alphaToCoverage: false
+        })
+    })
+}
+load_colors()
 class TreeManager {
     constructor(seed, position) {
         this.message = seed;
@@ -193,6 +268,28 @@ class TreeManager {
         this.line = this.buildLineFromPoints(points)
         this.object.add(this.line);
         this.postTransform();
+        this.line.material.color = color;
+
+        return this.object.clone();
+    }
+    // --------------------------------------------------------------------
+    buildTreeType(type = "Climate", generations = 1) {
+        const ruleset = treeTypes[type].rules.clone();
+        /* ruleset.randomize(2, false); */
+        const tree = this.build_generations(this.randomizeSentence(), generations, ruleset, new THREE.Color(treeTypes[type].color));
+        tree.children[0].material = treeColors[type];
+        tree.rotation.y = Math.random() * Math.TWO_PI
+        return tree;
+    }
+
+    randomizeSentence() {
+        let sentence = ""
+        let count = Math.random() * 100 + 50;
+        for (let i = 0; i < count; i++) {
+            sentence += alphabet[Math.floor(Math.random() * alphabet.length)]
+        }
+        /* log(sentence) */
+        return sentence;
     }
 
     postTransform() {

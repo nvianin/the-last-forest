@@ -15,6 +15,7 @@ text = []
 permalinks = []
 for d in data:
     """ if "title" in d: """
+    """ sentence = d["title"] + " " + d["flair"] + d[""] """
     text.append(d["title"]);
     permalinks.append(d["permalink"])
 
@@ -41,7 +42,7 @@ for i in range(len(result)):
     print(i)
     result[i].append(permalinks[i])
 """ print(result) """
-print("Included 0:" , zero_exists)
+""" print("Included 0:" , zero_exists) """
 with open("result.json", "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False, indent=4)
 
