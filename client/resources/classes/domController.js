@@ -20,7 +20,7 @@ class DomController {
         })
         this.modeSlider.dom.default = 500
 
-        const images = ["foot", "auto", "map"]
+        const images = ["foot", "map", "auto"]
         let j = 0;
         for (let i of images) {
             let img = document.createElement("img")
@@ -44,10 +44,10 @@ class DomController {
             this.currentState = "WALKING"
             /* log("selecting walk") */
         } else if (modeVal > 400 && modeVal < 600) {
-            this.currentState = "PROMENADE"
+            this.currentState = "MAP"
             /* log("selecting auto") */
         } else if (modeVal > 900) {
-            this.currentState = "MAP"
+            this.currentState = "PROMENADE"
             /* log("selecting map") */
         }
     }

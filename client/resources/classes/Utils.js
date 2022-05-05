@@ -45,6 +45,29 @@ Math.HALF_PI = Math.PI / 2;
 Math.QUARTER_PI = Math.PI / 4;
 Math.TWO_PI = Math.PI * 2;
 
+try {
+    THREE;
+    /* log("THREE.js detected, extending !") */
+
+    THREE.Euler.lerp = (e1, e2, t) => {
+        return new THREE.Euler(Math.lerp(e1.x, e2.x, t),
+            Math.lerp(e1.y, e2.y, t),
+            Math.lerp(e1.z, e2.z, t)
+        )
+    }
+
+    THREE.UP = new THREE.Vector3(0, 1, 0)
+    THREE.DOWN = new THREE.Vector3(0, -1, 0)
+    THREE.RIGHT = new THREE.Vector3(1, 0, 0)
+    THREE.LEFT = new THREE.Vector3(-1, 0, 0)
+    THREE.FORWARD = new THREE.Vector3(0, 0, 1)
+    THREE.BACK = new THREE.Vector3(0, 0, -1)
+
+
+} catch {
+    /* log("THREE.js not detected.") */
+}
+
 
 // Diacritics removal mess
 var defaultDiacriticsRemovalMap = [{

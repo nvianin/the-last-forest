@@ -143,11 +143,11 @@ canvas .text-input {
   left: 100%;
   transform: translate(-50%);
 }
-#auto {
+#map {
   left: 33%;
   transform: translate(-50%);
 }
-#map {
+#auto {
   right: 50%;
   transform: translate(50%);
 }
