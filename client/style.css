@@ -4,7 +4,7 @@ body {
   font-family: Helvetica;
 }
 
-.text-input {
+canvas .text-input {
   visibility: hidden;
   position: fixed;
   bottom: 2%;
@@ -40,4 +40,60 @@ body {
   user-select: none;
   color: white;
   text-align: center;
+}
+
+#post-tooltip {
+  width: auto;
+  height: auto;
+  max-width: 200px;
+  position: fixed;
+  transform: translate(-50%, -110%);
+
+  visibility: hidden;
+  z-index: 1001;
+  background-color: #223;
+  border-radius: 10px;
+  padding: 10px;
+  color: white;
+
+  user-select: none;
+  cursor: pointer;
+}
+
+.cool-slider {
+  -webkit-appearance: none;
+  background-color: #111;
+  width: 99%;
+  height: 23px;
+  border-radius: 50px;
+  box-shadow: inset #333 0 0 2.5px;
+}
+.cool-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 20px;
+  background-color: #111;
+
+  box-shadow: inset white 0 0 2.5px;
+}
+#zoom-slider {
+}
+#mode-slider {
+}
+
+.cool-slider-container {
+  z-index: 100;
+  position: fixed;
+}
+#zoom-slider-container {
+  top: 50%;
+  left: 50px;
+  width: fit-content;
+  height: fit-content;
+  /* transform: rotate(90deg); */
+  width: 1vh;
+  height: 90%;
+}
+#mode-slider-container {
 }

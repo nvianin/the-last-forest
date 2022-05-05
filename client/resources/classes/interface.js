@@ -1,5 +1,6 @@
 const CONTROLLER_STATES = {
     WALKING: "WALKING",
+    WALKING_ADVANCED: "WALKING_ADVANCED",
     MAP: "MAP",
     PROMENADE: "PROMENADE",
 }
@@ -7,13 +8,15 @@ const CONTROLLER_STATES = {
 class AppInterface {
     constructor() {
 
+        this.domController = new DomController();
+
         this.state = CONTROLLER_STATES.MAP
         this.prevState = CONTROLLER_STATES.MAP
         this.nextState = CONTROLLER_STATES.MAP
 
         this.orbitControls = new THREE.OrbitControls(app.camera, app.renderer.domElement);
 
-        this.setupListeners()
+        this.setupListeners();
     }
     setupListeners() {
         window.addEventListener("pointermove", e => {
@@ -29,19 +32,35 @@ class AppInterface {
 
         })
     }
+
+
+
     update() {
+
+        // Next state initialization
         if (this.nextState != this.state) {
             this.state = this.nextState;
             switch (this.nextState) {
-                case CONTROLLER_STATES.PROMENADE:
+                case CONTROLLER_STATES.WALKING:
                     break;
-                case CONTROLLER_STATES.PROMENADE:
+                case CONTROLLER_STATES.MAP:
+
                     break;
                 case CONTROLLER_STATES.PROMENADE:
                     break;
             }
         }
-        switch ()
+
+        // Current state behaviour
+        switch (this.state) {
+            case CONTROLLER_STATES.WALKING:
+                break;
+            case CONTROLLER_STATES.MAP:
+                this.orbitControls.update()
+                break;
+            case CONTROLLER_STATES.PROMENADE:
+                break;
+        }
     }
 
     preventAutoRotate() {

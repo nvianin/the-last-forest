@@ -384,7 +384,7 @@ class Server {
             log("[PYTHON]" + data.toString())
         })
         this.python.stderr.on("data", error => {
-            console.error(error)
+            console.error(error.toString())
         })
     }
 }
