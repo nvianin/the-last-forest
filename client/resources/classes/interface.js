@@ -18,6 +18,9 @@ class AppInterface {
         this.mapControls.maxDistance = 1000;
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
+        this.mapControls.getDistance = () => {
+            return this.mapControls.target.distanceTo(app.camera.position);
+        }
 
         this.setupListeners();
         this.domController = new DomController(this.mapControls);

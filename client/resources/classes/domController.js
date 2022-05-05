@@ -12,12 +12,13 @@ class DomController {
                 app.camera.position.clone().sub(this.mapControls.target).normalize().multiplyScalar(newzoom)
             ); */
         })
+        this.zoomSlider.targetValue = this.zoomSlider.dom.value = this.mapControls.getDistance()
 
 
         this.modeSlider = new CoolSlider("mode-slider", 0, 1000, 3)
         this.modeSlider.dom.addEventListener("input", e => {
             const val = parseFloat(e.target.value)
-            this.modeSlider.targetValue = Math.ceil(val / 333);
+            this.modeSlider.targetValue = Math.floor(val / 333) * 500;
         })
         this.modeSlider.dom.default = 500
 
@@ -25,7 +26,7 @@ class DomController {
 
     update() {
         this.zoomSlider.update()
-        /* this.modeSlider.update() */
+        this.modeSlider.update()
     }
 }
 
@@ -43,17 +44,25 @@ class CoolSlider {
         this.container = document.createElement("div");
         this.container.classList.add("cool-slider-container");
         this.container.appendChild(this.dom)
+        this.container.ondragstart = e => {
+            e.preventDefault()
+            /* log("prevented default drag form " + e.target) */
+        }
+        this.dom.ondragstart = this.container.ondragstart;
 
         if (id != "") this.container.id = id + "-container";
+
+        this.steps = steps;
 
         for (let i = 0; i < steps; i++) {
             const step = document.createElement("div")
             step.classList.add("slider-step")
             step.id = "slider-step-" + i
+            step.ondragstart = this.dom.ondragstart;
             this.container.appendChild(step)
         }
 
-        this.targetValue = 499;
+        this.targetValue = 500;
         this.frame = 0;
 
         document.body.appendChild(this.container)
@@ -62,10 +71,16 @@ class CoolSlider {
     update() {
         this.frame++
         const val = parseFloat(this.dom.value);
+        const diff = Math.abs(val - this.targetValue);
         /* this.targetValue = Math.sin(this.frame / 100) * 1000 */
-        if (Math.abs(val - this.targetValue) > .1) {
-            log(val, Math.abs(val - this.targetValue))
-            this.dom.value = Math.lerp(val, this.targetValue, .1) + ""
+        if (diff > 5) {
+            /* log(val, Math.abs(val - this.targetValue)) */
+            const t = Math.clamp(Math.pow(diff / 1000, 2), 0.1, .2);
+            log(Math.pow(diff / 100, 2), t, diff)
+            this.dom.value = Math.lerp(val, this.targetValue, t) + ""
+            /* if (this.) */
+        } else {
+            this.dom.value = this.targetValue + ""
         }
     }
 }
