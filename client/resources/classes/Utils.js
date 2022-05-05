@@ -1,7 +1,7 @@
 const log = console.log
 
 Math.lerp = (x, y, t) => {
-    return x * t + y * (1 - t);
+    return x * (1 - t) + y * t;
 }
 
 Math.map = (v, x1, y1, x2, y2) => {

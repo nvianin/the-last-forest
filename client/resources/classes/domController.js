@@ -64,7 +64,7 @@ class CoolSlider {
         /* this.targetValue = Math.sin(this.frame / 100) * 1000 */
         if (Math.abs(val - this.targetValue) > .1) {
             log(val, Math.abs(val - this.targetValue))
-            this.dom.value = Math.lerp(val, this.targetValue, .001) + ""
+            this.dom.value = Math.lerp(val, this.targetValue, .1) + ""
         }
     }
 }
