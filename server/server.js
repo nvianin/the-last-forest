@@ -14,6 +14,7 @@ const PoissonDiskSampling = require("poisson-disk-sampling");
 const {
     spawn
 } = require("child_process")
+const Utils = require("../client/resources/classes/Utils.js")
 /* const simpleGit = require("simple-git"); */
 /* simpleGit().clean(simpleGit.CleanOptions.FORCE); */
 
@@ -233,22 +234,14 @@ class Server {
         /* log(Object.values(this.posts)[0]) */
         this.getCommentsFromRecentPosts();
         /* this.userman.broadcastPosts(this.posts); */
-
-        const python = spawn("python", ["./bert/build_tsne.py"])
-        python.stdout.on("data", data => {
-            log("[PYTHON]" + data.toString())
-        })
-        python.stderr.on("data", error => {
-            console.error(error)
-        })
-
+        this.userman.updatePosts(this.posts);
     }
 
     getCommentsFromRecentPosts() {
         log("FETCHING RECENT COMMENTS")
         for (let [key, post] of Object.entries(this.posts)) {
             /* log(key) */
-            log(post)
+            /* log(post) */
             if (post.date * 1000 < Date.now() - 1000 * 60 * 60 * this.settings.recentCommentThreshold && post.comments && post.comments.fetchAll) {
                 /* log(post.comments) */
                 post.comments.fetchAll().then(comments => {
@@ -323,7 +316,8 @@ class Server {
         log(this.temperature_data);
     }
 
-    update() {
+    async update() {
+        if (!this.gapi_control || !this.reddit_control) return
         this.now = Date.now();
         const last_gapi_reset = (Date.now() - this.gapi_control.last_reset) / 1000 / 60 / 60 / 24;
         log("**************************************")
@@ -334,12 +328,20 @@ class Server {
                 1000 / 3600 * 1000)) / 1000 +
             " hours out of " + this.settings.getDailyTopInterval);
         log("   Last gapi reset: " + last_gapi_reset + " out of 31 days")
+        log(this.displayClientsIp())
         log("**************************************")
+
         if (this.settings.getDailyTopInterval * 1000 * 3600 < this.now - this.reddit_control.last_getDailyTop) {
             log("REDDIT UPDATE")
             this.getDailyTop();
             this.reddit_control.last_getDailyTop = Date.now();
             this.setRedditControl()
+
+            await Utils.wait(6000);
+            log("Building TSNE !")
+            this.buildTSNE()
+            await Utils.wait(15000);
+            this.reloadPostsDB();
         }
 
         const current_month = new Date().getMonth();
@@ -356,6 +358,34 @@ class Server {
             this.setRedditControl()
         }
 
+    }
+
+    displayClientsIp() {
+        let current_users = ""
+        this.userman.io.sockets.sockets.forEach(socket => {
+            log(socket.handshake.address)
+        })
+        return
+    }
+
+    async reloadPostsDB() {
+        log("Reloading the post DB...")
+        this.posts = await this.reddit_db.find({}).toArray()
+        this.userman.updatePosts(this.posts);
+        log("Post DB reloaded.")
+    }
+
+    buildTSNE() {
+        if (this.python) {
+            this.python.kill()
+        }
+        this.python = spawn("python", ["./bert/build_tsne.py"])
+        this.python.stdout.on("data", data => {
+            log("[PYTHON]" + data.toString())
+        })
+        this.python.stderr.on("data", error => {
+            console.error(error)
+        })
     }
 }
 

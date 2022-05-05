@@ -26,11 +26,13 @@ const main = async () => {
             }
             if (incomplete) posts_with_incomplete_data++;
         }
-        missing[post.permalink] = missing_conditions
+        if (missing_conditions.length > 0) missing[post.permalink] = missing_conditions
     }
 
-    log(missing_conditions)
-    log()
+    log(missing)
+    log("Incomplete posts:" + posts_with_incomplete_data + " with " + missing_fields + " missing fields.")
+    log("Watched fields: " + conditions.join(", "))
+    process.exit()
 
 }
 

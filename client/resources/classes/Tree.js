@@ -179,6 +179,11 @@ class TreeManager {
             vertexColors: false,
             alphaToCoverage: false
         })
+        this.line_mat.onBeforeCompile = shader => {
+            log(shader.vertexShader)
+            log(shader.fragmentShader)
+        }
+
         /* this.line_mat.uniforms = {
             "time": {
                 value: 0

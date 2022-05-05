@@ -25,10 +25,14 @@ for d in posts:
     print(posts[d]["title"]) """
     """ if "title" in d: """
     """ print(str(posts[d]["score"])) """
-    sentence = posts[d]["title"] + ", "  + str(posts[d]["score"]) + " upvotes, "
+
+    sentence = posts[d]["title"] 
+    """ + ", "  + str(posts[d]["score"]) + " upvotes, " """
     if "flair" in posts[d] : 
         """ print(posts[d]["flair"]) """
         sentence += str(posts[d]["flair"])
+    if "text" in posts[d]:
+        sentence += "; " + posts[d]["text"]
     text.append(sentence);
     permalinks.append(posts[d]["permalink"])
 

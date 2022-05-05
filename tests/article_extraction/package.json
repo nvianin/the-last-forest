@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "boilerpipe": "^0.0.7",
+    "html-to-text": "^8.2.0",
+    "mongodb": "^4.5.0",
+    "request": "^2.88.2"
+  }
+}

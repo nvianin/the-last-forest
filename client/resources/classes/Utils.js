@@ -35,6 +35,12 @@ const sphericalToCartesian = (distance, azimuth, elevation) => {
     )
 }
 
+const wait = (time) => {
+    return new Promise(resolve => {
+        setTimeout(resolve, time)
+    })
+}
+
 Math.HALF_PI = Math.PI / 2;
 Math.QUARTER_PI = Math.PI / 4;
 Math.TWO_PI = Math.PI * 2;
@@ -394,7 +400,8 @@ try {
     if (module) {
         module.exports = {
             removeDiacritics,
-            sphericalToCartesian
+            sphericalToCartesian,
+            wait
         }
     }
 } catch {

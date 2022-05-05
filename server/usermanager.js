@@ -6,7 +6,7 @@ const crypto = require("crypto");
 class UserManager {
     constructor(posts, temperature_data, points) {
         this.users = {};
-        this.posts = posts;
+        this.updatePosts(posts)
         this.points = points
         this.temperature_data = temperature_data;
         this.init();
@@ -32,12 +32,12 @@ class UserManager {
         this.io.on("connection", client => {
             client.user = new User(client);
             this.users[client.user.id] = client;
-            log("-->" + client.user.id);
-            client.emit("posts", this.posts);
+            log("-->" + client.handshake.address);
+            client.emit("posts", this.serialized_posts);
             /* client.emit("temperature_data", this.temperature_data); */
             /* client.emit("points", this.points) */
             client.on("disconnect", () => {
-                log("<--" + client.user.id);
+                log("<--" + client.handshake.address);
                 delete this.users[client.user.id];
             });
         });
@@ -53,6 +53,22 @@ class UserManager {
         this.io.sockets.emit("posts", posts);
         this.posts = posts;
     };
+
+    updatePosts(posts) {
+        this.posts = posts
+        this.serialized_posts = {}
+        for (let [key, post] of Object.entries(posts)) {
+            this.serialized_posts[key] = {
+                title: post.title,
+                permalink: post.permalink,
+                date: post.date,
+                score: post.score,
+                tsne_coordinates: post.tsne_coordinates,
+                flair: post.flair,
+                url: post.url
+            }
+        }
+    }
 };
 
 class User {
