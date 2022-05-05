@@ -62,7 +62,7 @@ canvas .text-input {
 
 .cool-slider {
   -webkit-appearance: none;
-  background-color: #000005;
+  background-color: #020206;
   width: 99%;
   height: 12px;
   border-radius: 50px;
@@ -104,8 +104,8 @@ canvas .text-input {
 }
 
 .slider-step {
-  display:none
-  z-index: 90;
+  /* display: none; */
+  z-index: 101;
   width: 14px;
   height: 14px;
   position: fixed;
