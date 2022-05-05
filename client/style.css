@@ -102,7 +102,13 @@ canvas .text-input {
   height: 23px;
   transform: rotate(90deg) translate(50%);
   opacity: 50%;
+  transition: 0.3s;
 }
+#zoom-slider-container:hover {
+  opacity: 90%;
+  transform: rotate(90deg) translate(50%) scale(110%);
+}
+
 #mode-slider-container {
   bottom: 5px;
   left: 50%;
