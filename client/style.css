@@ -102,12 +102,54 @@ canvas .text-input {
   width: 90vh;
   height: 23px;
   transform: rotate(90deg) translate(50%);
+  opacity: 50%;
+  transition: 0.3s;
 }
+#zoom-slider-container:hover {
+  opacity: 90%;
+  transform: rotate(90deg) translate(50%) scale(110%);
+}
+
 #mode-slider-container {
   bottom: 5px;
   left: 50%;
   transform: translate(-50%) scale(1.3);
-  width: 20%;
+  width: 10%;
+  min-width: 100px;
+  transition: 0.3s;
+  opacity: 90%;
+}
+
+#mode-slider-container:hover {
+  transform: translate(-50%) scale(1.5);
+}
+
+.mode-icon {
+  position: fixed;
+  /* top: -300px; */
+  width: 30px;
+  height: 30px;
+  z-index: 104;
+  /* background-color: ; */
+  filter: invert();
+  bottom: 175%;
+  opacity: 20%;
+  user-select: none;
+}
+.mode-icon:hover {
+}
+
+#foot {
+  left: 100%;
+  transform: translate(-50%);
+}
+#auto {
+  left: 33%;
+  transform: translate(-50%);
+}
+#map {
+  right: 50%;
+  transform: translate(50%);
 }
 
 .slider-step {
@@ -117,8 +159,8 @@ canvas .text-input {
   height: 8px;
   position: fixed;
   top: 9.4996px;
-  background-color: lightgrey;
-  opacity: 10%;
+  background-color: #333;
+  opacity: 100%;
   border-radius: 50px;
   transform: translate(-50%, -50%);
 }
