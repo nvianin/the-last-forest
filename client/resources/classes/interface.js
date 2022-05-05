@@ -3,6 +3,7 @@ const CONTROLLER_STATES = {
     WALKING_ADVANCED: "WALKING_ADVANCED",
     MAP: "MAP",
     PROMENADE: "PROMENADE",
+    LERPING: "LERPING"
 }
 
 class AppInterface {
@@ -24,6 +25,9 @@ class AppInterface {
 
         this.setupListeners();
         this.domController = new DomController(this.mapControls);
+
+        this.target = new THREE.Object3D();
+        this.raycaster = new THREE.Raycaster();
     }
     setupListeners() {
         window.addEventListener("pointermove", e => {
@@ -56,6 +60,7 @@ class AppInterface {
             this.state = this.nextState;
             switch (this.nextState) {
                 case CONTROLLER_STATES.WALKING:
+
                     break;
                 case CONTROLLER_STATES.MAP:
 
@@ -86,4 +91,6 @@ class AppInterface {
             this.mapControls.autoRotate = true;
         }, 2000);
     }
+
+    findPoint
 }
