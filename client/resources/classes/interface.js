@@ -8,25 +8,34 @@ const CONTROLLER_STATES = {
 class AppInterface {
     constructor() {
 
-        this.domController = new DomController();
 
         this.state = CONTROLLER_STATES.MAP
         this.prevState = CONTROLLER_STATES.MAP
         this.nextState = CONTROLLER_STATES.MAP
 
-        this.orbitControls = new THREE.OrbitControls(app.camera, app.renderer.domElement);
+        this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
+        this.mapControls.maxPolarAngle = Math.HALF_PI * .8
+        this.mapControls.maxDistance = 1000;
+        this.mapControls.minDistance = 1;
+        this.mapControls.screenSpacePanning = false;
 
         this.setupListeners();
+        this.domController = new DomController(this.mapControls);
     }
     setupListeners() {
         window.addEventListener("pointermove", e => {
 
         })
         window.addEventListener("pointerup", e => {
-            this.preventAutoRotate()
+            /* this.preventAutoRotate() */
         })
         window.addEventListener("wheel", e => {
-            this.preventAutoRotate()
+            /* this.preventAutoRotate() */
+            const zoom = this.mapControls.target.distanceTo(app.camera.position);
+            this.domController.zoomSlider.targetValue = zoom;
+            this.mapControls.minDistance = this.domController.zoomSlider.dom.min
+            this.mapControls.maxDistance = this.domController.zoomSlider.dom.max
+            /* log(zoom) */
         })
         window.addEventListener("pointerdown", e => {
 
@@ -36,6 +45,8 @@ class AppInterface {
 
 
     update() {
+        /* this.mapControls.target.y = 0; */
+        this.domController.update()
 
         // Next state initialization
         if (this.nextState != this.state) {
@@ -56,7 +67,7 @@ class AppInterface {
             case CONTROLLER_STATES.WALKING:
                 break;
             case CONTROLLER_STATES.MAP:
-                this.orbitControls.update()
+                this.mapControls.update()
                 break;
             case CONTROLLER_STATES.PROMENADE:
                 break;
@@ -64,12 +75,12 @@ class AppInterface {
     }
 
     preventAutoRotate() {
-        this.orbitControls.autoRotate = false;
+        this.mapControls.autoRotate = false;
         if (this.autoRotateTimeout) {
             clearTimeout(this.autoRotateTimeout);
         }
         this.autoRotateTimeout = setTimeout(() => {
-            this.orbitControls.autoRotate = true;
+            this.mapControls.autoRotate = true;
         }, 2000);
     }
 }

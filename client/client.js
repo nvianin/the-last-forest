@@ -67,7 +67,7 @@ class App {
         this.settings = {
             ground_side: 128,
             ground_scale: 20,
-            draw_distance: 1000,
+            draw_distance: 1200,
             fog_offset: 500,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
@@ -284,36 +284,9 @@ class App {
 
         /* this.ruleset.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
         this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF") */
-
-
-
-        this.rule_dom.addEventListener("input", e => {
-            if (this.input_timeout) {
-                clearTimeout(this.input_timeout);
-            }
-            this.input_timeout = setTimeout(() => {
-                clearTimeout(this.input_timeout);
-                this.input_timeout = false;
-                this.ruleset.parse(removeDiacritics(this.rule_dom.value).toUpperCase(), true)
-                this.tree.build_generations(this.sentence, 5, this.ruleset)
-            }, 2000)
-            /* log(e) */
-        })
         /* this.ruleset.addRule("U", "F") */
 
-        this.input = document.querySelector("#text-input");
-        this.input.addEventListener("input", e => {
-            this.sentence = this.input.value;
-            this.sentence = removeDiacritics(this.sentence)
-            /* log(this.input.value); */
-            this.tree.build_generations(this.sentence, 3, this.ruleset);
-            this.lastInstructions = this.tree.turtle.alphConv(this.sentence);
-            this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence)
-        })
-        this.sentence = "Les arbres sont générés en fonction de la phrase tapée et de règles suivant un système de Lindenmayer. Créé par Aristid Lindenmayer, un biologiste Hongrois en 1968, ce système permet d'encoder un formule décrivant une forme végétale auto-réplicatrice dans une chaîne d'opérations représentées par des lettres."
-        this.input.value = this.sentence
-        this.sentence = removeDiacritics(this.sentence)
-        this.translation_output = document.querySelector("#text-translation");
+
         /* this.input.dispatchEvent(new Event("input")) */
         /* this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence) */
         document.body.addEventListener("keypress", e => {
@@ -371,12 +344,6 @@ class App {
 
             /* this.orbitControls.target.copy(this.trees[this.activeTree].position)
             this.camera.position.copy(this.orbitControls.target.clone().add(new THREE.Vector3(5, 3, 0))) */
-        })
-        this.input.addEventListener("keypress", e => {
-            e.stopPropagation();
-        })
-        this.rule_dom.addEventListener("keypress", e => {
-            e.stopPropagation();
         })
         /* let i = 0;
         for (let s of sentences) {
@@ -840,7 +807,7 @@ class App {
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
         this.sun.target.updateMatrixWorld();
 
-
+        if (this.interface) this.interface.update()
         /* this.csm.update(this.camera.matrix) */
 
         this.postDom.style.left = this.mouse.x + "px";
