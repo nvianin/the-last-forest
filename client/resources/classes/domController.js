@@ -27,6 +27,7 @@ class DomController {
             img.src = "./resources/textures/" + i + ".svg"
             img.classList.add("mode-icon")
             img.id = i;
+            img.setAttribute("type", "image/svg+xml")
             this.modeSlider.step_elements[j].append(img)
             j++
         }
