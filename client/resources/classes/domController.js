@@ -14,11 +14,12 @@ class DomController {
         })
 
 
-        this.modeSlider = new CoolSlider("mode-slider", 1, 1000, 0)
+        this.modeSlider = new CoolSlider("mode-slider", 0, 1000, 3)
         this.modeSlider.dom.addEventListener("input", e => {
             const val = parseFloat(e.target.value)
             this.modeSlider.targetValue = Math.ceil(val / 333);
         })
+        this.modeSlider.dom.default = 500
 
     }
 
