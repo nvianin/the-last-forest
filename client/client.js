@@ -27,6 +27,8 @@ const debug = {
     },
     treeSeparationArrows: false,
     use_cached_data: false,
+    aggregate: false,
+    show_imposters: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -91,9 +93,7 @@ class App {
 
         this.postDom = document.querySelector("#post-tooltip")
 
-        this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        /* this.orbitControls.autoRotate = true; */
-        this.orbitControls.target.set(0, 0, 0);
+
         /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
         /* this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
         this.scene.add(this.skylight); */
@@ -245,6 +245,8 @@ class App {
             }),
             10000
         );
+
+        this.interface = new AppInterface();
 
         /* this.baseLine = new BaseLine(); */
 
@@ -401,9 +403,14 @@ class App {
         })
 
         window.addEventListener("pointerup", e => {
-            /* this.preventAutoRotate(); */
+
             /* log(e.button) */
-            if (this.postDom.style.visibility == "visible" && e.button == 0 && !this.pointer_moved_while_down) window.open(this.activeUrl)
+            const URL = this.activeUrl;
+            log(URL);
+            if (this.postDom.style.visibility == "visible" && e.button == 0 && !this.pointer_moved_while_down) window.open(URL);
+            else {
+                log(e.button == 0, this.pointer_moved_while_down)
+            }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
             this.pointer_is_down = false;
             this.pointer_moved_while_down = false;
@@ -466,7 +473,7 @@ class App {
         /* this.composer.addPass(this.fxaaPass); */
         /* this.composer.addPass(this.bloomPass);
         this.composer.addPass(this.saoPass); */
-        this.composer.addPass(this.outlinePass)
+        /* this.composer.addPass(this.outlinePass) */
     }
 
     initShadows() {
@@ -532,7 +539,7 @@ class App {
             })
             this.socket.on("posts", posts => {
                 this.posts = posts;
-                window.localStorage.setItem("posts", JSON.stringify(this.posts))
+                /* window.localStorage.setItem("posts", JSON.stringify(this.posts)) */
                 log(Object.keys(posts).length + " posts received and cached" /* , posts */ )
 
                 this.connection_conditions_count++;
@@ -603,13 +610,13 @@ class App {
             const sc = Math.sqrt(Object.keys(this.posts).length);
             log("Calculated scale: " + sc)
             const invisible_mat = new THREE.MeshBasicMaterial({
-                visible: false,
+                visible: debug.show_imposters,
                 wireframe: true
             })
-
+            log(Object.keys(this.posts).length)
             for (let post of Object.values(this.posts)) {
-                if ( /* post.sentiment && post.sentiment.score */ true) {
-                    const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length);
+                if ( /* post.sentiment && post.sentiment.score */ post.tsne_coordinates) {
+                    /* const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length); */
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
                     const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
@@ -627,13 +634,6 @@ class App {
                         tree = this.tree.buildTreeType("Climate", development)
                         console.warn("Tree type \"" + post.flair + "\" missing!")
                     }
-                    const imposter = new THREE.Mesh(
-                        new THREE.SphereGeometry(scale, 3, 2),
-                        invisible_mat
-                    )
-                    imposter.userData.tree = tree;
-                    this.scene.add(imposter);
-                    this.tree_imposters.push(imposter)
 
                     /* let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone(); */
                     raycaster.set(
@@ -653,12 +653,22 @@ class App {
                         z
                     )
                     /* tree.children[0].geometry.calculateBoundingSphere() */
-                    imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position));
+
+                    /* const imposter = new THREE.Mesh(
+                        new THREE.SphereGeometry(scale, 3, 2),
+                        invisible_mat
+                    )
+                    imposter.userData.tree = tree;
+                    this.scene.add(imposter);
+                    this.tree_imposters.push(imposter)
+                    imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position)); */
 
 
-                    tree.scale.set(scale, scale, scale)
+                    tree.children[0].scale.set(scale, scale, scale)
+                    /* object.updateMatrix */
+
                     tree.userData.post = post;
-                    /* this.scene.add(tree) */
+                    if (!debug.aggregate) this.scene.add(tree)
                     this.trees.push(tree)
 
 
@@ -708,27 +718,64 @@ class App {
             removed_trees++;
         }
 
-        let aggregated = []
         let vertCount = 0;
 
-        for (let tree of this.trees) {
-            aggregated.concat(tree.children[0].geometry.attributes.position.array)
+        this.trees.forEach(tree => {
             vertCount += tree.children[0].geometry.attributes.position.count
+        })
+        if (debug.aggregate) {
+            const aggregated = new Float32Array(vertCount * 3)
+
+            for (let tree of this.trees) {
+                const upvote_factor = Math.map(tree.userData.post.score, 300, 16000, 1, 100);
+                const scale = 1 * upvote_factor;
+                /* aggregated = aggregated.concat(Array.from(tree.children[0].geometry.attributes.position.array)) */
+                const vertArray = tree.children[0].geometry.attributes.position.array
+                for (let i = 0; i < vertArray.length; i += 3) {
+                    aggregated[i] = (vertArray[i] * scale + tree.position.x)
+                    aggregated[i + 1] = (vertArray[i + 1] * scale + tree.position.y)
+                    aggregated[i + 2] = (vertArray[i + 2] * scale + tree.position.z)
+                }
+            }
+            const aggregated_positions = new THREE.BufferAttribute(aggregated, 3);
+            const aggregated_geometry = new THREE.BufferGeometry();
+            aggregated_geometry.setAttribute("position", aggregated_positions);
+            aggregated_geometry.computeVertexNormals();
+
+            this.aggregate = new THREE.Mesh(
+                aggregated_geometry,
+                new THREE.LineBasicMaterial({
+                    color: "red",
+                    opacity: .3,
+                    transparent: true,
+                    linewidth: .002,
+                    vertexColors: false,
+                    alphaToCoverage: false
+                })
+            );
+            this.scene.add(this.aggregate)
         }
-        const aggregated_positions = new THREE.BufferAttribute(new Float32Array(aggregated), 3);
-        const aggregated_geometry = new THREE.BufferGeometry();
-        aggregated_geometry.setAttribute("position", aggregated_positions);
-        aggregated_geometry.computeVertexNormals();
-        this.scene.add(new THREE.Mesh(
-            aggregated_geometry,
-            new THREE.LineBasicMaterial({
-                color: "red"
-            })
-        ))
 
         log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
         log("Tree vertex: " + vertCount)
-        log(aggregated_geometry)
+        if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
+    }
+
+    buildLODs() {
+        const vertices = []
+        this.trees.forEach(tree => {
+            vertices.push(tree.position.clone());
+        })
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+
+        this.LODMaterial = new THREE.PointsMaterial({
+
+        })
+
+        this.LODs = new THREE.Points(
+
+        )
     }
 
     buildTreesFromPosts__old() {
@@ -758,7 +805,7 @@ class App {
             let tree = this.tree.line.clone();
             tree.text = post.title;
             this.trees.push(tree)
-            const imposter = new THREE.Mesh(
+            /* const imposter = new THREE.Mesh(
                 new THREE.SphereGeometry(),
                 new THREE.MeshBasicMaterial({
                     visible: false
@@ -767,7 +814,7 @@ class App {
             imposter.position.copy(tree.position);
             imposter.tree = tree;
             this.scene.add(imposter)
-            this.tree_imposters.push(imposter)
+            this.tree_imposters.push(imposter) */
             const point = this.baseLine.sampleOnGround(i / Object.keys(this.posts).length)
             tree.position.copy(point);
             /* log(point) */
@@ -800,12 +847,14 @@ class App {
         this.postDom.style.top = this.mouse.y + "px";
 
 
-        this.orbitControls.update()
         if (this.built_trees) {
             this.mousecast.setFromCamera(this.pointer, this.camera);
-            const intersects = this.mousecast.intersectObjects(this.tree_imposters);
+            const intersects = this.mousecast.intersectObjects(this.trees);
             if (intersects[0]) {
-                let object = intersects[0].object.userData.tree;
+                /* let object = intersects[0].object.userData.tree; */
+                /* log(intersects[0].object) */
+                intersects[0].object.geometry.attributes
+                let object = intersects[0].object.parent;
                 this.outlinePass.selectedObjects = [object]
                 object.active = true;
 
@@ -865,15 +914,7 @@ class App {
         this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
     }
 
-    preventAutoRotate() {
-        this.orbitControls.autoRotate = false;
-        if (this.autoRotateTimeout) {
-            clearTimeout(this.autoRotateTimeout);
-        }
-        this.autoRotateTimeout = setTimeout(() => {
-            this.orbitControls.autoRotate = true;
-        }, 2000);
-    }
+
 
     generateSpiral(r, t) {
         return new THREE.Vector3(
