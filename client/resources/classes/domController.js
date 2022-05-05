@@ -5,14 +5,12 @@ class DomController {
         this.zoomSlider.dom.addEventListener("input", e => {
             // Zoom slider behaviour
             const newzoom = parseFloat(e.target.value)
-            this.mapControls.minDistance = newzoom;
-            this.mapControls.maxDistance = newzoom;
-            this.zoomSlider.targetValue = newzoom;
+            this.setZoomLevel(newzoom)
             /* app.camera.position.copy(
                 app.camera.position.clone().sub(this.mapControls.target).normalize().multiplyScalar(newzoom)
             ); */
         })
-        this.zoomSlider.targetValue = this.zoomSlider.dom.value = this.mapControls.getDistance()
+        this.zoomSlider.targetValue = this.zoomSlider.dom.value = this.getDistance()
 
 
         this.modeSlider = new CoolSlider("mode-slider", 0, 1000, 3)
@@ -33,11 +31,36 @@ class DomController {
             j++
         }
 
+        this.currentState = "map"
+
     }
 
     update() {
         this.zoomSlider.update()
         this.modeSlider.update()
+
+        const modeVal = parseFloat(this.modeSlider.dom.value);
+        if (modeVal < 100) {
+            this.currentState = "WALKING"
+            /* log("selecting walk") */
+        } else if (modeVal > 400 && modeVal < 600) {
+            this.currentState = "PROMENADE"
+            /* log("selecting auto") */
+        } else if (modeVal > 900) {
+            this.currentState = "MAP"
+            /* log("selecting map") */
+        }
+    }
+
+    setZoomLevel(newzoom) {
+        this.mapControls.minDistance = newzoom;
+        this.mapControls.maxDistance = newzoom;
+        this.zoomSlider.targetValue = newzoom;
+        /* this.mapControls.update() */
+    }
+
+    getDistance = () => {
+        return this.mapControls.target.distanceTo(app.camera.position);
     }
 }
 

@@ -373,10 +373,10 @@ class App {
 
             /* log(e.button) */
             const URL = this.activeUrl;
-            log(URL);
+            /* log(URL); */
             if (this.postDom.style.visibility == "visible" && e.button == 0 && !this.pointer_moved_while_down) window.open(URL);
             else {
-                log(e.button == 0, this.pointer_moved_while_down)
+                /* log(e.button == 0, this.pointer_moved_while_down) */
             }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
             this.pointer_is_down = false;
