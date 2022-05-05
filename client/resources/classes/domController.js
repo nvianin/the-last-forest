@@ -79,7 +79,7 @@ class CoolSlider {
             log(Math.pow(diff / 100, 2), t, diff)
             this.dom.value = Math.lerp(val, this.targetValue, t) + ""
             /* if (this.) */
-        } else {
+        } else if (this.dom.value != this.targetValue + "") {
             this.dom.value = this.targetValue + ""
         }
     }
