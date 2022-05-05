@@ -22,6 +22,17 @@ class DomController {
         })
         this.modeSlider.dom.default = 500
 
+        const images = ["foot", "auto", "map"]
+        let j = 0;
+        for (let i of images) {
+            let img = document.createElement("img")
+            img.src = "./resources/textures/" + i + ".svg"
+            img.classList.add("mode-icon")
+            img.id = i;
+            this.modeSlider.step_elements[j].append(img)
+            j++
+        }
+
     }
 
     update() {
@@ -53,12 +64,14 @@ class CoolSlider {
         if (id != "") this.container.id = id + "-container";
 
         this.steps = steps;
+        this.step_elements = []
 
         for (let i = 0; i < steps; i++) {
             const step = document.createElement("div")
             step.classList.add("slider-step")
             step.id = "slider-step-" + i
             step.ondragstart = this.dom.ondragstart;
+            this.step_elements.push(step)
             this.container.appendChild(step)
         }
 
@@ -76,7 +89,7 @@ class CoolSlider {
         if (diff > 5) {
             /* log(val, Math.abs(val - this.targetValue)) */
             const t = Math.clamp(Math.pow(diff / 1000, 2), 0.1, .2);
-            log(Math.pow(diff / 100, 2), t, diff)
+            /* log(Math.pow(diff / 100, 2), t, diff) */
             this.dom.value = Math.lerp(val, this.targetValue, t) + ""
             /* if (this.) */
         } else if (this.dom.value != this.targetValue + "") {
