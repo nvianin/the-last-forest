@@ -205,6 +205,6 @@ canvas .text-input {
   text-align: center;
   line-height: 100vh;
   transition: 3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  opacity: 0;
+  opacity: 1;
   user-select: none;
 }

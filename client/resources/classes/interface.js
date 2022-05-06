@@ -6,7 +6,6 @@ const CONTROLLER_STATES = {
     LERPING: "LERPING"
 }
 
-
 class AppInterface {
     constructor() {
 
@@ -34,6 +33,8 @@ class AppInterface {
         this.settings = {
             camera_ground_offset: 8
         }
+
+        this.simplex = new THREE.SimplexNoise()
     }
     setupListeners() {
         this.mouse = new THREE.Vector2;
@@ -95,8 +96,13 @@ class AppInterface {
                     }
 
                     if (this.prevState != "LERPING") {
-                        this.target.position.copy(this.findPointOnGround())
-                        this.target.rotation.set(0, 0, 0)
+                        if (this.prevState == "PROMENADE") {
+                            this.target.position.copy(app.camera.position);
+                            this.target.rotation.copy(app.camera.rotation);
+                        } else {
+                            this.target.position.copy(this.findPointOnGround())
+                            this.target.rotation.set(0, 0, 0)
+                        }
                         this.changeState("LERPING")
                     }
                     this.mapControls.enabled = false;
@@ -115,16 +121,22 @@ class AppInterface {
                     this.target.state = "PROMENADE"
                     this.mapControls.enabled = false;
 
-                    if (this.prevState != "LERPING") {
-                        this.target.position.copy(this.findPointOnGround())
-                        this.target.rotation.set(0, 0, 0)
-                        this.changeState("LERPING")
-                    }
-
                     if (this.prevState == "MAP") {
                         this.map_transform.position.copy(app.camera.position);
                         this.map_transform.rotation.copy(app.camera.rotation)
                         this.map_transform.zoom = this.domController.getDistance()
+                    }
+
+                    if (this.prevState != "LERPING") {
+                        if (this.prevState == "WALKING") {
+                            this.target.position.copy(app.camera.position);
+                            this.target.rotation.copy(app.camera.rotation);
+                        } else {
+                            this.target.position.copy(this.findPointOnGround())
+                            this.target.rotation.set(0, 0, 0)
+                        }
+                        this.target.target = this.findPointOnGround();
+                        this.changeState("LERPING")
                     }
 
                     break;
@@ -157,6 +169,8 @@ class AppInterface {
                     if (i.length > 0) {
                         app.camera.position.y = i[0].point.y + this.settings.camera_ground_offset
                     }
+
+
                 }
                 break;
 
@@ -166,6 +180,23 @@ class AppInterface {
                 break;
 
             case CONTROLLER_STATES.PROMENADE:
+                let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
+                x = Math.clamp(x, -.2, .2);
+                app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
+                /* const y = this.simplex.noise(app.camera.position.y * .1, app.clock.getElapsedTime() * .01); */
+                const y = .2;
+                app.camera.translateZ(-y)
+                app.camera.position.lerp(this.target.target.clone().normalize().add(app.camera.position), .1);
+                if (app.camera.position.distanceTo(this.target.target) < 2) {
+                    this.target.target = this.findPointOnGround();
+                }
+
+                log(x, y)
+                this.raycaster.set(app.camera.position, THREE.DOWN)
+                const i = this.raycaster.intersectObject(app.ground)
+                if (i.length > 0) {
+                    app.camera.position.y = i[0].point.y + this.settings.camera_ground_offset
+                }
                 break;
 
             case CONTROLLER_STATES.LERPING:
@@ -197,6 +228,15 @@ class AppInterface {
                             log(dist)
                         }
                         break;
+                    case "PROMENADE":
+                        app.camera.position.lerp(this.target.position, .1);
+                        app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                        dist = app.camera.position.distanceTo(this.target.position)
+                        if (dist < 2) {
+                            this.changeState(this.target.state)
+                        } else {
+                            log(dist)
+                        }
                 }
                 /* this.domController.setZoomLevel(this.domController.getDistance()) */
                 /* this.mapControls.update() */

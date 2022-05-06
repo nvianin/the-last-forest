@@ -579,7 +579,8 @@ class App {
         let removed_trees = 0
         let i = 0;
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
-            document.querySelector("#loading-screen-text").style.opacity = 1
+            /* document.querySelector("#loading-screen-text").style.opacity = 1
+            document.querySelector("#loading-screen-text").style.transition = ".2s cubic-bezier(0.165, 0.84, 0.44, 1);" */
             log("Preparing to build " + Object.values(this.posts).length + " trees")
 
             const sc = Math.sqrt(Object.keys(this.posts).length * 15);
