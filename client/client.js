@@ -66,9 +66,10 @@ class App {
 
         this.settings = {
             ground_side: 128,
-            ground_scale: 20,
-            draw_distance: 1200,
+            ground_scale: 48,
+            draw_distance: 1600,
             fog_offset: 500,
+            walking_fog_multiplier: .10,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -97,7 +98,7 @@ class App {
         /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
         /* this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
         this.scene.add(this.skylight); */
-        this.sun = new THREE.DirectionalLight(0xffffaa, 2);
+        this.sun = new THREE.DirectionalLight(0xffffaa, 1.2);
         this.sun.position.set(50, 100, 50);
         this.sun_target_offset = new THREE.Vector3(-20, -10, -40);
         /* this.sun.lookAt(0, 0, 0); */
@@ -374,8 +375,14 @@ class App {
             /* log(e.button) */
             const URL = this.activeUrl;
             /* log(URL); */
-            if (this.postDom.style.visibility == "visible" && e.button == 0 && !this.pointer_moved_while_down) window.open(URL);
-            else {
+            if (
+                this.postDom.style.visibility == "visible" &&
+                e.button == 0 &&
+                !this.pointer_moved_while_down &&
+                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+            ) {
+                window.open(URL);
+            } else {
                 /* log(e.button == 0, this.pointer_moved_while_down) */
             }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
@@ -401,9 +408,9 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            1, // strength
-            2, // radius
-            .4 // threshold
+            1.2, // strength
+            .7, // radius
+            .2 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -438,8 +445,8 @@ class App {
 
         this.composer.addPass(this.renderScene);
         /* this.composer.addPass(this.fxaaPass); */
-        /* this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.saoPass); */
+        this.composer.addPass(this.bloomPass);
+        /* this.composer.addPass(this.saoPass); */
         /* this.composer.addPass(this.outlinePass) */
     }
 
@@ -572,9 +579,10 @@ class App {
         let removed_trees = 0
         let i = 0;
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
+            document.querySelector("#loading-screen-text").style.opacity = 1
             log("Preparing to build " + Object.values(this.posts).length + " trees")
 
-            const sc = Math.sqrt(Object.keys(this.posts).length);
+            const sc = Math.sqrt(Object.keys(this.posts).length * 15);
             log("Calculated scale: " + sc)
             const invisible_mat = new THREE.MeshBasicMaterial({
                 visible: debug.show_imposters,
@@ -586,8 +594,8 @@ class App {
                     /* const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length); */
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
-                    const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
-                    const scale = 1 * upvote_factor;
+                    const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20);
+                    const scale = 4 * upvote_factor;
                     const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
 
                     let y = -100;
@@ -681,6 +689,14 @@ class App {
                     removed_trees++;
                 }
             }
+            document.querySelector("#loading-screen-background").style.opacity = 0
+            setTimeout(() => {
+                document.querySelector("#loading-screen-text").style.opacity = 0
+            }, 700)
+            setTimeout(() => {
+                document.querySelector("#loading-screen-text").style.display = "none"
+                document.querySelector("#loading-screen-background").style.display = "none"
+            }, 3700)
         } else {
             removed_trees++;
         }
@@ -817,7 +833,7 @@ class App {
         if (this.built_trees) {
             this.mousecast.setFromCamera(this.pointer, this.camera);
             const intersects = this.mousecast.intersectObjects(this.trees);
-            if (intersects[0]) {
+            if (intersects[0] && intersects[0].distance < this.scene.fog.far + 10) {
                 /* let object = intersects[0].object.userData.tree; */
                 /* log(intersects[0].object) */
                 intersects[0].object.geometry.attributes

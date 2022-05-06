@@ -19,6 +19,7 @@ class AppInterface {
         this.mapControls.maxDistance = 1000;
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
+        this.mapControls.enabled = false;
 
         this.setupListeners();
         this.domController = new DomController(this.mapControls);
@@ -112,7 +113,13 @@ class AppInterface {
                     break;
                 case CONTROLLER_STATES.PROMENADE:
                     this.target.state = "PROMENADE"
-                    this.mapControls.enabled = true;
+                    this.mapControls.enabled = false;
+
+                    if (this.prevState != "LERPING") {
+                        this.target.position.copy(this.findPointOnGround())
+                        this.target.rotation.set(0, 0, 0)
+                        this.changeState("LERPING")
+                    }
 
                     if (this.prevState == "MAP") {
                         this.map_transform.position.copy(app.camera.position);
@@ -200,6 +207,20 @@ class AppInterface {
     changeState(state) {
         this.prevState = this.state;
         this.nextState = state;
+        switch (state) {
+            case "WALKING":
+                app.scene.fog.near = (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier
+                app.scene.fog.far = app.settings.draw_distance * app.settings.walking_fog_multiplier
+                break;
+            case "MAP":
+                app.scene.fog.near = app.settings.draw_distance - app.settings.fog_offset
+                app.scene.fog.far = app.settings.draw_distance
+                break;
+            case "PROMENADE":
+                app.scene.fog.near = (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier
+                app.scene.fog.far = app.settings.draw_distance * app.settings.walking_fog_multiplier
+                break;
+        }
     }
 
     preventAutoRotate() {
@@ -226,5 +247,11 @@ class AppInterface {
         } else {
             return this.findPointOnGround()
         }
+    }
+
+    generatePath() {
+        /* const generatedCurve = 
+        const count = Math.random() * 12;
+        for (let i = 0; i < count;i++) */
     }
 }

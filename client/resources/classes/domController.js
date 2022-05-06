@@ -28,6 +28,7 @@ class DomController {
             img.classList.add("mode-icon")
             img.id = i;
             img.setAttribute("type", "image/svg+xml")
+            img.setAttribute("xmlns", "http://www.w3.org/2000/svg")
             this.modeSlider.step_elements[j].append(img)
             j++
         }

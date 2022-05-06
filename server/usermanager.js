@@ -10,6 +10,17 @@ class UserManager {
         this.points = points
         this.temperature_data = temperature_data;
         this.init();
+
+        this.mimeTypes = {
+            "html": "text/html",
+            "jpeg": "image/jpeg",
+            "jpg": "image/jpeg",
+            "png": "image/png",
+            "svg": "image/svg+xml",
+            "json": "application/json",
+            "js": "text/javascript",
+            "css": "text/css"
+        };
     };
 
     init() {
@@ -24,7 +35,11 @@ class UserManager {
                     console.error("[404]: " + req.url + " not found!")
                     return
                 }
-                res.writeHead(200);
+                let mimeType = this.mimeTypes[req.url.split('.').pop()];
+                if (!mimeType) mimeType = "text/plain";
+                res.writeHead(200, {
+                    "Content-Type": mimeType
+                });
                 res.end(data);
             })
         });
