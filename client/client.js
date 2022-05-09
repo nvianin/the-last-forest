@@ -98,7 +98,7 @@ class App {
         /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
         /* this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
         this.scene.add(this.skylight); */
-        this.sun = new THREE.DirectionalLight(0xffffaa, 2);
+        this.sun = new THREE.DirectionalLight(0xffffaa, 1.2);
         this.sun.position.set(50, 100, 50);
         this.sun_target_offset = new THREE.Vector3(-20, -10, -40);
         /* this.sun.lookAt(0, 0, 0); */
