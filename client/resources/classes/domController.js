@@ -20,15 +20,12 @@ class DomController {
         })
         this.modeSlider.dom.default = 500
 
-        const images = ["foot", "map", "auto"]
+        const images = ["walk", "map", "auto"]
         let j = 0;
         for (let i of images) {
-            let img = document.createElement("img")
-            img.src = "./resources/textures/" + i + ".svg"
-            img.classList.add("mode-icon")
-            img.id = i;
-            img.setAttribute("type", "image/svg+xml")
-            this.modeSlider.step_elements[j].append(img)
+            let label = document.createElement("div")
+            label.innerText =
+                this.modeSlider.step_elements[j].append(label)
             j++
         }
 
