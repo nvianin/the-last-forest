@@ -53,7 +53,7 @@ for sentence, embedding in zip(text, embeddings):
     i+=1
 
 print("Embedding success, computing TSNE...")
-tsne = TSNE(n_components=2, verbose=1, random_state=123, perplexity=50, learning_rate=200);
+tsne = TSNE(n_components=2, verbose=1, random_state=123, perplexity=15, early_exaggeration=12, learning_rate=200, );
 result = tsne.fit_transform(embeddings).tolist()
 zero_exists = False
 for i in range(len(result)):
