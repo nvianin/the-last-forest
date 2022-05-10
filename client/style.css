@@ -1,23 +1,23 @@
 @font-face {
-  font-family: Avara;
-  font-style: bold;
+  font-family: Avarabold;
+  /* font-style: bold; */
   src: url("./resources/fonts/Avara-Bold.otf");
 }
 @font-face {
-  font-family: Avara;
-  font-style: black;
+  font-family: Avarablack;
+  /* font-style: black; */
   src: url("./resources/fonts/Avara-Black.otf");
 }
 @font-face {
-  font-family: Avara;
-  font-style: bold-italic;
+  font-family: Avarabolditalic;
+  /* font-style: bold-italic; */
   src: url("./resources/fonts/Avara-BoldItalic.otf");
 }
 
 body {
   margin: 0;
   overflow: hidden;
-  font-family: Avara;
+  font-family: Avarabold;
 }
 
 canvas .text-input {
@@ -65,7 +65,7 @@ canvas .text-input {
   position: fixed;
   /* transform: translate(-50%, -110%); */
   font-size: 10pt;
-  font-style: italic;
+  /* font-style: italic; */
 
   visibility: hidden;
   z-index: 1001;
@@ -222,7 +222,7 @@ canvas .text-input {
 }
 
 #loading-screen-text {
-  font-family: Avara;
+  font-family: Avarablack;
   position: fixed;
   width: 100%;
   height: 100%;

@@ -44,13 +44,33 @@ class AppInterface {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
             this.mouse_target_element = e.target
+            switch (this.state) {
+                case "WALKING":
+                    if (document.pointerLockElement) {
+                        app.camera.rotateOnWorldAxis(THREE.UP, -e.movementX * .003)
+                        app.camera.rotateX(-e.movementY * .003)
+                    }
+                    break;
+            }
         })
         window.dispatchEvent(new Event("pointermove"))
         window.addEventListener("pointerup", e => {
             /* this.preventAutoRotate() */
+            switch (this.state) {
+                case "WALKING":
+                    log("releasing lock")
+                    document.exitPointerLock()
+                    break;
+            }
         })
         window.addEventListener("pointerdown", e => {
+            switch (this.state) {
+                case "WALKING":
+                    log("locking pointer")
+                    app.renderer.domElement.requestPointerLock()
+                    break;
 
+            }
         })
         window.addEventListener("wheel", e => {
             /* this.preventAutoRotate() */
@@ -68,11 +88,59 @@ class AppInterface {
             log("mouseenter")
             this.mouse_is_in_screen = true;
         })
+
+        this.movement = new THREE.Vector3();
+
+        document.addEventListener("keydown", e => {
+            switch (this.state) {
+                case "WALKING":
+                    if (document.pointerLockElement) {
+                        switch (e.key) {
+                            case "w":
+                                this.movement.z = -1;
+                                break;
+                            case "a":
+                                this.movement.x = -1;
+                                break;
+                            case "s":
+                                this.movement.z = 1;
+                                break;
+                            case "d":
+                                this.movement.x = 1
+                                break;
+                        }
+                    }
+                    break;
+            }
+        })
+        document.addEventListener("keyup", e => {
+            switch (this.state) {
+                case "WALKING":
+                    if (document.pointerLockElement) {
+                        switch (e.key) {
+                            case "w":
+                                this.movement.z = 0;
+                                break;
+                            case "a":
+                                this.movement.x = 0;
+                                break;
+                            case "s":
+                                this.movement.z = 0;
+                                break;
+                            case "d":
+                                this.movement.x = 0;
+                                break;
+                        }
+                    }
+                    break;
+            }
+        })
     }
 
 
 
     update() {
+
         /* this.mapControls.target.y = 0; */
         this.domController.update()
         // Update state according to dom inputs
@@ -153,17 +221,22 @@ class AppInterface {
         switch (this.state) {
             case CONTROLLER_STATES.WALKING:
                 if (this.mouse_is_in_screen && this.mouse_target_element == app.renderer.domElement) {
-                    const x = (this.mouse.x - innerWidth / 2) / innerWidth;
-                    if (Math.abs(x) > .4) {
-                        app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
-                    }
-                    const y = (this.mouse.y - innerHeight / 2) / innerHeight;
+                    if (!document.pointerLockElement) {
+                        const x = (this.mouse.x - innerWidth / 2) / innerWidth;
+                        if (Math.abs(x) > .4) {
+                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
+                        }
+                        const y = (this.mouse.y - innerHeight / 2) / innerHeight;
 
-                    if (Math.abs(y) > .35) {
-                        /* app.camera.rotateX(y * -.02) */
-                        app.camera.translateZ(y)
+                        if (Math.abs(y) > .35) {
+                            /* app.camera.rotateX(y * -.02) */
+                            app.camera.translateZ(y)
+                        }
+                        /* log(x, y) */
+                    } else {
+                        app.camera.translateZ(this.movement.z * .5);
+                        app.camera.translateX(this.movement.x * .5);
                     }
-                    /* log(x, y) */
                     this.raycaster.set(app.camera.position, THREE.DOWN)
                     const i = this.raycaster.intersectObject(app.ground)
                     if (i.length > 0) {
