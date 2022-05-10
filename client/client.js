@@ -51,7 +51,7 @@ let waiting_to_release_tooltip = false;
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
-            /* logarithmicDepthBuffer: true */
+            logarithmicDepthBuffer: true,
             antialias: true
         });
         this.renderer.info.autoReset = false;
@@ -65,9 +65,9 @@ class App {
         if (localstorage_points) this.points = localstorage_points;
 
         this.settings = {
-            ground_side: 128,
-            ground_scale: 48,
-            draw_distance: 1600,
+            ground_side: 64,
+            ground_scale: 96,
+            draw_distance: 5000,
             fog_offset: 500,
             walking_fog_multiplier: .10,
         }
@@ -77,12 +77,15 @@ class App {
         this.camera.position.set(0, .5, 1);
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
-        this.camera.position.set(0, 100, 0)
+        this.camera.position.set(0, 3000, 0)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
 
         let bgCol = new THREE.Color(0x00510);
         this.fog = new THREE.Fog(bgCol, this.settings.draw_distance - this.settings.fog_offset, this.settings.draw_distance);
+        /* this.fog = new THREE.FogExp2(bgCol, 1.);
+        this.fog.near = this.settings.draw_distance - this.settings.fog_offset;
+        this.fog.far = this.settings.draw_distance; */
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
 
@@ -186,6 +189,12 @@ class App {
         this.ground_fakeBack.material = new THREE.MeshBasicMaterial({
             color: bgCol
         })
+        this.ground_fakeBack.position.y -= .1
+        this.scene.add(this.ground_fakeBack)
+
+        /* this.ground.material = new THREE.MeshBasicMaterial({
+            color: 0x222222
+        }) */
 
         /* let spires = 8
         this.helpers = []

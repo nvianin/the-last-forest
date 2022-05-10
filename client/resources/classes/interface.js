@@ -15,10 +15,21 @@ class AppInterface {
 
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
         this.mapControls.maxPolarAngle = Math.HALF_PI * .8
-        this.mapControls.maxDistance = 1000;
+        this.mapControls.maxDistance = app.settings.draw_distance;
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
         this.mapControls.enabled = false;
+
+        this.settings = {
+            fov: {
+                walk: 120,
+                map: 20,
+            },
+            camera_ground_offset: 8
+        }
+
+        app.camera.fov = this.settings.fov.map;
+        app.camera.updateProjectionMatrix()
 
         this.setupListeners();
         this.domController = new DomController(this.mapControls);
@@ -27,12 +38,9 @@ class AppInterface {
         this.map_transform = new THREE.Object3D();
         this.map_transform.position.copy(app.camera.position)
         this.map_transform.rotation.copy(app.camera.rotation)
-        this.map_transform.zoom = parseFloat(this.domController.zoomSlider.dom.value)
+        /* this.map_transform.zoom = parseFloat(this.domController.zoomSlider.dom.value) */
+        this.map_transform.zoom = app.camera.position.y
         this.raycaster = new THREE.Raycaster();
-
-        this.settings = {
-            camera_ground_offset: 8
-        }
 
         this.simplex = new THREE.SimplexNoise()
     }
@@ -58,16 +66,20 @@ class AppInterface {
             /* this.preventAutoRotate() */
             switch (this.state) {
                 case "WALKING":
-                    log("releasing lock")
-                    document.exitPointerLock()
+                    if (document.pointerLockElement) {
+                        log("releasing lock")
+                        document.exitPointerLock()
+                    }
                     break;
             }
         })
         window.addEventListener("pointerdown", e => {
             switch (this.state) {
                 case "WALKING":
-                    log("locking pointer")
-                    app.renderer.domElement.requestPointerLock()
+                    if (e.target.id == "three") {
+                        log("locking pointer")
+                        app.renderer.domElement.requestPointerLock()
+                    }
                     break;
 
             }
@@ -155,6 +167,7 @@ class AppInterface {
             switch (this.nextState) {
                 case CONTROLLER_STATES.WALKING:
                     this.target.state = "WALKING"
+                    this.target.fov = this.settings.fov.walk
                     /* app.renderer.domElement.requestPointerLock() */
 
                     if (this.prevState == "MAP") {
@@ -178,6 +191,7 @@ class AppInterface {
                     break;
                 case CONTROLLER_STATES.MAP:
                     this.target.state = "MAP"
+                    this.target.fov = this.settings.fov.map
                     this.mapControls.enabled = true;
 
                     if (this.prevState != "LERPING") {
@@ -187,6 +201,7 @@ class AppInterface {
                     break;
                 case CONTROLLER_STATES.PROMENADE:
                     this.target.state = "PROMENADE"
+                    this.target.fov = this.settings.fov.walk
                     this.mapControls.enabled = false;
 
                     if (this.prevState == "MAP") {
@@ -278,6 +293,8 @@ class AppInterface {
                     case "WALKING":
                         app.camera.position.lerp(this.target.position, .1)
                         app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                        app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                        app.camera.updateProjectionMatrix()
                         dist = app.camera.position.distanceTo(this.target.position)
                         if (dist < 2) {
                             this.changeState(this.target.state)
@@ -288,6 +305,8 @@ class AppInterface {
                     case "MAP":
                         app.camera.position.lerp(this.map_transform.position, .1)
                         app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, .1))
+                        app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                        app.camera.updateProjectionMatrix()
                         const currentzoom = this.domController.getDistance()
                         this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1));
                         dist = this.map_transform.position.distanceTo(app.camera.position) + Math.abs(currentzoom - this.map_transform.zoom);
@@ -304,6 +323,8 @@ class AppInterface {
                     case "PROMENADE":
                         app.camera.position.lerp(this.target.position, .1);
                         app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                        app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                        app.camera.updateProjectionMatrix()
                         dist = app.camera.position.distanceTo(this.target.position)
                         if (dist < 2) {
                             this.changeState(this.target.state)
