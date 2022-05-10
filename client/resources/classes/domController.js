@@ -24,8 +24,10 @@ class DomController {
         let j = 0;
         for (let i of images) {
             let label = document.createElement("div")
-            label.innerText =
-                this.modeSlider.step_elements[j].append(label)
+            label.innerText = images[j].toUpperCase()
+            label.className = "label"
+            label.id = images[j]
+            this.modeSlider.container.append(label)
             j++
         }
 

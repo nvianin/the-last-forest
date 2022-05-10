@@ -1,12 +1,23 @@
 @font-face {
   font-family: Avara;
+  font-style: bold;
   src: url("./resources/fonts/Avara-Bold.otf");
+}
+@font-face {
+  font-family: Avara;
+  font-style: black;
+  src: url("./resources/fonts/Avara-Black.otf");
+}
+@font-face {
+  font-family: Avara;
+  font-style: bold-italic;
+  src: url("./resources/fonts/Avara-BoldItalic.otf");
 }
 
 body {
   margin: 0;
   overflow: hidden;
-  font-family: Helvetica;
+  font-family: Avara;
 }
 
 canvas .text-input {
@@ -53,6 +64,8 @@ canvas .text-input {
   max-width: 400px;
   position: fixed;
   /* transform: translate(-50%, -110%); */
+  font-size: 10pt;
+  font-style: italic;
 
   visibility: hidden;
   z-index: 1001;
@@ -141,32 +154,34 @@ canvas .text-input {
   transform: translate(-50%) scale(1.5);
 }
 
-.mode-icon {
+.label {
   position: fixed;
   /* top: -300px; */
-  width: 30px;
-  height: 30px;
+  width: 60px;
+  height: 0px;
   z-index: 104;
+  font-size: 9pt;
   /* background-color: ; */
   filter: invert();
   bottom: 175%;
   opacity: 20%;
+  text-align: center;
   user-select: none;
 }
-.mode-icon:hover {
+.label:hover {
 }
 
-#foot {
-  left: 100%;
+#walk {
+  left: 0.5%;
   transform: translate(-50%);
 }
 #map {
-  left: 33%;
+  left: 50%;
   transform: translate(-50%);
 }
 #auto {
-  right: 50%;
-  transform: translate(50%);
+  left: 99.5%;
+  transform: translate(-50%);
 }
 
 .slider-step {

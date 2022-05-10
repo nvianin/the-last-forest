@@ -26,7 +26,7 @@ const debug = {
         value: 5
     },
     treeSeparationArrows: false,
-    use_cached_data: true,
+    use_cached_data: false,
     aggregate: false,
     show_imposters: true,
 

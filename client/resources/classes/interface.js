@@ -191,7 +191,7 @@ class AppInterface {
                     this.target.target = this.findPointOnGround();
                 }
 
-                log(x, y)
+                /* log(x, y) */
                 this.raycaster.set(app.camera.position, THREE.DOWN)
                 const i = this.raycaster.intersectObject(app.ground)
                 if (i.length > 0) {
