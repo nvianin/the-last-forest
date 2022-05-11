@@ -976,11 +976,11 @@ class App {
 
             this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, 256, 256, pixelBuffer)
 
-            let all_black = true;
+            /* let all_black = true;
             for (let val of pixelBuffer) {
                 if (val != 0) all_black = false;
             }
-            log("Rendered thumbnail is black: " + all_black)
+            log("Rendered thumbnail is black: " + all_black) */
 
             const imgData = new ImageData(pixelBuffer, 256, 256)
             ctx.putImageData(imgData, 0, 0)
