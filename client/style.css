@@ -14,8 +14,8 @@
   src: url("./resources/fonts/Avara-BoldItalic.otf");
 }
 @font-face {
-  font-family: Slabo;
-  src: url("./resources/fonts/Slabo13px-Regular.ttf");
+  font-family: RobotoMono;
+  src: url("./resources/fonts/RobotoMono.ttf");
 }
 
 body {
@@ -159,17 +159,18 @@ canvas .text-input {
 }
 
 .label {
-  font-family: Slabo;
-  font-weight: 900;
+  font-family: RobotoMono;
+  font-weight: 100;
   position: fixed;
-  /* top: -300px; */
+
   width: 60px;
-  height: 0px;
+  height: 10px;
   z-index: 104;
   font-size: 9pt;
-  /* background-color: ; */
+  transform: translate(-50%, 100%);
+
   color: #ffffff;
-  backdrop-filter: invert();
+
   bottom: 175%;
   opacity: 30%;
   text-align: center;
@@ -179,16 +180,13 @@ canvas .text-input {
 }
 
 #walk {
-  left: 0.5%;
-  transform: translate(-50%);
+  left: 5%;
 }
 #map {
   left: 50%;
-  transform: translate(-50%);
 }
 #auto {
-  left: 99.5%;
-  transform: translate(-50%);
+  left: 95%;
 }
 
 .slider-step {
@@ -241,4 +239,5 @@ canvas .text-input {
   transition: 3s cubic-bezier(0.165, 0.84, 0.44, 1);
   opacity: 1;
   user-select: none;
+  pointer-events: none;
 }

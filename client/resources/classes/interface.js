@@ -94,11 +94,11 @@ class AppInterface {
             /* log(zoom) */
         })
         document.addEventListener("mouseleave", e => {
-            log("mouseleave")
+            /* log("mouseleave") */
             this.mouse_is_in_screen = false;
         })
         document.addEventListener("mouseenter", e => {
-            log("mouseenter")
+            /* f */
             this.mouse_is_in_screen = true;
         })
 

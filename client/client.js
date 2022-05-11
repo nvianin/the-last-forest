@@ -69,7 +69,7 @@ class App {
             ground_scale: 96,
             draw_distance: 8000,
             fog_offset: 1000,
-            walking_fog_multiplier: .10,
+            walking_fog_multiplier: .02,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -186,7 +186,9 @@ class App {
         log("Ground extent: " + this.ground.geometry.boundingBox.max.x * 2)
 
         this.ground_fakeBack = this.ground.clone();
-        this.ground_fakeBack.material = new THREE.MeshBasicMaterial({
+        this.ground_fakeBack.material = new THREE.MeshPhysicalMaterial({
+            roughness: .9,
+            specularIntensity: .3,
             color: bgCol
         })
         this.ground_fakeBack.position.y -= .1
@@ -453,15 +455,16 @@ class App {
 
         /* this.taaPass = new THREE.TAARenderPass(this.scene, this.camera);
         this.taaPass.unbiased = false;
-        this.taaPass.sampleLevel = 0; */
+        this.taaPass.sampleLevel = 1; */
 
         /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
         /* this.composer.addPass(this.ssaoPass); */
 
         this.composer.addPass(this.renderScene);
-        /* this.composer.addPass(this.fxaaPass); */
+        /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.bloomPass);
+        this.composer.addPass(this.fxaaPass)
         /* this.composer.addPass(this.saoPass); */
         /* this.composer.addPass(this.outlinePass) */
     }
@@ -708,11 +711,13 @@ class App {
             }
             document.querySelector("#loading-screen-background").style.opacity = 0
             setTimeout(() => {
+                document.querySelector("#loading-screen-background").style.display = "none"
+            }, 1300)
+            setTimeout(() => {
                 document.querySelector("#loading-screen-text").style.opacity = 0
             }, 700)
             setTimeout(() => {
                 document.querySelector("#loading-screen-text").style.display = "none"
-                document.querySelector("#loading-screen-background").style.display = "none"
             }, 3700)
         } else {
             removed_trees++;
@@ -918,13 +923,20 @@ class App {
     }
 
     buildIndexThumbnails() {
-        this.backup = {
+        let backup = {
             resolution: {
                 x: this.renderer.domElement.offsetWidth,
                 y: this.renderer.domElement.offsetHeight,
             },
-
+            position: this.camera.position.clone(),
+            rotation: this.camera.rotation.clone()
         }
+
+
+
+        this.renderer.setSize(backup.resolution.x, backup.resolution.y)
+        this.camera.position.copy(backup.position)
+        this.camera.rotation.copy(backup.rotation)
     }
 
     setSize() {
