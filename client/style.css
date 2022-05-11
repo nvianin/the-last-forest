@@ -282,6 +282,8 @@ canvas .text-input {
 }
 
 .thumbnail-element {
+  margin-top: 2px;
+  margin-bottom: 2px;
   user-select: none;
   -webkit-user-drag: none;
   width: 100%;

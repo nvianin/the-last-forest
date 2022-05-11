@@ -29,27 +29,31 @@ class UserManager {
         this.server = require("http").createServer((req, res) => {
             if (req.url == "/") req.url += "index.html";
             const ip = req.socket.address().address;
+            const url = req.url;
             req.url = __dirname + "/../client" + req.url;
             log(ip + ":" + req.url)
             /* log(this.login_db.findOne({
                 ip: ip
             })) */
-            // Log documents accessed, by who, how many times.
+            // Log which documents are accessed by who and how many times.
             this.login_db.findOne({
-                ip: ip
+                url: url
             }).then(resp => {
                 if (!resp) {
+                    const ips = {}
+                    ips[ip] = 1
                     this.login_db.insertOne({
-                        ip: ip,
-                        req: req.url,
-                        count: 0
+                        url: url,
+                        ips: ips
                     })
                 } else {
+                    let ips = resp.ips
+                    ips[ip] ? ips[ip]++ : ips[ip] = 1;
                     this.login_db.updateOne({
-                        ip: ip
+                        url: url
                     }, {
-                        $inc: {
-                            "count": 1
+                        $set: {
+                            ips: ips
                         }
                     })
                 }

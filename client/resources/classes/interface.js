@@ -257,7 +257,7 @@ class AppInterface {
 
                         if (Math.abs(y) > .35) {
                             /* app.camera.rotateX(y * -.02) */
-                            app.camera.translateZ(y)
+                            app.camera.translateZ(y * 2)
                         }
                         /* log(x, y) */
                     } else {
