@@ -180,6 +180,15 @@ class TreeManager {
             alphaToCoverage: false
         })
         this.line_mat.onBeforeCompile = shader => {
+            const vertexShader = `
+            
+            ////
+            
+            `
+            const [prelude, main] = vertexShader.split("////");
+            shader.vertexShader.replace("#include <clipping_planes_pars_fragment>", "#include <clipping_planes_pars_fragment> \n" + prelude)
+            shader.vertexShader.replace("#include <dithering_fragment>", "#include <dithering_fragment> \n" + main)
+
             log(shader.vertexShader)
             log(shader.fragmentShader)
         }

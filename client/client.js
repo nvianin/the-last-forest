@@ -886,7 +886,7 @@ class App {
             if (intersects[0] && intersects[0].object && intersects[0].distance < this.scene.fog.far + 10 &&
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)) {
                 /* let object = intersects[0].object.userData.tree; */
-                log(intersects[0].object)
+                /* log(intersects[0].object) */
                 intersects[0].object.geometry.attributes
                 let object = intersects[0].object.parent;
                 this.outlinePass.selectedObjects = [object]
