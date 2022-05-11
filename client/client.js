@@ -67,8 +67,8 @@ class App {
         this.settings = {
             ground_side: 64,
             ground_scale: 96,
-            draw_distance: 5000,
-            fog_offset: 500,
+            draw_distance: 8000,
+            fog_offset: 1000,
             walking_fog_multiplier: .10,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */

@@ -15,15 +15,15 @@ class AppInterface {
 
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
         this.mapControls.maxPolarAngle = Math.HALF_PI * .8
-        this.mapControls.maxDistance = app.settings.draw_distance;
+        this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset;
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
         this.mapControls.enabled = false;
 
         this.settings = {
             fov: {
-                walk: 120,
-                map: 20,
+                walk: 90,
+                map: 50,
             },
             camera_ground_offset: 8
         }
@@ -67,6 +67,7 @@ class AppInterface {
             switch (this.state) {
                 case "WALKING":
                     if (document.pointerLockElement) {
+                        this.movement.set(0, 0, 0)
                         log("releasing lock")
                         document.exitPointerLock()
                     }
@@ -131,16 +132,16 @@ class AppInterface {
                     if (document.pointerLockElement) {
                         switch (e.key) {
                             case "w":
-                                this.movement.z = 0;
+                                if (this.movement.z == -1) this.movement.z = 0;
                                 break;
                             case "a":
-                                this.movement.x = 0;
+                                if (this.movement.x == -1) this.movement.x = 0;
                                 break;
                             case "s":
-                                this.movement.z = 0;
+                                if (this.movement.z == 1) this.movement.z = 0;
                                 break;
                             case "d":
-                                this.movement.x = 0;
+                                if (this.movement.x == 1) this.movement.x = 0;
                                 break;
                         }
                     }
