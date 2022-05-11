@@ -134,7 +134,7 @@ const load_colors = async () => {
     Object.entries(treeTypes).forEach(([key, val]) => {
         treeColors[key] = new THREE.LineBasicMaterial({
             color: new THREE.Color(val.color),
-            opacity: .45,
+            opacity: .7,
             transparent: true,
             linewidth: .002,
             vertexColors: false,
