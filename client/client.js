@@ -948,6 +948,11 @@ class App {
         });
         const pixelBuffer = new Uint8Array(256 ** 2 * 4);
 
+        const thumbnailCanvas = document.createElement("canvas")
+        thumbnailCanvas.width = 256;
+        thumbnailCanvas.height = 256;
+        const ctx = thumbnailCanvas.getContext()
+
         thumbnailScene.add(
             new THREE.Mesh(
                 new THREE.SphereGeometry(),
@@ -977,16 +982,15 @@ class App {
             }
             log("Rendered thumbnail is black: " + all_black)
 
+            const imgData = new ImageData(pixelBuffer, 256, 256)
+            ctx.putImageData(imgData, 0, 0)
+
 
             /* log(pixelBuffer) */
             this.thumbnails.push(thumbnailBuffer.texture.clone())
 
             const img = document.createElement("img");
-            img.src = URL.createObjectURL(
-                new Blob(pixelBuffer, {
-                    type: "image/png"
-                })
-            )
+            img.src = thumbnailCanvas.toDataURL()
             img.className = "thumbnail"
             document.body.appendChild(img)
 
