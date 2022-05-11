@@ -101,7 +101,7 @@ class App {
         /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
         /* this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
         this.scene.add(this.skylight); */
-        this.sun = new THREE.DirectionalLight(0xffffaa, 1.2);
+        this.sun = new THREE.DirectionalLight(0xffffaa, 2);
         this.sun.position.set(50, 100, 50);
         this.sun_target_offset = new THREE.Vector3(-20, -10, -40);
         /* this.sun.lookAt(0, 0, 0); */
@@ -243,8 +243,6 @@ class App {
             document.body.appendChild(this.frameRateDom)
         }
 
-        this.buildIndexThumbnails()
-
         this.frameCount = 0;
         this.render()
 
@@ -297,9 +295,12 @@ class App {
 
 
         this.tree = new TreeManager("", new THREE.Vector3())
-        this.rule_dom = document.querySelector("#rule-set");
+        /* this.rule_dom = document.querySelector("#rule-set"); */
         this.ruleset = this.baseRuleSet.clone();
         this.ruleset.randomize()
+
+
+        this.buildIndexThumbnails()
 
         /* this.ruleset.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
         this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF") */
@@ -472,6 +473,8 @@ class App {
     initShadows() {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.autoUpdate = false
+        this.renderer.shadowMap.needsUpdate = true
 
         this.sun.castShadow = true;
         this.sun.shadow.mapSize.width = 1024 * 1;
@@ -838,8 +841,9 @@ class App {
         this.frame_time = Date.now();
         this.clock.getElapsedTime()
 
-        /* this.renderer.render(this.scene, this.camera); */
-        this.composer.render();
+        this.renderer.render(this.scene, this.camera);
+        /* this.composer.render(); */
+        /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
 
         this.sun.position.copy(this.camera.position).add(new THREE.Vector3(50, 100, 50));
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
@@ -923,20 +927,91 @@ class App {
     }
 
     buildIndexThumbnails() {
-        let backup = {
+        /* let backup = {
             resolution: {
                 x: this.renderer.domElement.offsetWidth,
                 y: this.renderer.domElement.offsetHeight,
             },
             position: this.camera.position.clone(),
             rotation: this.camera.rotation.clone()
-        }
+        } */
+
+        this.thumbnails = []
+
+        const thumbnailScene = new THREE.Scene()
+        const thumbnailCam = new THREE.PerspectiveCamera(50);
+        thumbnailCam.position.z = 5;
+        const thumbnailBuffer = new THREE.WebGLRenderTarget(256, 256, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBAFormat
+        });
+        const pixelBuffer = new Uint8Array(256 ** 2 * 4);
+
+        thumbnailScene.add(
+            new THREE.Mesh(
+                new THREE.SphereGeometry(),
+                new THREE.MeshBasicMaterial({
+                    color: "red"
+                })
+            )
+        )
+
+        let tree;
+
+        Object.entries(treeTypes).forEach(([flair, type]) => {
+            /* log(flair, type) */
+
+            tree = this.tree.buildTreeType(flair, 2);
+            thumbnailScene.add(tree);
+
+            this.renderer.setRenderTarget(thumbnailBuffer)
+            this.renderer.clear()
+            this.renderer.render(thumbnailScene, thumbnailCam);
+
+            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, 256, 256, pixelBuffer)
+
+            let all_black = true;
+            for (let val of pixelBuffer) {
+                if (val != 0) all_black = false;
+            }
+            log("Rendered thumbnail is black: " + all_black)
 
 
+            /* log(pixelBuffer) */
+            this.thumbnails.push(thumbnailBuffer.texture.clone())
 
-        this.renderer.setSize(backup.resolution.x, backup.resolution.y)
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(
+                new Blob(pixelBuffer, {
+                    type: "image/png"
+                })
+            )
+            img.className = "thumbnail"
+            document.body.appendChild(img)
+
+        })
+        this.renderer.setRenderTarget(null)
+        this.thumbnailDebug = new THREE.Mesh(
+            new THREE.PlaneGeometry(3, 3),
+            new THREE.MeshBasicMaterial({
+                map: this.thumbnails[0]
+            })
+        )
+        this.thumbnailDebug.position.set(0, 25, 0)
+        this.thumbnailDebug.scale.set(30, 30, 30)
+        this.thumbnailDebug.rotation.x = -Math.HALF_PI
+        this.scene.add(
+            this.thumbnailDebug
+        )
+
+        this.thumbnailScene = thumbnailScene;
+        this.thumbnailCam = thumbnailCam
+
+
+        /* this.renderer.setSize(backup.resolution.x, backup.resolution.y)
         this.camera.position.copy(backup.position)
-        this.camera.rotation.copy(backup.rotation)
+        this.camera.rotation.copy(backup.rotation) */
     }
 
     setSize() {
