@@ -927,54 +927,40 @@ class App {
     }
 
     buildIndexThumbnails() {
-        /* let backup = {
-            resolution: {
-                x: this.renderer.domElement.offsetWidth,
-                y: this.renderer.domElement.offsetHeight,
-            },
-            position: this.camera.position.clone(),
-            rotation: this.camera.rotation.clone()
-        } */
-
         this.thumbnails = []
+
+        const width = 256;
+        const height = 512;
 
         const thumbnailScene = new THREE.Scene()
         const thumbnailCam = new THREE.PerspectiveCamera(50);
-        thumbnailCam.position.z = 5;
-        const thumbnailBuffer = new THREE.WebGLRenderTarget(256, 256, {
+        thumbnailCam.rotation.z = Math.PI
+        thumbnailCam.position.y = .5
+        thumbnailCam.position.z = 3;
+        const thumbnailBuffer = new THREE.WebGLRenderTarget(width, height, {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
             format: THREE.RGBAFormat
         });
-        const pixelBuffer = new Uint8Array(256 ** 2 * 4);
+        const pixelBuffer = new Uint8ClampedArray(width * height * 4);
 
         const thumbnailCanvas = document.createElement("canvas")
-        thumbnailCanvas.width = 256;
-        thumbnailCanvas.height = 256;
-        const ctx = thumbnailCanvas.getContext()
-
-        thumbnailScene.add(
-            new THREE.Mesh(
-                new THREE.SphereGeometry(),
-                new THREE.MeshBasicMaterial({
-                    color: "red"
-                })
-            )
-        )
+        thumbnailCanvas.width = width;
+        thumbnailCanvas.height = height;
+        const ctx = thumbnailCanvas.getContext("2d")
 
         let tree;
 
         Object.entries(treeTypes).forEach(([flair, type]) => {
-            /* log(flair, type) */
-
+            thumbnailScene.remove(tree)
             tree = this.tree.buildTreeType(flair, 2);
             thumbnailScene.add(tree);
-
+            this.renderer.setClearAlpha(0)
             this.renderer.setRenderTarget(thumbnailBuffer)
             this.renderer.clear()
             this.renderer.render(thumbnailScene, thumbnailCam);
 
-            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, 256, 256, pixelBuffer)
+            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, width, height, pixelBuffer)
 
             let all_black = true;
             for (let val of pixelBuffer) {
@@ -982,40 +968,31 @@ class App {
             }
             log("Rendered thumbnail is black: " + all_black)
 
-            const imgData = new ImageData(pixelBuffer, 256, 256)
+            const imgData = new ImageData(pixelBuffer, width, height)
             ctx.putImageData(imgData, 0, 0)
 
 
             /* log(pixelBuffer) */
-            this.thumbnails.push(thumbnailBuffer.texture.clone())
-
-            const img = document.createElement("img");
-            img.src = thumbnailCanvas.toDataURL()
-            img.className = "thumbnail"
-            document.body.appendChild(img)
-
+            this.thumbnails.push(thumbnailCanvas.toDataURL())
         })
         this.renderer.setRenderTarget(null)
-        this.thumbnailDebug = new THREE.Mesh(
-            new THREE.PlaneGeometry(3, 3),
-            new THREE.MeshBasicMaterial({
-                map: this.thumbnails[0]
-            })
-        )
-        this.thumbnailDebug.position.set(0, 25, 0)
-        this.thumbnailDebug.scale.set(30, 30, 30)
-        this.thumbnailDebug.rotation.x = -Math.HALF_PI
-        this.scene.add(
-            this.thumbnailDebug
-        )
+        this.renderer.setClearAlpha(1)
 
-        this.thumbnailScene = thumbnailScene;
-        this.thumbnailCam = thumbnailCam
+        this.thumbnailContainer = document.createElement("div")
+        this.thumbnailContainer.id = "thumbnail-container"
 
+        for (let t of this.thumbnails) {
 
-        /* this.renderer.setSize(backup.resolution.x, backup.resolution.y)
-        this.camera.position.copy(backup.position)
-        this.camera.rotation.copy(backup.rotation) */
+            const img = document.createElement("img");
+            img.src = t
+            img.className = "thumbnail-element"
+
+            this.thumbnailContainer.appendChild(img)
+
+        }
+
+        document.body.appendChild(this.thumbnailContainer)
+        this.interface.thumbnailSlider = new CoolSlider("thumbnail-slider", 0, 100, app.thumbnails.length)
     }
 
     setSize() {

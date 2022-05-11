@@ -242,10 +242,18 @@ canvas .text-input {
   pointer-events: none;
 }
 
-.thumbnail {
-  width: 200px;
-  height: 200px;
-  z-index: 1000000;
-  top: 0px;
+#thumbnail-container {
   position: fixed;
+  width: 150px;
+  height: 100%;
+  top: 0%;
+  right: 0%;
+}
+
+.thumbnail-element {
+  user-select: none;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: #fff 0 0 1px;
+  background-color: rgba(0.6, 0.56, 0.56, 1);
 }

@@ -32,7 +32,6 @@ class DomController {
         }
 
         this.currentState = "map"
-
     }
 
     update() {
