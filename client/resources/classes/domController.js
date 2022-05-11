@@ -32,12 +32,12 @@ class DomController {
         }
 
         this.currentState = "map"
-
     }
 
     update() {
         this.zoomSlider.update()
         this.modeSlider.update()
+        if (this.thumbnailSlider) this.thumbnailSlider.update()
 
         const modeVal = parseFloat(this.modeSlider.dom.value);
         if (modeVal < 100) {
@@ -66,6 +66,8 @@ class DomController {
 
 class CoolSlider {
     constructor(id = "", min, max, steps = 0) {
+        this.min = min;
+        this.max = max;
         this.dom = document.createElement("input");
         this.dom.type = "range"
         this.dom.setAttribute("min", min)
@@ -97,6 +99,7 @@ class CoolSlider {
             this.step_elements.push(step)
             this.container.appendChild(step)
         }
+
 
         this.targetValue = 500;
         this.frame = 0;

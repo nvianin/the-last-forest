@@ -26,7 +26,7 @@ const debug = {
         value: 5
     },
     treeSeparationArrows: false,
-    use_cached_data: true,
+    use_cached_data: false,
     aggregate: false,
     show_imposters: true,
 
@@ -617,8 +617,9 @@ class App {
                     /* const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length); */
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
-                    const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20);
-                    const scale = 4 * upvote_factor;
+                    /* const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20); */
+                    const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
+                    const scale = 20 * upvote_factor;
                     const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
 
                     let y = -100;
@@ -927,54 +928,41 @@ class App {
     }
 
     buildIndexThumbnails() {
-        /* let backup = {
-            resolution: {
-                x: this.renderer.domElement.offsetWidth,
-                y: this.renderer.domElement.offsetHeight,
-            },
-            position: this.camera.position.clone(),
-            rotation: this.camera.rotation.clone()
-        } */
-
         this.thumbnails = []
+
+        const width = 256;
+        const height = 512;
 
         const thumbnailScene = new THREE.Scene()
         const thumbnailCam = new THREE.PerspectiveCamera(50);
-        thumbnailCam.position.z = 5;
-        const thumbnailBuffer = new THREE.WebGLRenderTarget(256, 256, {
+        thumbnailCam.rotation.z = Math.PI
+        thumbnailCam.position.y = .5
+        thumbnailCam.position.z = 3;
+        const thumbnailBuffer = new THREE.WebGLRenderTarget(width, height, {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
             format: THREE.RGBAFormat
         });
-        const pixelBuffer = new Uint8Array(256 ** 2 * 4);
+        const pixelBuffer = new Uint8ClampedArray(width * height * 4);
 
         const thumbnailCanvas = document.createElement("canvas")
-        thumbnailCanvas.width = 256;
-        thumbnailCanvas.height = 256;
-        const ctx = thumbnailCanvas.getContext()
-
-        thumbnailScene.add(
-            new THREE.Mesh(
-                new THREE.SphereGeometry(),
-                new THREE.MeshBasicMaterial({
-                    color: "red"
-                })
-            )
-        )
+        thumbnailCanvas.width = width;
+        thumbnailCanvas.height = height;
+        const ctx = thumbnailCanvas.getContext("2d")
 
         let tree;
+        let flairColors = []
 
         Object.entries(treeTypes).forEach(([flair, type]) => {
-            /* log(flair, type) */
-
+            thumbnailScene.remove(tree)
             tree = this.tree.buildTreeType(flair, 2);
             thumbnailScene.add(tree);
-
+            this.renderer.setClearAlpha(0)
             this.renderer.setRenderTarget(thumbnailBuffer)
             this.renderer.clear()
             this.renderer.render(thumbnailScene, thumbnailCam);
 
-            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, 256, 256, pixelBuffer)
+            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, width, height, pixelBuffer)
 
             /* let all_black = true;
             for (let val of pixelBuffer) {
@@ -982,40 +970,66 @@ class App {
             }
             log("Rendered thumbnail is black: " + all_black) */
 
-            const imgData = new ImageData(pixelBuffer, 256, 256)
+            const imgData = new ImageData(pixelBuffer, width, height)
             ctx.putImageData(imgData, 0, 0)
 
-
             /* log(pixelBuffer) */
-            this.thumbnails.push(thumbnailBuffer.texture.clone())
-
-            const img = document.createElement("img");
-            img.src = thumbnailCanvas.toDataURL()
-            img.className = "thumbnail"
-            document.body.appendChild(img)
-
+            this.thumbnails.push(thumbnailCanvas.toDataURL())
+            flairColors.push(treeTypes[flair].color)
         })
         this.renderer.setRenderTarget(null)
-        this.thumbnailDebug = new THREE.Mesh(
-            new THREE.PlaneGeometry(3, 3),
-            new THREE.MeshBasicMaterial({
-                map: this.thumbnails[0]
-            })
-        )
-        this.thumbnailDebug.position.set(0, 25, 0)
-        this.thumbnailDebug.scale.set(30, 30, 30)
-        this.thumbnailDebug.rotation.x = -Math.HALF_PI
-        this.scene.add(
-            this.thumbnailDebug
-        )
+        this.renderer.setClearAlpha(1)
 
-        this.thumbnailScene = thumbnailScene;
-        this.thumbnailCam = thumbnailCam
+        this.thumbnailContainer = document.createElement("div")
+        this.thumbnailContainer.id = "thumbnail-container"
 
+        this.thumbnailContainer.content = document.createElement("div")
+        this.thumbnailContainer.content.id = "thumbnail-content"
+        this.thumbnailContainer.appendChild(this.thumbnailContainer.content)
 
-        /* this.renderer.setSize(backup.resolution.x, backup.resolution.y)
-        this.camera.position.copy(backup.position)
-        this.camera.rotation.copy(backup.rotation) */
+        flairColors.reverse()
+        for (let t of this.thumbnails) {
+            const img = document.createElement("img");
+            img.src = t
+            img.className = "thumbnail-element"
+            img.style.backgroundColor = flairColors.pop()
+            img.setAttribute("draggable", false)
+
+            this.thumbnailContainer.content.appendChild(img)
+        }
+
+        document.body.appendChild(this.thumbnailContainer)
+        const thumbnailSlider = new CoolSlider("thumbnail-slider", 0, 100);
+        this.interface.domController.thumbnailSlider = thumbnailSlider;
+        thumbnailSlider.dom.value = "0"
+        thumbnailSlider.targetValue = 0;
+        thumbnailSlider.dom.oninput = e => {
+            thumbnailSlider.targetValue = parseFloat(e.target.value)
+        }
+
+        this.thumbnailContainer.onmousemove = e => {
+            if (this.pointer_is_down) thumbnailSlider.targetValue = Math.clamp(thumbnailSlider.targetValue - e.movementY / (innerHeight / 100), 0, 100);
+        }
+        this.thumbnailContainer.onwheel = thumbnailSlider.onwheel = e => {
+            thumbnailSlider.targetValue = Math.clamp(thumbnailSlider.targetValue + e.deltaY / 1 / (innerHeight / 100), 0, 100);
+        }
+        thumbnailSlider.update = () => {
+            this.thumbnailContainer.content.style.top = -parseFloat(thumbnailSlider.dom.value) * (this.thumbnailContainer.content.scrollHeight - this.thumbnailContainer.content.offsetHeight) / 100 + "px";
+
+            const val = parseFloat(thumbnailSlider.dom.value);
+            const diff = Math.abs(val - thumbnailSlider.targetValue);
+            /* this.targetValue = Math.sin(this.frame / 100) * 1000 */
+            // if (diff > 1) {
+            //     /* log(val, Math.abs(val - this.targetValue)) */
+            //     const t = Math.clamp(Math.pow(diff / 1000, 2), 0.1, .2);
+            //     /* log(Math.pow(diff / 100, 2), t, diff) */
+            //     thumbnailSlider.dom.value = Math.lerp(val, thumbnailSlider.targetValue, t) + ""
+            //     /* if (this.) */
+            // } else
+            if (thumbnailSlider.dom.value != thumbnailSlider.targetValue + "") {
+                thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
+            }
+        }
     }
 
     setSize() {
