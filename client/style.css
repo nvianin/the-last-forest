@@ -78,6 +78,7 @@ canvas .text-input {
   padding: 10px;
   color: white;
   backdrop-filter: blur(2px);
+  font-family: RobotoMono;
 
   user-select: none;
   cursor: pointer;
@@ -103,6 +104,7 @@ canvas .text-input {
   margin: 0;
   border-radius: 50px;
   box-shadow: inset #333 0 0 2.5px;
+  backdrop-filter: blur(3px);
   /* z-index: 100; */
 }
 .cool-slider::-webkit-slider-thumb {
@@ -243,17 +245,56 @@ canvas .text-input {
 }
 
 #thumbnail-container {
+  user-select: none;
+  -webkit-user-drag: none;
   position: fixed;
-  width: 150px;
+  width: 100px;
   height: 100%;
   top: 0%;
   right: 0%;
+  overflow: hidden;
+  z-index: 200;
+}
+
+#thumbnail-content {
+  height: 100%;
+  position: fixed;
+}
+
+.thumbnail-label {
 }
 
 .thumbnail-element {
   user-select: none;
+  -webkit-user-drag: none;
   width: 100%;
   border-radius: 10px;
   box-shadow: #fff 0 0 1px;
   background-color: rgba(0.6, 0.56, 0.56, 1);
+
+  backdrop-filter: blur(12px);
+  /* opacity: 0.9; */
+  transition: 0.3;
+  z-index: 900;
+}
+.thumbnail-element:hover {
+  transform: scale(1.5);
+  z-index: 1000;
+  opacity: 1;
+}
+
+.thumbnail-deactivated {
+}
+
+#thumbnail-slider-container {
+  top: 0%;
+  right: -39vh;
+  width: 96vh;
+  height: 23px;
+  transform: rotate(90deg) translate(50%);
+  opacity: 50%;
+  transition: 0.3s;
+}
+
+#thumbnail-slider {
 }

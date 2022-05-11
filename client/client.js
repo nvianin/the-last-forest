@@ -26,7 +26,7 @@ const debug = {
         value: 5
     },
     treeSeparationArrows: false,
-    use_cached_data: true,
+    use_cached_data: false,
     aggregate: false,
     show_imposters: true,
 
@@ -617,8 +617,9 @@ class App {
                     /* const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length); */
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
-                    const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20);
-                    const scale = 4 * upvote_factor;
+                    /* const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20); */
+                    const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
+                    const scale = 20 * upvote_factor;
                     const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
 
                     let y = -100;
@@ -950,6 +951,7 @@ class App {
         const ctx = thumbnailCanvas.getContext("2d")
 
         let tree;
+        let flairColors = []
 
         Object.entries(treeTypes).forEach(([flair, type]) => {
             thumbnailScene.remove(tree)
@@ -971,9 +973,9 @@ class App {
             const imgData = new ImageData(pixelBuffer, width, height)
             ctx.putImageData(imgData, 0, 0)
 
-
             /* log(pixelBuffer) */
             this.thumbnails.push(thumbnailCanvas.toDataURL())
+            flairColors.push(treeTypes[flair].color)
         })
         this.renderer.setRenderTarget(null)
         this.renderer.setClearAlpha(1)
@@ -981,18 +983,53 @@ class App {
         this.thumbnailContainer = document.createElement("div")
         this.thumbnailContainer.id = "thumbnail-container"
 
-        for (let t of this.thumbnails) {
+        this.thumbnailContainer.content = document.createElement("div")
+        this.thumbnailContainer.content.id = "thumbnail-content"
+        this.thumbnailContainer.appendChild(this.thumbnailContainer.content)
 
+        flairColors.reverse()
+        for (let t of this.thumbnails) {
             const img = document.createElement("img");
             img.src = t
             img.className = "thumbnail-element"
+            img.style.backgroundColor = flairColors.pop()
+            img.setAttribute("draggable", false)
 
-            this.thumbnailContainer.appendChild(img)
-
+            this.thumbnailContainer.content.appendChild(img)
         }
 
         document.body.appendChild(this.thumbnailContainer)
-        this.interface.thumbnailSlider = new CoolSlider("thumbnail-slider", 0, 100, app.thumbnails.length)
+        const thumbnailSlider = new CoolSlider("thumbnail-slider", 0, 100);
+        this.interface.domController.thumbnailSlider = thumbnailSlider;
+        thumbnailSlider.dom.value = "0"
+        thumbnailSlider.targetValue = 0;
+        thumbnailSlider.dom.oninput = e => {
+            thumbnailSlider.targetValue = parseFloat(e.target.value)
+        }
+
+        this.thumbnailContainer.onmousemove = e => {
+            if (this.pointer_is_down) thumbnailSlider.targetValue = Math.clamp(thumbnailSlider.targetValue - e.movementY / (innerHeight / 100), 0, 100);
+        }
+        this.thumbnailContainer.onwheel = thumbnailSlider.onwheel = e => {
+            thumbnailSlider.targetValue = Math.clamp(thumbnailSlider.targetValue + e.deltaY / 1 / (innerHeight / 100), 0, 100);
+        }
+        thumbnailSlider.update = () => {
+            this.thumbnailContainer.content.style.top = -parseFloat(thumbnailSlider.dom.value) * (this.thumbnailContainer.content.scrollHeight - this.thumbnailContainer.content.offsetHeight) / 100 + "px";
+
+            const val = parseFloat(thumbnailSlider.dom.value);
+            const diff = Math.abs(val - thumbnailSlider.targetValue);
+            /* this.targetValue = Math.sin(this.frame / 100) * 1000 */
+            // if (diff > 1) {
+            //     /* log(val, Math.abs(val - this.targetValue)) */
+            //     const t = Math.clamp(Math.pow(diff / 1000, 2), 0.1, .2);
+            //     /* log(Math.pow(diff / 100, 2), t, diff) */
+            //     thumbnailSlider.dom.value = Math.lerp(val, thumbnailSlider.targetValue, t) + ""
+            //     /* if (this.) */
+            // } else
+            if (thumbnailSlider.dom.value != thumbnailSlider.targetValue + "") {
+                thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
+            }
+        }
     }
 
     setSize() {
