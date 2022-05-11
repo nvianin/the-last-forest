@@ -64,7 +64,11 @@ class Server {
 
             this.getRedditControl();
             this.load_temperature_data();
-            this.userman = new UserManager(this.posts, this.temperature_data, this.points);
+
+            this.login_db = await this.db.collection("login")
+
+            this.userman = new UserManager(this.posts, this.temperature_data, this.points, this.login_db);
+            this.userman.io.addEvent
             log(await this.reddit_db.countDocuments())
         });
         this.sub = this.r.getSubreddit("collapse");

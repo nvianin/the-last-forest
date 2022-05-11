@@ -4,12 +4,14 @@ const crypto = require("crypto");
 
 
 class UserManager {
-    constructor(posts, temperature_data, points) {
+    constructor(posts, temperature_data, points, login_db) {
         this.users = {};
         this.updatePosts(posts)
         this.points = points
         this.temperature_data = temperature_data;
         this.init();
+
+        this.login_db = login_db;
 
         this.mimeTypes = {
             "html": "text/html",
@@ -26,8 +28,32 @@ class UserManager {
     init() {
         this.server = require("http").createServer((req, res) => {
             if (req.url == "/") req.url += "index.html";
+            const ip = req.socket.address().address;
             req.url = __dirname + "/../client" + req.url;
-            log(req.url)
+            log(ip + ":" + req.url)
+            /* log(this.login_db.findOne({
+                ip: ip
+            })) */
+            // Log documents accessed, by who, how many times.
+            this.login_db.findOne({
+                ip: ip
+            }).then(resp => {
+                if (!resp) {
+                    this.login_db.insertOne({
+                        ip: ip,
+                        req: req.url,
+                        count: 0
+                    })
+                } else {
+                    this.login_db.updateOne({
+                        ip: ip
+                    }, {
+                        $inc: {
+                            "count": 1
+                        }
+                    })
+                }
+            })
             fs.readFile(req.url, (err, data) => {
                 if (err || !req.url.includes("client")) {
                     res.writeHead(404);

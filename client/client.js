@@ -13,6 +13,16 @@ const loadList = [
     }
 ]
 
+const urlParams = new URLSearchParams(window.location.search)
+
+debug_activated = urlParams.get("debug") == ""
+if (debug_activated) {
+    log("Debug activated by url")
+
+} else {
+    log("Debug deactivated by url")
+}
+
 const debug = {
     shadow_helper: false,
     sun_helper: false,
@@ -26,7 +36,7 @@ const debug = {
         value: 5
     },
     treeSeparationArrows: false,
-    use_cached_data: false,
+    use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
 
@@ -66,9 +76,9 @@ class App {
 
         this.settings = {
             ground_side: 64,
-            ground_scale: 96,
-            draw_distance: 8000,
-            fog_offset: 1000,
+            ground_scale: 256 + 64,
+            draw_distance: 20000,
+            fog_offset: 2000,
             walking_fog_multiplier: .02,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
@@ -77,7 +87,7 @@ class App {
         this.camera.position.set(0, .5, 1);
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
-        this.camera.position.set(0, 3000, 0)
+        this.camera.position.set(0, this.settings.draw_distance - this.settings.fog_offset, 0)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
 
@@ -873,7 +883,8 @@ class App {
         if (this.built_trees) {
             this.mousecast.setFromCamera(this.pointer, this.camera);
             const intersects = this.mousecast.intersectObjects(this.trees);
-            if (intersects[0] && intersects[0].distance < this.scene.fog.far + 10) {
+            if (intersects[0] && intersects[0].distance < this.scene.fog.far + 10 &&
+                this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom) {
                 /* let object = intersects[0].object.userData.tree; */
                 /* log(intersects[0].object) */
                 intersects[0].object.geometry.attributes
@@ -977,7 +988,7 @@ class App {
             this.thumbnails.push(thumbnailCanvas.toDataURL())
             typeInfos.push({
                 color: treeTypes[flair].color,
-                name: type
+                name: flair
             })
         })
         this.renderer.setRenderTarget(null)
@@ -993,18 +1004,24 @@ class App {
         typeInfos.reverse()
         for (let t of this.thumbnails) {
             const info = typeInfos.pop()
+            log(info)
             const img = document.createElement("img");
             img.src = t
-            img.className = "thumbnail-element"
-            img.style.backgroundColor = info.color
+            img.className = "thumbnail-image"
             img.setAttribute("draggable", false)
 
             const imgLabel = document.createElement("div")
             imgLabel.textContent = info.name
             imgLabel.className = "thumbnail-label"
-            img.appendChild(imgLabel)
 
-            this.thumbnailContainer.content.appendChild(img)
+            const imgContainer = document.createElement("div");
+            imgContainer.className = "thumbnail-element"
+            imgContainer.style.backgroundColor = info.color
+
+            imgContainer.appendChild(img)
+            imgContainer.appendChild(imgLabel)
+
+            this.thumbnailContainer.content.appendChild(imgContainer)
 
         }
 

@@ -15,7 +15,7 @@
 }
 @font-face {
   font-family: RobotoMono;
-  src: url("./resources/fonts/RobotoMono.ttf");
+  src: url("./resources/fonts/Avara-Bold.otf");
 }
 
 body {
@@ -262,13 +262,23 @@ canvas .text-input {
 }
 
 .thumbnail-label {
-  font-family: Avarabold;
-  font-style: italic;
-  font-size: 12pt;
+  font-family: RobotoMono;
+  font-weight: 200;
+  font-size: 9pt;
+  line-height: 10pt;
+  text-align: center;
+  width: 100%;
   position: fixed;
-  bottom: 10%;
+  top: 2%;
   left: 50%;
   transform: translate(-50%);
+
+  background-clip: text;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
 }
 
 .thumbnail-element {
@@ -276,7 +286,7 @@ canvas .text-input {
   -webkit-user-drag: none;
   width: 100%;
   border-radius: 10px;
-  box-shadow: #fff 0 0 1px;
+  /* box-shadow: #fff 0 0 1px; */
   background-color: rgba(0.6, 0.56, 0.56, 1);
 
   backdrop-filter: blur(12px);
