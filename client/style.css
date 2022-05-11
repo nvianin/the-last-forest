@@ -262,6 +262,13 @@ canvas .text-input {
 }
 
 .thumbnail-label {
+  font-family: Avarabold;
+  font-style: italic;
+  font-size: 12pt;
+  position: fixed;
+  bottom: 10%;
+  left: 50%;
+  transform: translate(-50%);
 }
 
 .thumbnail-element {

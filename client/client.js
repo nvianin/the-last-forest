@@ -951,7 +951,7 @@ class App {
         const ctx = thumbnailCanvas.getContext("2d")
 
         let tree;
-        let flairColors = []
+        let typeInfos = []
 
         Object.entries(treeTypes).forEach(([flair, type]) => {
             thumbnailScene.remove(tree)
@@ -975,7 +975,10 @@ class App {
 
             /* log(pixelBuffer) */
             this.thumbnails.push(thumbnailCanvas.toDataURL())
-            flairColors.push(treeTypes[flair].color)
+            typeInfos.push({
+                color: treeTypes[flair].color,
+                name: type
+            })
         })
         this.renderer.setRenderTarget(null)
         this.renderer.setClearAlpha(1)
@@ -987,15 +990,22 @@ class App {
         this.thumbnailContainer.content.id = "thumbnail-content"
         this.thumbnailContainer.appendChild(this.thumbnailContainer.content)
 
-        flairColors.reverse()
+        typeInfos.reverse()
         for (let t of this.thumbnails) {
+            const info = typeInfos.pop()
             const img = document.createElement("img");
             img.src = t
             img.className = "thumbnail-element"
-            img.style.backgroundColor = flairColors.pop()
+            img.style.backgroundColor = info.color
             img.setAttribute("draggable", false)
 
+            const imgLabel = document.createElement("div")
+            imgLabel.textContent = info.name
+            imgLabel.className = "thumbnail-label"
+            img.appendChild(imgLabel)
+
             this.thumbnailContainer.content.appendChild(img)
+
         }
 
         document.body.appendChild(this.thumbnailContainer)
