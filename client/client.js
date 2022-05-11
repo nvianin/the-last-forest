@@ -241,6 +241,8 @@ class App {
             document.body.appendChild(this.frameRateDom)
         }
 
+        this.buildIndexThumbnails()
+
         this.frameCount = 0;
         this.render()
 
@@ -913,6 +915,16 @@ class App {
         }
         this.frameCount++;
         this.renderer.info.reset()
+    }
+
+    buildIndexThumbnails() {
+        this.backup = {
+            resolution: {
+                x: this.renderer.domElement.offsetWidth,
+                y: this.renderer.domElement.offsetHeight,
+            },
+
+        }
     }
 
     setSize() {
