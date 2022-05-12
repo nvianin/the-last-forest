@@ -218,7 +218,7 @@ class TreeManager {
         } */
         this.line = this.buildLineFromPoints(points)
         this.object.add(this.line);
-        app.scene.add(this.object)
+        /* app.scene.add(this.object) */
     }
 
     buildLineFromPoints(points) {

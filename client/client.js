@@ -208,13 +208,47 @@ class App {
             resp.text().then(frag => {
                 fetch("/resources/shaders/dustVert.glsl").then(resp => {
                     resp.text().then(vert => {
+
+                        const box = new THREE.BoxBufferGeometry(
+                            this.settings.ground_side, this.settings.ground_side / 2, this.settings.ground_side,
+                            this.settings.ground_side, this.settings.ground_side / 2, this.settings.ground_side)
+                        const points = []
+
+                        for (let i = 0; i < box.attributes.position.array.length; i++) {
+                            points.push(box.attributes.position.array[i] + Math.random() * 2 - 1);
+                        }
+
+
                         this.dustParticles = new THREE.Points(
-                            new THREE.BoxGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side),
-                            new THREE.ShaderMaterial({
+                            new THREE.BufferGeometry().setFromPoints(points),
+                            /* new THREE.ShaderMaterial({
                                 vertexShader: vert,
                                 fragmentShader: frag
-                            })
+                            }) */
+                            new THREE.PointsMaterial()
                         )
+
+                        this.dustParticles.userData.uniforms = {
+                            time: {
+                                value: 0
+                            }
+                        }
+                        this.dustParticles.material.onBeforeCompile = shader => {
+                            shader.uniforms.time = this.dustParticles.userData.uniforms.time;
+                            /* log(shader.fragmentShader) */
+                            let [prelude, main] = frag.split("////")
+                            shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
+                            shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + main)
+                            log(shader.fragmentShader)
+
+                            log(shader.vertexShader)
+
+                            prelude = vert.split("////")[0]
+                            main = vert.split("////")[1]
+                            shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common> \n" + prelude)
+                            shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
+                        }
+                        this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
                         this.scene.add(this.dustParticles)
                     })
                 })
@@ -868,7 +902,7 @@ class App {
 
     render() {
         this.frame_time = Date.now();
-        this.clock.getElapsedTime()
+        const time = this.clock.getElapsedTime()
 
         /* this.renderer.render(this.scene, this.camera); */
         this.composer.render();
@@ -900,10 +934,12 @@ class App {
         } */
 
 
+
         if (this.built_trees) {
+            if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = time
             Object.keys(treeTypes).forEach(type => {
                 if (treeColors[type] && treeColors[type].userData) {
-                    treeColors[type].userData.time.value = this.clock.getElapsedTime()
+                    treeColors[type].userData.time.value = time
 
                 }
             })
@@ -1031,7 +1067,6 @@ class App {
         typeInfos.reverse()
         for (let t of this.thumbnails) {
             const info = typeInfos.pop()
-            log(info)
             const img = document.createElement("img");
             img.src = t
             img.className = "thumbnail-image"
