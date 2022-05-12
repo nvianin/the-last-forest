@@ -140,6 +140,25 @@ const load_colors = async () => {
             vertexColors: false,
             alphaToCoverage: false
         })
+
+        treeColors[key].onBeforeCompile = shader => {
+            treeColors[key].userData.time = {
+                value: 0
+            }
+            shader.uniforms.time = treeColors[key].userData.time;
+
+            const vertexShader = `
+            uniform float time;
+            ////
+            gl_Position = 
+            `
+            const [prelude, main] = vertexShader.split("////");
+            shader.vertexShader.replace("#include <clipping_planes_pars_fragment>", "#include <clipping_planes_pars_fragment> \n" + prelude)
+            shader.vertexShader.replace("#include <dithering_fragment>", "#include <dithering_fragment> \n" + main)
+
+            log(shader.vertexShader)
+            /* log(shader.fragmentShader) */
+        }
     })
 }
 load_colors()
@@ -179,19 +198,7 @@ class TreeManager {
             vertexColors: false,
             alphaToCoverage: false
         })
-        this.line_mat.onBeforeCompile = shader => {
-            const vertexShader = `
-            
-            ////
-            
-            `
-            const [prelude, main] = vertexShader.split("////");
-            shader.vertexShader.replace("#include <clipping_planes_pars_fragment>", "#include <clipping_planes_pars_fragment> \n" + prelude)
-            shader.vertexShader.replace("#include <dithering_fragment>", "#include <dithering_fragment> \n" + main)
 
-            log(shader.vertexShader)
-            /* log(shader.fragmentShader) */
-        }
 
         /* this.line_mat.uniforms = {
             "time": {
