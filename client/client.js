@@ -220,14 +220,14 @@ class App {
 
 
                         this.dustParticles = new THREE.Points(
-                            new THREE.BufferGeometry().setFromPoints(points),
+                            new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side),
                             /* new THREE.ShaderMaterial({
                                 vertexShader: vert,
                                 fragmentShader: frag
                             }) */
                             new THREE.PointsMaterial()
                         )
-
+                        this.dustParticles.rotation.x = Math.HALF_PI
                         this.dustParticles.userData.uniforms = {
                             time: {
                                 value: 0
