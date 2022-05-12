@@ -122,6 +122,9 @@ const treeTypes = {
 
 const treeColors = {}
 const load_colors = async () => {
+    const vertexShader = await (await fetch("/resources/shaders/lineVertex.glsl")).text()
+    log(vertexShader)
+
     const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\r\n")
     let i = 0;
     for (key of Object.keys(treeTypes)) {
@@ -147,16 +150,11 @@ const load_colors = async () => {
             }
             shader.uniforms.time = treeColors[key].userData.time;
 
-            const vertexShader = `
-            uniform float time;
-            ////
-            gl_Position = 
-            `
             const [prelude, main] = vertexShader.split("////");
-            shader.vertexShader.replace("#include <clipping_planes_pars_fragment>", "#include <clipping_planes_pars_fragment> \n" + prelude)
-            shader.vertexShader.replace("#include <dithering_fragment>", "#include <dithering_fragment> \n" + main)
+            shader.vertexShader = shader.vertexShader.replace("#include <clipping_planes_pars_vertex>", "#include <clipping_planes_pars_vertex> \n" + prelude)
+            shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
 
-            log(shader.vertexShader)
+            /* log(shader.vertexShader) */
             /* log(shader.fragmentShader) */
         }
     })

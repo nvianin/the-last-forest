@@ -18,7 +18,6 @@ const urlParams = new URLSearchParams(window.location.search)
 debug_activated = urlParams.get("debug") == ""
 if (debug_activated) {
     log("Debug activated by url")
-
 } else {
     log("Debug deactivated by url")
 }
@@ -79,7 +78,7 @@ class App {
             ground_scale: 256 + 64,
             draw_distance: 20000,
             fog_offset: 2000,
-            walking_fog_multiplier: .02,
+            walking_fog_multiplier: .1,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -165,6 +164,7 @@ class App {
                 side: 0,
             })
         )
+        this.ground.name = "ground"
 
         /* this.csm.setupMaterial(this.ground.material); */
 
@@ -203,6 +203,24 @@ class App {
         })
         this.ground_fakeBack.position.y -= .1
         this.scene.add(this.ground_fakeBack)
+
+        fetch("/resources/shaders/dustFrag.glsl").then(resp => {
+            resp.text().then(frag => {
+                fetch("/resources/shaders/dustVert.glsl").then(resp => {
+                    resp.text().then(vert => {
+                        this.dustParticles = new THREE.Points(
+                            new THREE.BoxGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side),
+                            new THREE.ShaderMaterial({
+                                vertexShader: vert,
+                                fragmentShader: frag
+                            })
+                        )
+                        this.scene.add(this.dustParticles)
+                    })
+                })
+
+            })
+        })
 
         /* this.ground.material = new THREE.MeshBasicMaterial({
             color: 0x222222
@@ -308,9 +326,6 @@ class App {
         /* this.rule_dom = document.querySelector("#rule-set"); */
         this.ruleset = this.baseRuleSet.clone();
         this.ruleset.randomize()
-
-
-        this.buildIndexThumbnails()
 
         /* this.ruleset.addRule("F", "RF[RF[RF]LF[LF[LFR]]]");
         this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF") */
@@ -464,9 +479,9 @@ class App {
         /* this.ssaoPass. */
 
 
-        /* this.taaPass = new THREE.TAARenderPass(this.scene, this.camera);
+        this.taaPass = new THREE.TAARenderPass(this.scene, this.camera);
         this.taaPass.unbiased = false;
-        this.taaPass.sampleLevel = 1; */
+        this.taaPass.sampleLevel = 1;
 
         /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
@@ -475,7 +490,7 @@ class App {
         this.composer.addPass(this.renderScene);
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.fxaaPass)
+        /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
         /* this.composer.addPass(this.outlinePass) */
     }
@@ -611,6 +626,7 @@ class App {
         let removed_trees = 0
         let i = 0;
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
+            this.buildIndexThumbnails()
             /* document.querySelector("#loading-screen-text").style.opacity = 1
             document.querySelector("#loading-screen-text").style.transition = ".2s cubic-bezier(0.165, 0.84, 0.44, 1);" */
             log("Preparing to build " + Object.values(this.posts).length + " trees")
@@ -672,8 +688,10 @@ class App {
                     this.tree_imposters.push(imposter)
                     imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position)); */
 
+                    const outerScale = 10;
 
-                    tree.children[0].scale.set(scale, scale, scale)
+                    tree.scale.set(10, 10, 10)
+                    tree.children[0].scale.set(scale / outerScale, scale / outerScale, scale / outerScale)
                     /* object.updateMatrix */
 
                     tree.userData.post = post;
@@ -875,15 +893,23 @@ class App {
         if (this.mouse.y > innerHeight - 200) {
             this.postDom.style.top = this.mouse.y - this.postDom.clientHeight + "px"
         }
+
+
         /* else if (this.mouse.y < 200) {
-                   this.postDom.style.top = this.mouse.y + 200 + "px"
-               } */
+            this.postDom.style.top = this.mouse.y + 200 + "px"
+        } */
 
 
         if (this.built_trees) {
+            Object.keys(treeTypes).forEach(type => {
+                if (treeColors[type] && treeColors[type].userData) {
+                    treeColors[type].userData.time.value = this.clock.getElapsedTime()
+
+                }
+            })
             this.mousecast.setFromCamera(this.pointer, this.camera);
-            const intersects = this.mousecast.intersectObjects(this.trees);
-            if (intersects[0] && intersects[0].object && intersects[0].distance < this.scene.fog.far + 10 &&
+            const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
+            if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)) {
                 /* let object = intersects[0].object.userData.tree; */
                 /* log(intersects[0].object) */
@@ -945,10 +971,10 @@ class App {
         const height = 512;
 
         const thumbnailScene = new THREE.Scene()
-        const thumbnailCam = new THREE.PerspectiveCamera(50);
+        const thumbnailCam = new THREE.PerspectiveCamera(50, 256 / 512);
         thumbnailCam.rotation.z = Math.PI
         thumbnailCam.position.y = .5
-        thumbnailCam.position.z = 3;
+        thumbnailCam.position.z = 4;
         const thumbnailBuffer = new THREE.WebGLRenderTarget(width, height, {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
@@ -966,7 +992,8 @@ class App {
 
         Object.entries(treeTypes).forEach(([flair, type]) => {
             thumbnailScene.remove(tree)
-            tree = this.tree.buildTreeType(flair, 2);
+            tree = this.tree.buildTreeType(flair, 4);
+            log(tree)
             thumbnailScene.add(tree);
             this.renderer.setClearAlpha(0)
             this.renderer.setRenderTarget(thumbnailBuffer)
@@ -1090,11 +1117,11 @@ class App {
 
         /* let pos = new THREE.Vector3(x, y, z); */
 
-        const sc = .005;
+        const sc = .0005;
 
         const disp = new THREE.Vector3(
             0,
-            simplex.noise3d(y * sc, z * sc, x * sc) * 10,
+            simplex.noise3d(y * sc, z * sc, x * sc) * this.settings.ground_scale / 2,
             0,
         )
         disp.y += simplex.noise3d(
