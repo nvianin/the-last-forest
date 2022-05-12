@@ -190,7 +190,7 @@ class TreeManager {
             shader.vertexShader.replace("#include <dithering_fragment>", "#include <dithering_fragment> \n" + main)
 
             log(shader.vertexShader)
-            log(shader.fragmentShader)
+            /* log(shader.fragmentShader) */
         }
 
         /* this.line_mat.uniforms = {

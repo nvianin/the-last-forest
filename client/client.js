@@ -439,7 +439,7 @@ class App {
             ),
             1.2, // strength
             .7, // radius
-            .1 // threshold
+            .5 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -852,8 +852,8 @@ class App {
         this.frame_time = Date.now();
         this.clock.getElapsedTime()
 
-        this.renderer.render(this.scene, this.camera);
-        /* this.composer.render(); */
+        /* this.renderer.render(this.scene, this.camera); */
+        this.composer.render();
         /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
 
         this.sun.position.copy(this.camera.position).add(new THREE.Vector3(50, 100, 50));
