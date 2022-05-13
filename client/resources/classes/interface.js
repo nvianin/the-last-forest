@@ -25,7 +25,7 @@ class AppInterface {
                 walk: 90,
                 map: 50,
             },
-            camera_ground_offset: 8
+            camera_ground_offset: 16
         }
 
         app.camera.fov = this.settings.fov.map;

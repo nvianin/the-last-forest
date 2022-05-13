@@ -90,7 +90,8 @@ class App {
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
 
-        let bgCol = new THREE.Color(0x00510);
+        let bgCol = new THREE.Color(0x000510);
+        let fakeBackCol = bgCol.clone()
         this.fog = new THREE.Fog(bgCol, this.settings.draw_distance - this.settings.fog_offset, this.settings.draw_distance);
         /* this.fog = new THREE.FogExp2(bgCol, 1.);
         this.fog.near = this.settings.draw_distance - this.settings.fog_offset;
@@ -199,7 +200,7 @@ class App {
         this.ground_fakeBack.material = new THREE.MeshPhysicalMaterial({
             roughness: .9,
             specularIntensity: .3,
-            color: bgCol
+            color: fakeBackCol
         })
         this.ground_fakeBack.position.y -= .1
         this.scene.add(this.ground_fakeBack)
@@ -208,26 +209,17 @@ class App {
             resp.text().then(frag => {
                 fetch("/resources/shaders/dustVert.glsl").then(resp => {
                     resp.text().then(vert => {
-
-                        const box = new THREE.BoxBufferGeometry(
-                            this.settings.ground_side, this.settings.ground_side / 2, this.settings.ground_side,
-                            this.settings.ground_side, this.settings.ground_side / 2, this.settings.ground_side)
-                        const points = []
-
-                        for (let i = 0; i < box.attributes.position.array.length; i++) {
-                            points.push(box.attributes.position.array[i] + Math.random() * 2 - 1);
-                        }
-
-
                         this.dustParticles = new THREE.Points(
-                            new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side, this.settings.ground_side),
+                            new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 1, this.settings.ground_side * 1),
                             /* new THREE.ShaderMaterial({
                                 vertexShader: vert,
                                 fragmentShader: frag
                             }) */
-                            new THREE.PointsMaterial()
+                            new THREE.PointsMaterial({
+                                transparent: true
+                            })
                         )
-                        this.dustParticles.rotation.x = Math.HALF_PI
+                        this.dustParticles.rotation.x = -Math.HALF_PI
                         this.dustParticles.userData.uniforms = {
                             time: {
                                 value: 0
@@ -248,7 +240,18 @@ class App {
                             shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common> \n" + prelude)
                             shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
                         }
+                        const random = new Float32Array(this.dustParticles.geometry.attributes.position.count)
+                        for (let i = 0; i < this.dustParticles.geometry.attributes.position.array.length; i += 3) {
+                            this.dustParticles.geometry.attributes.position.array[i] = this.dustParticles.geometry.attributes.position.array[i] + Math.random() * 3;
+                            this.dustParticles.geometry.attributes.position.array[i + 1] = this.dustParticles.geometry.attributes.position.array[i + 1] + Math.random() * 3;
+                            this.dustParticles.geometry.attributes.position.array[i + 2] = this.dustParticles.geometry.attributes.position.array[i + 2] + (Math.random() * 2 - 1) * 6;
+                            random[i / 3] = Math.random()
+                        }
+
+                        this.dustParticles.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
+
                         this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
+                        this.dustParticles.position.y = -40;
                         this.scene.add(this.dustParticles)
                     })
                 })
@@ -915,8 +918,8 @@ class App {
         if (this.interface) this.interface.update()
         /* this.csm.update(this.camera.matrix) */
 
-        this.postDom.style.left = this.mouse.x + "px";
-        this.postDom.style.top = this.mouse.y + "px";
+        this.postDom.style.left = this.mouse.x + 20 + "px";
+        this.postDom.style.top = this.mouse.y + 20 + "px";
         if (this.mouse.x > innerWidth - 200) {
             this.postDom.style.left = this.mouse.x - 200 + "px"
         }

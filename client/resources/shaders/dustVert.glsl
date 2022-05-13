@@ -31,11 +31,22 @@ float snoise(vec2 v) {
 }
 
 uniform float time;
+attribute float random;
+varying vec3 vPos;
+varying float sin_time;
 
 ////
-float sc = .5;
-float time_scale = .02;
 
-vec3 noise = vec3(snoise((position.xy * sc) * (time * time_scale)), snoise((position.yz * sc) * (time * time_scale)), snoise((position.zx * sc) * (time * time_scale)));
+vPos = position;
+
+float sc = 10. * random;
+float time_scale = .02;
+float t = time * .8 * random + random * 1000.;
+
+float depth = - (modelViewMatrix * vec4(position, 1.)).z;
+
+vec3 noise = vec3(snoise((position.xy * sc) + (time * time_scale)), snoise((position.yz * sc) + (time * time_scale)), snoise((position.zx * sc) + (time * time_scale)));
 gl_Position = projectionMatrix * modelViewMatrix * vec4(position + noise, 1.0);
-gl_PointSize = sin(time) + 1.;
+sin_time = (sin(t) + (sin(t * 3.) / 3.) + (sin(t * 5.) / 5.) + 1.) / 2.;
+gl_PointSize = sin_time;
+gl_PointSize *= 14. - depth / 1000.;
