@@ -151,6 +151,7 @@ class App {
 
         this.trees = [];
         this.tree_imposters = [];
+        this.trees_by_category = {}
 
         // Ground generation & displacement
         this.ground = new THREE.Mesh(
@@ -251,7 +252,7 @@ class App {
                         this.dustParticles.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
 
                         this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
-                        this.dustParticles.position.y = -40;
+                        this.dustParticles.position.y = 2000;
                         this.scene.add(this.dustParticles)
                     })
                 })
@@ -457,14 +458,19 @@ class App {
             const URL = this.activeUrl;
             /* log(URL); */
             if (
+                this.interface.state != "LERPING" &&
                 this.postDom.style.visibility == "visible" &&
                 e.button == 0 &&
                 !this.pointer_moved_while_down &&
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
             ) {
-                window.open(URL);
-            } else {
-                /* log(e.button == 0, this.pointer_moved_while_down) */
+                /* window.open(URL); */
+                /* log(this.activeTree)
+                this.interface.nextState = "FOCUSED";
+                log(this.interface.nextState) */
+
+                this.interface.enter_focus(this.activeTree)
+
             }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
             this.pointer_is_down = false;
@@ -503,30 +509,31 @@ class App {
         });
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
-        this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
-        this.saoPass.params.saoIntensity = .003;
+        /* this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
+        this.saoPass.params.saoIntensity = .0003;
         this.saoPass.params.saoBias = 1;
         this.saoPass.params.saoKernelRadius = 10;
-        this.saoPass.params.saoScale = 3;
+        this.saoPass.params.saoScale = 3; */
+
 
         this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera);
 
 
-        /* this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight); */
+        this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight);
         /* this.ssaoPass. */
 
 
-        this.taaPass = new THREE.TAARenderPass(this.scene, this.camera);
+        /* this.taaPass = new THREE.TAARenderPass(this.scene, this.camera);
         this.taaPass.unbiased = false;
-        this.taaPass.sampleLevel = 1;
+        this.taaPass.sampleLevel = 1; */
 
         /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
-        /* this.composer.addPass(this.ssaoPass); */
 
         this.composer.addPass(this.renderScene);
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.bloomPass);
+        this.composer.addPass(this.ssaoPass);
         /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
         /* this.composer.addPass(this.outlinePass) */
@@ -690,12 +697,11 @@ class App {
                         score: 1
                     }
                     let tree;
-                    if (treeTypes[post.flair]) {
-                        tree = this.tree.buildTreeType(post.flair, development)
-                    } else {
-                        tree = this.tree.buildTreeType("Climate", development)
+                    if (!treeTypes[post.flair]) {
                         console.warn("Tree type \"" + post.flair + "\" missing!")
+                        post.flair = "Society"
                     }
+                    tree = this.tree.buildTreeType(post.flair, development)
 
                     /* let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone(); */
                     raycaster.set(
@@ -734,6 +740,9 @@ class App {
                     tree.userData.post = post;
                     if (!debug.aggregate) this.scene.add(tree)
                     this.trees.push(tree)
+                    if (!this.trees_by_category[post.flair]) this.trees_by_category[post.flair] = []
+                    this.trees_by_category[post.flair].push(tree)
+
 
 
                     /* try {
@@ -905,7 +914,7 @@ class App {
 
     render() {
         this.frame_time = Date.now();
-        const time = this.clock.getElapsedTime()
+        this.time = this.clock.getElapsedTime()
 
         /* this.renderer.render(this.scene, this.camera); */
         this.composer.render();
@@ -939,10 +948,10 @@ class App {
 
 
         if (this.built_trees) {
-            if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = time
+            if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = this.time
             Object.keys(treeTypes).forEach(type => {
                 if (treeColors[type] && treeColors[type].userData) {
-                    treeColors[type].userData.time.value = time
+                    treeColors[type].userData.time.value = this.time
 
                 }
             })
@@ -952,7 +961,7 @@ class App {
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)) {
                 /* let object = intersects[0].object.userData.tree; */
                 /* log(intersects[0].object) */
-                intersects[0].object.geometry.attributes
+                /* intersects[0].object.geometry.attributes */
                 let object = intersects[0].object.parent;
                 this.outlinePass.selectedObjects = [object]
                 object.active = true;
@@ -970,6 +979,7 @@ class App {
                 /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
                 this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
                 this.activeUrl = post.url;
+                this.activeTree = intersects[0].object.parent;
                 this.postDom.style.visibility = "visible";
 
             } else {

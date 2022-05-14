@@ -317,3 +317,33 @@ canvas .text-input {
 
 #thumbnail-slider {
 }
+
+#focus-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  color: white;
+  pointer-events: none;
+
+  transition: 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+  opacity: 0;
+}
+
+#focus-title {
+  position: fixed;
+  top: 5%;
+  left: 2.5%;
+  font-size: 4vw;
+  line-height: 10vw;
+  max-width: 100%;
+  user-select: none;
+}
+
+#focus-media {
+}
+
+#focus-text {
+}

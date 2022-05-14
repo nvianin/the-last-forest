@@ -1,9 +1,10 @@
 const CONTROLLER_STATES = {
     WALKING: "WALKING",
-    WALKING_ADVANCED: "WALKING_ADVANCED",
+    /* WALKING_ADVANCED: "WALKING_ADVANCED", */
     MAP: "MAP",
     PROMENADE: "PROMENADE",
-    LERPING: "LERPING"
+    LERPING: "LERPING",
+    FOCUSED: "FOCUSED"
 }
 
 class AppInterface {
@@ -13,19 +14,31 @@ class AppInterface {
         this.prevState = CONTROLLER_STATES.MAP
         this.nextState = CONTROLLER_STATES.MAP
 
+        this.focused_mode = false;
+        this.focused_tree = null;
+        this.focused_target = new THREE.Object3D();
+        this.rotation_dummy = new THREE.Object3D();
+        this.focused_rotation_offset = Math.HALF_PI
+        this.focused_angle = 0;
+        this.focused_target_distance = 900;
+        this.focused_target_height = 200;
+
+
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
         this.mapControls.maxPolarAngle = Math.HALF_PI * .8
         this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset;
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
-        this.mapControls.enabled = false;
+        this.mapControls.enabled = true;
 
         this.settings = {
             fov: {
                 walk: 90,
                 map: 50,
+                focused: 50,
             },
-            camera_ground_offset: 16
+            camera_ground_offset: 16,
+            focused_fog_multiplier: .08
         }
 
         app.camera.fov = this.settings.fov.map;
@@ -53,18 +66,23 @@ class AppInterface {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
             this.mouse_target_element = e.target
-            switch (this.state) {
-                case "WALKING":
-                    if (document.pointerLockElement) {
-                        app.camera.rotateOnWorldAxis(THREE.UP, -e.movementX * .003)
-                        app.camera.rotateX(-e.movementY * .003)
-                    }
-                    break;
+            if (this.focused_mode) {
+                if (app.pointer_is_down) {
+                    this.focused_angle += e.movementX * .01
+                }
+            } else {
+                switch (this.state) {
+                    case "WALKING":
+                        if (document.pointerLockElement) {
+                            app.camera.rotateOnWorldAxis(THREE.UP, -e.movementX * .003)
+                            app.camera.rotateX(-e.movementY * .003)
+                        }
+                        break;
+                }
             }
         })
         window.dispatchEvent(new Event("pointermove"))
         window.addEventListener("pointerup", e => {
-            /* this.preventAutoRotate() */
             switch (this.state) {
                 case "WALKING":
                     if (document.pointerLockElement) {
@@ -78,20 +96,26 @@ class AppInterface {
         window.addEventListener("pointerdown", e => {
             switch (this.state) {
                 case "WALKING":
-                    if (e.target.id == "three") {
-                        log("locking pointer")
-                        app.renderer.domElement.requestPointerLock()
-                    }
+                    setTimeout(() => {
+                        if (e.target.id == "three" && app.pointer_is_down) {
+                            log("locking pointer")
+                            app.renderer.domElement.requestPointerLock()
+                        }
+                    }, 100)
                     break;
 
             }
         })
         window.addEventListener("wheel", e => {
             /* this.preventAutoRotate() */
-            const zoom = this.mapControls.target.distanceTo(app.camera.position);
-            this.domController.zoomSlider.targetValue = zoom;
-            this.mapControls.minDistance = this.domController.zoomSlider.dom.min
-            this.mapControls.maxDistance = this.domController.zoomSlider.dom.max
+            if (this.state == "MAP" && !this.focused_mode) {
+                const zoom = this.mapControls.target.distanceTo(app.camera.position);
+                this.domController.zoomSlider.targetValue = zoom;
+                this.mapControls.minDistance = this.domController.zoomSlider.dom.min
+                this.mapControls.maxDistance = this.domController.zoomSlider.dom.max
+            } else if (this.focused_mode) {
+                this.focused_target_distance = Math.clamp(this.focused_target_distance + e.deltaY, 300, 1500)
+            }
             /* log(zoom) */
         })
         document.addEventListener("mouseleave", e => {
@@ -152,217 +176,298 @@ class AppInterface {
     }
 
 
+    enter_focus(tree) {
+        this.focused_mode = true;
+        this.focused_tree = tree;
+        this.focused_backup = {
+            mapControls: this.mapControls.enabled
+        }
+        this.mapControls.enabled = false;
+
+        this.domController.focusInterface.container.style.opacity = 1;
+        this.domController.focusInterface.build(tree.userData.post);
+    }
+
+    exit_focus() {
+        this.domController.focusInterface.container.style.opacity = 0;
+        this.focused_mode = false;
+        this.mapControls.enabled = this.focused_backup.mapControls;
+    }
+
+
 
     update() {
 
         /* this.mapControls.target.y = 0; */
         this.domController.update()
-        // Update state according to dom inputs
-        if (this.domController.currentState != this.nextState && this.nextState != "LERPING" && this.currentState != "LERPING") {
-            this.changeState(this.domController.currentState);
-            /* this.nextState = this.domController.currentState */
-        }
+        // Are we in focused mode ? Different state machines
+        if (this.focused_mode) {
 
-        // Enter Next State initialization
-        if (this.nextState != this.state) {
-            this.state = this.nextState;
-            log("Entering state " + this.nextState + " from " + this.prevState)
-            switch (this.nextState) {
-                case CONTROLLER_STATES.WALKING:
-                    this.target.state = "WALKING"
-                    this.target.fov = this.settings.fov.walk
-                    /* app.renderer.domElement.requestPointerLock() */
+            app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, .1);
+            app.camera.updateProjectionMatrix()
 
-                    if (this.prevState == "MAP") {
-                        this.map_transform.position.copy(app.camera.position);
-                        this.map_transform.rotation.copy(app.camera.rotation)
-                        this.map_transform.zoom = this.domController.getDistance()
-                    }
-
-                    if (this.prevState != "LERPING") {
-                        if (this.prevState == "PROMENADE") {
-                            this.target.position.copy(app.camera.position);
-                            this.target.rotation.copy(app.camera.rotation);
-                        } else {
-                            this.target.position.copy(this.findPointOnGround())
-                            this.target.rotation.set(0, 0, 0)
-                        }
-                        this.changeState("LERPING")
-                    } else {
-                        this.setFog(this.state)
-                    }
-                    this.mapControls.enabled = false;
-
-                    break;
-                case CONTROLLER_STATES.MAP:
-                    this.target.state = "MAP"
-                    this.target.fov = this.settings.fov.map
-                    this.mapControls.enabled = true;
-
-                    if (this.prevState != "LERPING") {
-                        this.changeState("LERPING")
-                    } else {
-                        this.setFog(this.state)
-
-                    }
-
-                    break;
-                case CONTROLLER_STATES.PROMENADE:
-                    this.target.state = "PROMENADE"
-                    this.target.fov = this.settings.fov.walk
-                    this.mapControls.enabled = false;
-
-                    if (this.prevState == "MAP") {
-                        this.map_transform.position.copy(app.camera.position);
-                        this.map_transform.rotation.copy(app.camera.rotation)
-                        this.map_transform.zoom = this.domController.getDistance()
-                    }
-
-                    if (this.prevState != "LERPING") {
-                        if (this.prevState == "WALKING") {
-                            this.target.position.copy(app.camera.position);
-                            this.target.rotation.copy(app.camera.rotation);
-                        } else {
-                            this.target.position.copy(this.findPointOnGround())
-                            this.target.rotation.set(0, 0, 0)
-                        }
-                        this.target.target = this.findPointOnGround();
-                        this.changeState("LERPING")
-                    } else {
-                        this.setFog(this.state)
-
-                    }
-
-                    break;
-                case CONTROLLER_STATES.LERPING:
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, .1)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, .1)
 
 
-                    this.mapControls.enabled = false;
-                    break;
+            this.focused_target.position.set(
+                    Math.cos(app.time * .1 + this.focused_angle) * this.focused_target_distance,
+                    2,
+                    Math.sin(app.time * .1 + this.focused_angle) * this.focused_target_distance
+                ).add(this.focused_tree.position)
+                .add(new THREE.Vector3(0, this.focused_target_height + 100, 0))
+
+            this.rotation_dummy.position.copy(app.camera.position)
+            this.rotation_dummy.rotation.set( /* -Math.atan2(this.focused_target_height, this.focused_target_distance) */ 0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
+
+
+            app.camera.position.lerp(this.focused_target.position, .1)
+            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, .1))
+
+        } else {
+            // Update state according to dom inputs
+            if (this.domController.currentState != this.nextState && this.nextState != "LERPING" && this.currentState != "LERPING") {
+                this.changeState(this.domController.currentState);
+                /* this.nextState = this.domController.currentState */
             }
-        }
 
-        // Current state behaviour
-        let dist;
-        switch (this.state) {
-            case CONTROLLER_STATES.WALKING:
-                if (this.mouse_is_in_screen && this.mouse_target_element == app.renderer.domElement) {
-                    // Simple fps controller
-                    if (!document.pointerLockElement) {
-                        const x = (this.mouse.x - innerWidth / 2) / innerWidth;
-                        if (Math.abs(x) > .4) {
-                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
-                        }
-                        const y = (this.mouse.y - innerHeight / 2) / innerHeight;
+            // Enter Next State initialization
+            if (this.nextState != this.state) {
+                this.state = this.nextState;
+                log("Entering state " + this.nextState + " from " + this.prevState)
+                switch (this.nextState) {
+                    case CONTROLLER_STATES.WALKING:
+                        this.target.state = "WALKING"
+                        this.target.fov = this.settings.fov.walk
+                        /* app.renderer.domElement.requestPointerLock() */
 
-                        if (Math.abs(y) > .35) {
-                            /* app.camera.rotateX(y * -.02) */
-                            app.camera.translateZ(y * 2)
+                        if (this.prevState == "MAP") {
+                            this.map_transform.position.copy(app.camera.position);
+                            this.map_transform.rotation.copy(app.camera.rotation)
+                            this.map_transform.zoom = this.domController.getDistance()
                         }
-                        /* log(x, y) */
-                    } else {
-                        // Advanced fps controller
-                        app.camera.translateZ(this.movement.z * .5);
-                        app.camera.translateX(this.movement.x * .5);
+
+                        if (this.prevState != "LERPING") {
+                            if (this.prevState == "PROMENADE") {
+                                this.target.position.copy(app.camera.position);
+                                this.target.rotation.copy(app.camera.rotation);
+                            } else {
+                                this.target.position.copy(this.findPointOnGround())
+                                this.target.rotation.set(0, 0, 0)
+                            }
+                            this.changeState("LERPING")
+                        } else {
+                            this.setFog(this.state)
+                        }
+                        this.mapControls.enabled = false;
+
+                        break;
+                    case CONTROLLER_STATES.MAP:
+                        this.target.state = "MAP"
+                        this.target.fov = this.settings.fov.map
+                        this.mapControls.enabled = true;
+
+                        if (this.prevState != "LERPING") {
+                            this.changeState("LERPING")
+                        } else {
+                            this.setFog(this.state)
+
+                        }
+
+                        break;
+                    case CONTROLLER_STATES.PROMENADE:
+                        this.target.state = "PROMENADE"
+                        this.target.fov = this.settings.fov.walk
+                        this.mapControls.enabled = false;
+
+                        if (this.prevState == "MAP") {
+                            this.map_transform.position.copy(app.camera.position);
+                            this.map_transform.rotation.copy(app.camera.rotation)
+                            this.map_transform.zoom = this.domController.getDistance()
+                        }
+
+                        if (this.prevState != "LERPING") {
+                            if (this.prevState == "WALKING") {
+                                this.target.position.copy(app.camera.position);
+                                this.target.rotation.copy(app.camera.rotation);
+                            } else {
+                                this.target.position.copy(this.findPointOnGround())
+                                this.target.rotation.set(0, 0, 0)
+                            }
+                            this.target.target = this.findPointOnGround();
+                            this.changeState("LERPING")
+                        } else {
+                            this.setFog(this.state)
+
+                        }
+
+                        break;
+
+                    case CONTROLLER_STATES.FOCUSED:
+                        this.target.state = "FOCUSED"
+                        this.target.fov = this.settings.fov.focused
+                        this.mapControls.enabled = false;
+
+                        if (this.prevState != "LERPING") {
+                            this.target.position.copy(app.camera.position);
+                            this.target.rotation.copy(app.camera.rotation)
+                        } else {
+                            this.target.position.copy()
+                        }
+
+
+                        break;
+                    case CONTROLLER_STATES.LERPING:
+
+
+                        this.mapControls.enabled = false;
+                        break;
+                }
+            }
+
+            // Current state behaviour
+            let dist;
+            switch (this.state) {
+                case CONTROLLER_STATES.WALKING:
+                    if (this.mouse_is_in_screen && this.mouse_target_element == app.renderer.domElement) {
+                        // Simple fps controller
+                        if (!document.pointerLockElement) {
+                            const x = (this.mouse.x - innerWidth / 2) / innerWidth;
+                            if (Math.abs(x) > .4) {
+                                app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
+                            }
+                            const y = (this.mouse.y - innerHeight / 2) / innerHeight;
+
+                            if (Math.abs(y) > .35) {
+                                /* app.camera.rotateX(y * -.02) */
+                                app.camera.translateZ(y * 2)
+                            }
+                            /* log(x, y) */
+                        } else {
+                            // Advanced fps controller
+                            app.camera.translateZ(this.movement.z * .5);
+                            app.camera.translateX(this.movement.x * .5);
+                        }
+
+                        // Cast to ground
+                        this.raycaster.set(app.camera.position, THREE.DOWN)
+                        const i = this.raycaster.intersectObject(app.ground)
+                        if (i.length > 0) {
+                            app.camera.position.y = i[0].point.y + this.settings.camera_ground_offset
+                        }
+
+
+                    }
+                    break;
+
+
+                case CONTROLLER_STATES.MAP:
+                    this.mapControls.update()
+                    break;
+
+                case CONTROLLER_STATES.PROMENADE:
+                    let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
+                    x = Math.clamp(x, -.2, .2);
+                    app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
+                    /* const y = this.simplex.noise(app.camera.position.y * .1, app.clock.getElapsedTime() * .01); */
+                    const y = .2;
+                    app.camera.translateZ(-y)
+                    app.camera.position.lerp(this.target.target.clone().normalize().add(app.camera.position), .1);
+                    if (app.camera.position.distanceTo(this.target.target) < 2) {
+                        this.target.target = this.findPointOnGround();
                     }
 
-                    // Cast to ground
+                    /* log(x, y) */
                     this.raycaster.set(app.camera.position, THREE.DOWN)
                     const i = this.raycaster.intersectObject(app.ground)
                     if (i.length > 0) {
                         app.camera.position.y = i[0].point.y + this.settings.camera_ground_offset
                     }
+                    break;
+
+                    // State-to-state lerping
+                case CONTROLLER_STATES.LERPING:
+                    log("lerping to state " + this.target.state)
+                    switch (this.target.state) {
+                        case "WALKING":
+                            app.camera.position.lerp(this.target.position, .1)
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                            app.camera.updateProjectionMatrix()
+
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, .1)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, .1)
+
+                            dist = app.camera.position.distanceTo(this.target.position)
+                            if (dist < 2) {
+                                this.changeState(this.target.state)
+                            } else {
+                                /* log(dist) */
+                            }
+                            break;
+                        case "MAP":
+                            app.camera.position.lerp(this.map_transform.position, .1)
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, .1))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                            app.camera.updateProjectionMatrix()
+                            const currentzoom = this.domController.getDistance()
+                            this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1));
+
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), .1)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, .1)
+
+                            dist = this.map_transform.position.distanceTo(app.camera.position) + Math.abs(currentzoom - this.map_transform.zoom);
+                            if (dist < 2) {
+                                this.changeState(this.target.state)
+                                /* app.camera.rotation.set(
+                                    this.mapControls.get
+                                    ) */
+                            } else {
+                                /* log(dist) */
+                            }
+                            break;
 
 
-                }
-                break;
+                        case "FOCUSED":
+                            app.camera.position.lerp(this.target.position, .1)
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                            app.camera.updateProjectionMatrix()
+
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, .1)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, .1)
+
+                            dist = this.app.camera.position.distanceTo(this.target.position)
+                            if (dist < 2) {
+                                this.changeState(this.target.state)
+                            }
 
 
-            case CONTROLLER_STATES.MAP:
-                this.mapControls.update()
-                break;
 
-            case CONTROLLER_STATES.PROMENADE:
-                let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
-                x = Math.clamp(x, -.2, .2);
-                app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
-                /* const y = this.simplex.noise(app.camera.position.y * .1, app.clock.getElapsedTime() * .01); */
-                const y = .2;
-                app.camera.translateZ(-y)
-                app.camera.position.lerp(this.target.target.clone().normalize().add(app.camera.position), .1);
-                if (app.camera.position.distanceTo(this.target.target) < 2) {
-                    this.target.target = this.findPointOnGround();
-                }
+                            break;
 
-                /* log(x, y) */
-                this.raycaster.set(app.camera.position, THREE.DOWN)
-                const i = this.raycaster.intersectObject(app.ground)
-                if (i.length > 0) {
-                    app.camera.position.y = i[0].point.y + this.settings.camera_ground_offset
-                }
-                break;
 
-                // State-to-state lerping
-            case CONTROLLER_STATES.LERPING:
-                log("lerping to state " + this.target.state)
-                switch (this.target.state) {
-                    case "WALKING":
-                        app.camera.position.lerp(this.target.position, .1)
-                        app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
-                        app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
-                        app.camera.updateProjectionMatrix()
+                        case "PROMENADE":
+                            this.target.rotation.set(0, 0, 0)
+                            app.camera.position.lerp(this.target.position, .1);
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
+                            app.camera.updateProjectionMatrix()
 
-                        app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, .1)
-                        app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, .1)
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, .1)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, .1)
 
-                        dist = app.camera.position.distanceTo(this.target.position)
-                        if (dist < 2) {
-                            this.changeState(this.target.state)
-                        } else {
-                            /* log(dist) */
-                        }
-                        break;
-                    case "MAP":
-                        app.camera.position.lerp(this.map_transform.position, .1)
-                        app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, .1))
-                        app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
-                        app.camera.updateProjectionMatrix()
-                        const currentzoom = this.domController.getDistance()
-                        this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1));
-
-                        app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), .1)
-                        app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, .1)
-
-                        dist = this.map_transform.position.distanceTo(app.camera.position) + Math.abs(currentzoom - this.map_transform.zoom);
-                        if (dist < 2) {
-                            this.changeState(this.target.state)
-                            /* app.camera.rotation.set(
-                                this.mapControls.get
-                            ) */
-                        } else {
-                            /* log(dist) */
-                        }
-                        break;
-                    case "PROMENADE":
-                        this.target.rotation.set(0, 0, 0)
-                        app.camera.position.lerp(this.target.position, .1);
-                        app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
-                        app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
-                        app.camera.updateProjectionMatrix()
-
-                        app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, .1)
-                        app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, .1)
-
-                        dist = app.camera.position.distanceTo(this.target.position)
-                        if (dist < 2) {
-                            this.changeState(this.target.state)
-                        } else {
-                            /* log(dist) */
-                        }
-                }
-                /* this.domController.setZoomLevel(this.domController.getDistance()) */
-                /* this.mapControls.update() */
-                break;
+                            dist = app.camera.position.distanceTo(this.target.position)
+                            if (dist < 2) {
+                                this.changeState(this.target.state)
+                            } else {
+                                /* log(dist) */
+                            }
+                    }
+                    /* this.domController.setZoomLevel(this.domController.getDistance()) */
+                    /* this.mapControls.update() */
+                    break;
+            }
         }
     }
 
@@ -393,6 +498,10 @@ class AppInterface {
                 app.scene.fog.far = app.settings.draw_distance
                 break;
             case "PROMENADE":
+                app.scene.fog.near = (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier
+                app.scene.fog.far = app.settings.draw_distance * app.settings.walking_fog_multiplier
+                break;
+            case "FOCUSED":
                 app.scene.fog.near = (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier
                 app.scene.fog.far = app.settings.draw_distance * app.settings.walking_fog_multiplier
                 break;
