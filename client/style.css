@@ -335,9 +335,10 @@ canvas .text-input {
 #focus-title {
   position: fixed;
   top: 5%;
-  left: 2.5%;
+  left: 5%;
+  right: 10%;
   font-size: 4vw;
-  line-height: 10vw;
+  line-height: 4vw;
   max-width: 100%;
   user-select: none;
 }

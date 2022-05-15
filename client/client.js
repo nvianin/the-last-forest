@@ -1119,7 +1119,7 @@ class App {
             this.thumbnailContainer.content.style.top = -parseFloat(thumbnailSlider.dom.value) * (this.thumbnailContainer.content.scrollHeight - this.thumbnailContainer.content.offsetHeight) / 100 + "px";
 
             const val = parseFloat(thumbnailSlider.dom.value);
-            const diff = Math.abs(val - thumbnailSlider.targetValue);
+            /* const diff = Math.abs(val - thumbnailSlider.targetValue); */
             /* this.targetValue = Math.sin(this.frame / 100) * 1000 */
             // if (diff > 1) {
             //     /* log(val, Math.abs(val - this.targetValue)) */
@@ -1132,6 +1132,14 @@ class App {
                 thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
             }
         }
+
+        this.thumbnailContainer.button = document.createElement("div");
+        this.thumbnailContainer.button.id = "thumbnail-button"
+        this.thumbnailContainer.appendChild(this.thumbnailContainer.button)
+        this.thumbnailContainer.button.onclick = () => {
+
+        }
+
     }
 
     setSize() {
