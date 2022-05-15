@@ -75,7 +75,7 @@ class AppInterface {
                     case "WALKING":
                         if (document.pointerLockElement) {
                             app.camera.rotateOnWorldAxis(THREE.UP, -e.movementX * .003)
-                            app.camera.rotateX(-e.movementY * .003)
+                            app.camera.rotateX(-e.movementY * 0.003)
                         }
                         break;
                 }
