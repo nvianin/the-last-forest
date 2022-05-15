@@ -4,3 +4,5 @@ chrome.dll
 interactive_ui_tests.exe
 
 node_modules/*
+
+mongodump/*

@@ -1,4 +1,5 @@
 const TAKEOUTERROR_FULL = new Error("InstanceManager could not find free instance !");
+
 var lut = [];
 for (var i = 0; i < 256; i++) {
     lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
@@ -97,7 +98,8 @@ class InstanceManager {
             }
         }
         this.takeOutErrors++;
-        throw TAKEOUTERROR_FULL;
+        if (this.takeOutErrors % 1000 == 0) console.warn("InstanceManager full!")
+        /* throw TAKEOUTERROR_FULL; */
     }
 
     get_count() {

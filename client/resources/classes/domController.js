@@ -15,8 +15,14 @@ class DomController {
 
         this.modeSlider = new CoolSlider("mode-slider", 0, 1000, 3)
         this.modeSlider.dom.addEventListener("input", e => {
-            const val = parseFloat(e.target.value)
-            this.modeSlider.targetValue = Math.floor(val / 333) * 500;
+            if (app.interface.state != "LERPING") {
+                const val = parseFloat(e.target.value)
+                this.modeSlider.targetValue = Math.floor(val / 333) * 500;
+                if (app.interface.focused_mode) {
+                    app.interface.exit_focus()
+
+                }
+            }
         })
         this.modeSlider.dom.default = 500
 
@@ -32,6 +38,8 @@ class DomController {
         }
 
         this.currentState = "map"
+
+        this.focusInterface = new FocusInterface()
     }
 
     update() {
@@ -121,5 +129,34 @@ class CoolSlider {
         } else if (this.dom.value != this.targetValue + "") {
             this.dom.value = this.targetValue + ""
         }
+    }
+}
+
+class FocusInterface {
+    constructor() {
+        this.container = document.createElement("div");
+        this.container.id = "focus-container"
+
+        this.title = document.createElement("div");
+        this.title.id = "focus-title"
+        this.title.innerText = "Title of the post"
+        this.container.appendChild(this.title)
+
+        this.mediaContainer = document.createElement("div");
+        this.mediaContainer.id = "focus-media"
+        this.container.appendChild(this.mediaContainer)
+
+        this.textContainer = document.createElement("div");
+        this.textContainer.id = "focus-text"
+        this.container.appendChild(this.textContainer)
+
+        document.body.appendChild(this.container)
+    }
+
+    build(post) {
+        log(post)
+        this.title.textContent = post.title;
+        /* if (post.url.includes(""))  */
+        /* this.textContainer.textContent = post */
     }
 }
