@@ -136,6 +136,7 @@ class Server {
             post.uuid = crypto.randomUUID();
             log(post.uuid)
             log(post.media)
+            log(post)
             const hasMedia = mediaConditions.some(i => {
                 return post.url.includes(i);
             })
@@ -150,6 +151,8 @@ class Server {
                 has_media: hasMedia,
                 media: post.media,
                 comments: post.comments,
+                self_text: post.selftext,
+                is_video: post.is_video,
             }
 
             /* log(post.comments) */

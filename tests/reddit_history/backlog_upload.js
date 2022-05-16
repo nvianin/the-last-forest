@@ -15,12 +15,6 @@ async function main() {
     const mongo = await new MongoClient("mongodb://localhost:27017").connect()
     const posts_db = mongo.db("last-forest").collection("reddit");
     const control = mongo.db("last-forest").collection("control");
-    /* control.insertOne({
-        fuck: 21
-    }).then(res => {
-        log("successfully inserted")
-        log(res)
-    }) */
 
 
     posts.forEach(async post => {
@@ -40,6 +34,8 @@ async function main() {
                 }),
                 media: post.media,
                 comments: post.comments,
+                self_text: post.selftext,
+                is_video: post.is_video
             }
         }, {
             upsert: true

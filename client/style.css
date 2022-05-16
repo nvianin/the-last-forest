@@ -360,10 +360,13 @@ canvas .text-input {
 
 #focus-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+
+  right: 10%;
+  left: 5%;
+  top: 5%;
   height: 100%;
+  /* width: 100%; */
+  width: calc(100% - 100px - 10%);
   z-index: 2000;
   color: white;
   pointer-events: none;
@@ -373,20 +376,30 @@ canvas .text-input {
 }
 
 #focus-title {
-  position: fixed;
+  /* position: fixed; */
   top: 5%;
   left: 5%;
   right: 10%;
   font-size: 4vw;
-  line-height: 4.2vw;
-  max-width: 100%;
+  line-height: 4.6vw;
   user-select: none;
+  max-width: 95%;
 }
 
 #focus-media {
+  max-width: 90%;
+}
+#focus-video {
+  width: 0%;
+  height: 0%;
+}
+#focus-img {
 }
 
 #focus-text {
+  margin: 10px;
+  position: relative;
+  max-width: 100%;
 }
 
 #focus-exit {

@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: false,
     postprocessing: false,
-    tree_build_limit: 100,
+    tree_build_limit: 512,
 
     enable: () => {
         for (let key of Object.keys(debug)) {

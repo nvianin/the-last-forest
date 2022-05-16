@@ -144,6 +144,12 @@ class FocusInterface {
         this.mediaContainer = document.createElement("div");
         this.mediaContainer.id = "focus-media"
         this.container.appendChild(this.mediaContainer)
+        this.videoContainer = document.createElement("video");
+        this.videoContainer.id = "focus-video"
+        this.mediaContainer.appendChild(this.videoContainer)
+        this.imgContainer = document.createElement("img");
+        this.imgContainer.id = "focus-img"
+        this.mediaContainer.appendChild(this.imgContainer)
 
         this.textContainer = document.createElement("div");
         this.textContainer.id = "focus-text"
@@ -153,17 +159,43 @@ class FocusInterface {
         this.exitButton.id = "focus-exit";
         this.container.appendChild(this.exitButton)
         this.exitButton.onclick = () => {
-            app.interface.focused_mode ?
-                app.interface.exit_focus() :
-                app.interface.enter_focus()
+            app.interface.exit_focus()
         }
+
+        this.linkButton = document.createElement("div")
+        this.linkButton.id = "focus-link"
+        this.linkButton.onclick = () => {
+            window.open(this.post.url)
+        }
+        this.container.appendChild(this.linkButton);
+
+
         document.body.appendChild(this.container)
     }
 
     build(post) {
+        this.post = post;
         log(post)
         this.title.textContent = post.title;
-        /* if (post.url.includes(""))  */
-        /* this.textContainer.textContent = post */
+
+        this.textContainer.textContent = post.selftext
+
+        if (post.is_video) {
+            log("post is video")
+        } else if (post.media) {
+            log("post has media", post.media)
+        } else if (post.has_media) {
+            if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
+                this.imgContainer.src = post.url;
+                /* if (post.url.includes(""))  */
+                /* this.textContainer.textContent = post */
+            }
+            if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
+                this.videoContainer.src = post.url;
+            }
+        } else {
+            this.imgContainer.src = ""
+            this.videoContainer.src = ""
+        }
     }
 }

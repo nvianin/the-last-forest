@@ -102,7 +102,11 @@ class UserManager {
     updatePosts(posts) {
         this.posts = posts
         this.serialized_posts = {}
-        for (let [key, post] of Object.entries(posts)) {
+        let post_array = Object.entries(posts);
+        post_array.sort((a, b) => {
+            a.date - b.date
+        });
+        for (let [key, post] of post_array) {
             this.serialized_posts[key] = {
                 title: post.title,
                 permalink: post.permalink,
@@ -110,7 +114,11 @@ class UserManager {
                 score: post.score,
                 tsne_coordinates: post.tsne_coordinates,
                 flair: post.flair,
-                url: post.url
+                url: post.url,
+                has_media: post.has_media,
+                media: post.media,
+                selftext: post.self_text,
+                is_video: post.is_video
             }
         }
     }
