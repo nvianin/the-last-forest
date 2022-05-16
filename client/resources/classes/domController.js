@@ -149,6 +149,14 @@ class FocusInterface {
         this.textContainer.id = "focus-text"
         this.container.appendChild(this.textContainer)
 
+        this.exitButton = document.createElement("div");
+        this.exitButton.id = "focus-exit";
+        this.container.appendChild(this.exitButton)
+        this.exitButton.onclick = () => {
+            app.interface.focused_mode ?
+                app.interface.exit_focus() :
+                app.interface.enter_focus()
+        }
         document.body.appendChild(this.container)
     }
 

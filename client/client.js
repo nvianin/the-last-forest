@@ -38,6 +38,9 @@ const debug = {
     use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
+    particle: false,
+    postprocessing: false,
+    tree_build_limit: 100,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -103,7 +106,7 @@ class App {
 
         this.loadResources();
 
-        this.initPostprocess()
+        if (debug.postprocessing) this.initPostprocess()
 
         this.postDom = document.querySelector("#post-tooltip")
 
@@ -205,60 +208,61 @@ class App {
         })
         this.ground_fakeBack.position.y -= .1
         this.scene.add(this.ground_fakeBack)
-
-        fetch("/resources/shaders/dustFrag.glsl").then(resp => {
-            resp.text().then(frag => {
-                fetch("/resources/shaders/dustVert.glsl").then(resp => {
-                    resp.text().then(vert => {
-                        this.dustParticles = new THREE.Points(
-                            new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 1, this.settings.ground_side * 1),
-                            /* new THREE.ShaderMaterial({
-                                vertexShader: vert,
-                                fragmentShader: frag
-                            }) */
-                            new THREE.PointsMaterial({
-                                transparent: true
-                            })
-                        )
-                        this.dustParticles.rotation.x = -Math.HALF_PI
-                        this.dustParticles.userData.uniforms = {
-                            time: {
-                                value: 0
+        if (debug.particle) {
+            fetch("/resources/shaders/dustFrag.glsl").then(resp => {
+                resp.text().then(frag => {
+                    fetch("/resources/shaders/dustVert.glsl").then(resp => {
+                        resp.text().then(vert => {
+                            this.dustParticles = new THREE.Points(
+                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 1, this.settings.ground_side * 1),
+                                /* new THREE.ShaderMaterial({
+                                    vertexShader: vert,
+                                    fragmentShader: frag
+                                }) */
+                                new THREE.PointsMaterial({
+                                    transparent: true
+                                })
+                            )
+                            this.dustParticles.rotation.x = -Math.HALF_PI
+                            this.dustParticles.userData.uniforms = {
+                                time: {
+                                    value: 0
+                                }
                             }
-                        }
-                        this.dustParticles.material.onBeforeCompile = shader => {
-                            shader.uniforms.time = this.dustParticles.userData.uniforms.time;
-                            /* log(shader.fragmentShader) */
-                            let [prelude, main] = frag.split("////")
-                            shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
-                            shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + main)
-                            log(shader.fragmentShader)
+                            this.dustParticles.material.onBeforeCompile = shader => {
+                                shader.uniforms.time = this.dustParticles.userData.uniforms.time;
+                                /* log(shader.fragmentShader) */
+                                let [prelude, main] = frag.split("////")
+                                shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
+                                shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + main)
+                                log(shader.fragmentShader)
 
-                            log(shader.vertexShader)
+                                log(shader.vertexShader)
 
-                            prelude = vert.split("////")[0]
-                            main = vert.split("////")[1]
-                            shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common> \n" + prelude)
-                            shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
-                        }
-                        const random = new Float32Array(this.dustParticles.geometry.attributes.position.count)
-                        for (let i = 0; i < this.dustParticles.geometry.attributes.position.array.length; i += 3) {
-                            this.dustParticles.geometry.attributes.position.array[i] = this.dustParticles.geometry.attributes.position.array[i] + Math.random() * 3;
-                            this.dustParticles.geometry.attributes.position.array[i + 1] = this.dustParticles.geometry.attributes.position.array[i + 1] + Math.random() * 3;
-                            this.dustParticles.geometry.attributes.position.array[i + 2] = this.dustParticles.geometry.attributes.position.array[i + 2] + (Math.random() * 2 - 1) * 6;
-                            random[i / 3] = Math.random()
-                        }
+                                prelude = vert.split("////")[0]
+                                main = vert.split("////")[1]
+                                shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common> \n" + prelude)
+                                shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
+                            }
+                            const random = new Float32Array(this.dustParticles.geometry.attributes.position.count)
+                            for (let i = 0; i < this.dustParticles.geometry.attributes.position.array.length; i += 3) {
+                                this.dustParticles.geometry.attributes.position.array[i] = this.dustParticles.geometry.attributes.position.array[i] + Math.random() * 3;
+                                this.dustParticles.geometry.attributes.position.array[i + 1] = this.dustParticles.geometry.attributes.position.array[i + 1] + Math.random() * 3;
+                                this.dustParticles.geometry.attributes.position.array[i + 2] = this.dustParticles.geometry.attributes.position.array[i + 2] + (Math.random() * 2 - 1) * 6;
+                                random[i / 3] = Math.random()
+                            }
 
-                        this.dustParticles.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
+                            this.dustParticles.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
 
-                        this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
-                        this.dustParticles.position.y = 2000;
-                        this.scene.add(this.dustParticles)
+                            this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
+                            this.dustParticles.position.y = 2000;
+                            this.scene.add(this.dustParticles)
+                        })
                     })
-                })
 
+                })
             })
-        })
+        }
 
         /* this.ground.material = new THREE.MeshBasicMaterial({
             color: 0x222222
@@ -465,10 +469,11 @@ class App {
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
             ) {
                 /* window.open(URL); */
-                /* log(this.activeTree)
-                this.interface.nextState = "FOCUSED";
+                /* this.interface.nextState = "FOCUSED";
                 log(this.interface.nextState) */
 
+
+                /* log(this.activeTree) */
                 this.interface.enter_focus(this.activeTree)
 
             }
@@ -606,6 +611,8 @@ class App {
                 this.posts = posts;
                 /* window.localStorage.setItem("posts", JSON.stringify(this.posts)) */
                 log(Object.keys(posts).length + " posts received and cached" /* , posts */ )
+
+                this.interface.domController.focusInterface.build(Object.values(posts)[0])
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
@@ -751,6 +758,7 @@ class App {
                         log(post)
                     } */
                     i++;
+                    if (debug.tree_build_limit > 0 && i > debug.tree_build_limit) break;
                 }
             }
 
@@ -916,15 +924,16 @@ class App {
         this.frame_time = Date.now();
         this.time = this.clock.getElapsedTime()
 
-        /* this.renderer.render(this.scene, this.camera); */
-        this.composer.render();
+        debug.postprocessing ?
+            this.composer.render() :
+            this.renderer.render(this.scene, this.camera);
         /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
 
         this.sun.position.copy(this.camera.position).add(new THREE.Vector3(50, 100, 50));
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
         this.sun.target.updateMatrixWorld();
 
-        if (this.interface) this.interface.update()
+        if (this.interface) this.interface.update(this.dt)
         /* this.csm.update(this.camera.matrix) */
 
         this.postDom.style.left = this.mouse.x + 20 + "px";
@@ -959,11 +968,11 @@ class App {
             const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
             if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)) {
-                /* let object = intersects[0].object.userData.tree; */
+
                 /* log(intersects[0].object) */
                 /* intersects[0].object.geometry.attributes */
                 let object = intersects[0].object.parent;
-                this.outlinePass.selectedObjects = [object]
+                /* this.outlinePass.selectedObjects = [object] */
                 object.active = true;
 
 
@@ -980,14 +989,15 @@ class App {
                 this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
                 this.activeUrl = post.url;
                 this.activeTree = intersects[0].object.parent;
+                /* log(this.activeTree) */
                 this.postDom.style.visibility = "visible";
 
             } else {
                 this.renderer.domElement.style.cursor = "default";
                 this.postDom.style.cursor = "default";
-                if (this.outlinePass.selectedObjects[0]) {
+                /* if (this.outlinePass.selectedObjects[0]) {
                     this.outlinePass.selectedObjects[0].active = false;
-                }
+                } */
                 if (!waiting_to_release_tooltip) {
                     waiting_to_release_tooltip = true;
                     setTimeout(() => {
@@ -995,7 +1005,7 @@ class App {
                         waiting_to_release_tooltip = false;
                     }, 200)
                 }
-                this.outlinePass.selectedObjects = []
+                /* this.outlinePass.selectedObjects = [] */
             }
         }
 
@@ -1011,6 +1021,7 @@ class App {
         }
         this.frameCount++;
         this.renderer.info.reset()
+        this.dt = this.clock.getDelta()
     }
 
     buildIndexThumbnails() {
@@ -1064,7 +1075,7 @@ class App {
             this.thumbnails.push(thumbnailCanvas.toDataURL())
             typeInfos.push({
                 color: treeTypes[flair].color,
-                name: flair
+                name: flair,
             })
         })
         this.renderer.setRenderTarget(null)
@@ -1092,6 +1103,7 @@ class App {
             const imgContainer = document.createElement("div");
             imgContainer.className = "thumbnail-element"
             imgContainer.style.backgroundColor = info.color
+            imgContainer.type = info.name;
 
             imgContainer.appendChild(img)
             imgContainer.appendChild(imgLabel)
@@ -1132,6 +1144,9 @@ class App {
                 thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
             }
         }
+        this.thumbnailContainer.onclick = e => {
+            log(e.target.parentElement.type)
+        }
 
         this.thumbnailContainer.button = document.createElement("div");
         this.thumbnailContainer.button.id = "thumbnail-button"
@@ -1142,8 +1157,10 @@ class App {
             if (this.thumbnailHidden) {
                 this.thumbnailContainer.style.right = "0%"
                 this.thumbnailContainer.button.style.transform = ""
+                this.thumbnailContainer.button.style.transformOrigin = "right"
             } else {
-                this.thumbnailContainer.button.style.transform = "rotate(180deg) translate(300%)"
+                this.thumbnailContainer.button.style.transform = "rotate(180deg)"
+                this.thumbnailContainer.button.style.transformOrigin = "left"
                 this.thumbnailContainer.style.right = "-6.5%"
             }
 
@@ -1152,14 +1169,30 @@ class App {
 
     }
 
+    showOnlyCategories(categories) {
+        for (let i = 0; i < this.trees.length; i++) {
+            if (!multiCludes(this.trees[i].userData.post.flair, categories)) {
+                this.trees[i].visible = false;
+            }
+        }
+
+    }
+    showAllTrees() {
+        for (let i = 0; i < this.trees.length; i++) {
+            this.trees[i].visible = true;
+        }
+    }
+
     setSize() {
         this.renderer.setSize(innerWidth, innerHeight);
-        this.composer.setSize(innerWidth, innerHeight);
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
 
-        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
-        this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
+        if (this.composer) {
+            this.composer.setSize(innerWidth, innerHeight);
+            this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
+            this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
+        }
     }
 
 
