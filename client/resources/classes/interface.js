@@ -196,7 +196,7 @@ class AppInterface {
 
 
 
-    update() {
+    update(dt) {
 
         /* this.mapControls.target.y = 0; */
         this.domController.update()
@@ -221,8 +221,8 @@ class AppInterface {
             this.rotation_dummy.rotation.set( /* -Math.atan2(this.focused_target_height, this.focused_target_distance) */ 0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
 
 
-            app.camera.position.lerp(this.focused_target.position, .1)
-            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, .1))
+            app.camera.position.lerp(this.focused_target.position, 10 * dt)
+            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, 10 * dt))
 
         } else {
             // Update state according to dom inputs

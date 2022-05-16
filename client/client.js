@@ -1101,7 +1101,7 @@ class App {
         }
 
         document.body.appendChild(this.thumbnailContainer)
-        const thumbnailSlider = new CoolSlider("thumbnail-slider", 0, 100);
+        const thumbnailSlider = new CoolSlider("thumbnail-slider", 0, 100, 0, false);
         this.interface.domController.thumbnailSlider = thumbnailSlider;
         thumbnailSlider.dom.value = "0"
         thumbnailSlider.targetValue = 0;
@@ -1136,8 +1136,18 @@ class App {
         this.thumbnailContainer.button = document.createElement("div");
         this.thumbnailContainer.button.id = "thumbnail-button"
         this.thumbnailContainer.appendChild(this.thumbnailContainer.button)
+        this.thumbnailHidden = false;
         this.thumbnailContainer.button.onclick = () => {
 
+            if (this.thumbnailHidden) {
+                this.thumbnailContainer.style.right = "0%"
+                this.thumbnailContainer.button.style.transform = ""
+            } else {
+                this.thumbnailContainer.button.style.transform = "rotate(180deg) translate(300%)"
+                this.thumbnailContainer.style.right = "-6.5%"
+            }
+
+            this.thumbnailHidden = !this.thumbnailHidden;
         }
 
     }

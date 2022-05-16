@@ -73,7 +73,7 @@ class DomController {
 }
 
 class CoolSlider {
-    constructor(id = "", min, max, steps = 0) {
+    constructor(id = "", min, max, steps = 0, add = true) {
         this.min = min;
         this.max = max;
         this.dom = document.createElement("input");
@@ -111,8 +111,7 @@ class CoolSlider {
 
         this.targetValue = 500;
         this.frame = 0;
-
-        document.body.appendChild(this.container)
+        if (add) document.body.appendChild(this.container)
     }
 
     update() {
