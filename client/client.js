@@ -599,9 +599,10 @@ class App {
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
-                if (this.connectionFailed) {
+                /* if (this.connectionFailed) {
+                    log("Reloading because of change")
                     window.location.reload()
-                }
+                } */
             })
             this.socket.on("disconnect", () => {
                 log("Disconnected !");
