@@ -394,11 +394,12 @@ canvas .text-input {
   height: 0%;
 }
 #focus-img {
-  margin-top: 60px;
+  margin-top: 25px;
   max-width: 100%;
-  max-height: 600px;
+  max-height: 50vh;
   overflow-y: scroll;
   cursor: pointer;
+  pointer-events: all;
 }
 
 #focus-text {
