@@ -610,7 +610,7 @@ class App {
             })
             this.socket.on("posts", posts => {
                 this.posts = posts;
-                /* window.localStorage.setItem("posts", JSON.stringify(this.posts)) */
+                window.localStorage.setItem("posts", JSON.stringify(this.posts))
                 log(Object.keys(posts).length + " posts received and cached" /* , posts */ )
 
                 this.interface.domController.focusInterface.build(Object.values(posts)[0])
