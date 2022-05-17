@@ -149,6 +149,9 @@ class FocusInterface {
         this.mediaContainer.appendChild(this.videoContainer)
         this.imgContainer = document.createElement("img");
         this.imgContainer.id = "focus-img"
+        this.imgContainer.onclick = () => {
+            open(this.post.url)
+        }
         this.mediaContainer.appendChild(this.imgContainer)
 
         this.textContainer = document.createElement("div");
@@ -196,6 +199,8 @@ class FocusInterface {
         } else {
             this.imgContainer.src = ""
             this.videoContainer.src = ""
+            this.linkButton.style.visibility = "visible"
+            this.linkButton.r
         }
     }
 }
