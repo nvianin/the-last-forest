@@ -394,6 +394,11 @@ canvas .text-input {
   height: 0%;
 }
 #focus-img {
+  margin-top: 40%;
+  max-width: 100%;
+  max-height: 600px;
+  overflow-y: scroll;
+  cursor: pointer;
 }
 
 #focus-text {

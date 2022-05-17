@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: false,
     postprocessing: false,
-    tree_build_limit: 512,
+    tree_build_limit: 1024 - 256,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -921,7 +921,7 @@ class App {
         }
     }
 
-    render() {
+    async render() {
         this.frame_time = Date.now();
         this.time = this.clock.getElapsedTime()
 

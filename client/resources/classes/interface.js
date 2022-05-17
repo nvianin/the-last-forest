@@ -197,17 +197,18 @@ class AppInterface {
 
 
     update(dt) {
-
+        dt = Math.clamp(dt * 100, .01, .1)
         /* this.mapControls.target.y = 0; */
         this.domController.update()
         // Are we in focused mode ? Different state machines
         if (this.focused_mode) {
 
+
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, .1);
             app.camera.updateProjectionMatrix()
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, 100 * dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, 100 * dt)
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
 
 
             this.focused_target.position.set(
@@ -221,15 +222,15 @@ class AppInterface {
             this.rotation_dummy.rotation.set( /* -Math.atan2(this.focused_target_height, this.focused_target_distance) */ 0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
 
             /* log(app.camera.position, this.focused_target.position, dt) */
-            app.camera.position.lerp(this.focused_target.position, 100 * dt)
+            app.camera.position.lerp(this.focused_target.position, dt)
             /* log(app.camera.position) */
-            /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, 100 * dt)) */
+            /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
             app.camera.lookAt(this.focused_tree.position)
 
         } else {
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), 100 * dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, 100 * dt)
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
 
 
             // Update state according to dom inputs
@@ -402,8 +403,8 @@ class AppInterface {
                             app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                             app.camera.updateProjectionMatrix()
 
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, 100 * dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, 100 * dt)
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
 
                             dist = app.camera.position.distanceTo(this.target.position)
                             if (dist < 2) {
@@ -414,14 +415,14 @@ class AppInterface {
                             break;
                         case "MAP":
                             app.camera.position.lerp(this.map_transform.position, .1)
-                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, 100 * dt))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, 100 * dt);
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, dt))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
                             app.camera.updateProjectionMatrix()
                             const currentzoom = this.domController.getDistance()
                             this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1));
 
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), 100 * dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, 100 * dt)
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
 
                             dist = this.map_transform.position.distanceTo(app.camera.position) + Math.abs(currentzoom - this.map_transform.zoom);
                             if (dist < 2) {
@@ -437,12 +438,12 @@ class AppInterface {
 
                         case "FOCUSED":
                             app.camera.position.lerp(this.target.position, .1)
-                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, 100 * dt))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, 100 * dt);
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
                             app.camera.updateProjectionMatrix()
 
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, 100 * dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, 100 * dt)
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
 
                             dist = this.app.camera.position.distanceTo(this.target.position)
                             if (dist < 2) {
@@ -456,13 +457,13 @@ class AppInterface {
 
                         case "PROMENADE":
                             this.target.rotation.set(0, 0, 0)
-                            app.camera.position.lerp(this.target.position, dt * 100);
-                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt * 100))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt * 100);
+                            app.camera.position.lerp(this.target.position, dt);
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
+                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
                             app.camera.updateProjectionMatrix()
 
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt * 100)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt * 100)
+                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
 
                             dist = app.camera.position.distanceTo(this.target.position)
                             if (dist < 2) {
