@@ -406,6 +406,8 @@ canvas .text-input {
   position: relative;
   max-width: 100%;
   overflow-y: scroll;
+  word-break: break-all;
+  pointer-events: all;
 }
 
 #focus-link {
@@ -413,6 +415,8 @@ canvas .text-input {
   max-height: 20%;
   margin-top: 30px;
   color: #4433ff;
+  pointer-events: all;
+  cursor: pointer;
 }
 
 #focus-exit {

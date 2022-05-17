@@ -199,8 +199,8 @@ class FocusInterface {
         } else {
             this.imgContainer.src = ""
             this.videoContainer.src = ""
-            this.linkButton.style.visibility = "visible"
-            this.linkButton.r
         }
+        /* this.linkButton.style.visibility = "visible" */
+        this.linkButton.textContent = post.url;
     }
 }
