@@ -232,7 +232,7 @@ class AppInterface {
                 .add(new THREE.Vector3(0, this.focused_target_height + 100, 0))
 
             this.rotation_dummy.position.copy(app.camera.position)
-            this.rotation_dummy.rotation.set( /* -Math.atan2(this.focused_target_height, this.focused_target_distance) */ 0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
+            this.rotation_dummy.rotation.set(0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
 
             /* log(app.camera.position, this.focused_target.position, dt) */
             app.camera.position.lerp(this.focused_target.position, dt)
@@ -387,7 +387,12 @@ class AppInterface {
 
 
                 case CONTROLLER_STATES.MAP:
-                    this.mapControls.update()
+                    if (app.camera.position.distanceTo(mapControls.target) > 2) {
+                        this.mapControls.enabled = false;
+                        app.camera.position.lerp(this.mapControls.target.position, dt)
+                    } else {
+                        this.mapControls.update()
+                    }
                     break;
 
                 case CONTROLLER_STATES.PROMENADE:
