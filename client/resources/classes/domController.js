@@ -199,6 +199,8 @@ class FocusInterface {
             }
             if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
                 this.videoContainer.src = post.url;
+            } else if (post.url.includes("v.redd.it")) {
+
             }
         } else {
             this.imgContainer.src = ""

@@ -14,6 +14,14 @@ class AppInterface {
         this.prevState = CONTROLLER_STATES.MAP
         this.nextState = CONTROLLER_STATES.MAP
 
+        this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
+        this.mapControls.maxPolarAngle = Math.HALF_PI * .8
+        this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset;
+        this.mapControls.minDistance = 1;
+        this.mapControls.screenSpacePanning = false;
+        this.mapControls.enabled = true;
+
+
         this.focused_mode = false;
         this.focused_tree = null;
         this.focused_target = new THREE.Object3D();
@@ -25,14 +33,6 @@ class AppInterface {
         this.focused_backup = {
             mapControls: this.mapControls.enabled
         }
-
-
-        this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
-        this.mapControls.maxPolarAngle = Math.HALF_PI * .8
-        this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset;
-        this.mapControls.minDistance = 1;
-        this.mapControls.screenSpacePanning = false;
-        this.mapControls.enabled = true;
 
         this.settings = {
             fov: {
@@ -186,11 +186,13 @@ class AppInterface {
         this.mapControls.enabled = false;
 
         this.domController.focusInterface.container.style.opacity = 1;
+        /* this.domController.focusInterface.container.style.pointerEvents = "all"; */
         this.domController.focusInterface.build(tree.userData.post);
     }
 
     exit_focus() {
         this.domController.focusInterface.container.style.opacity = 0;
+        /* this.domController.focusInterface.container.style.pointerEvents = "none"; */
         this.focused_mode = false;
         this.mapControls.enabled = this.focused_backup.mapControls;
     }
