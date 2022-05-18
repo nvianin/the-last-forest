@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: false,
     postprocessing: false,
-    tree_build_limit: 256,
+    tree_build_limit: 128,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -104,7 +104,7 @@ class App {
 
         this.initSocket();
 
-        this.loadResources();
+        /* this.loadResources(); */
 
         if (debug.postprocessing) this.initPostprocess()
 
@@ -589,13 +589,13 @@ class App {
             this.points = JSON.parse(await (await fetch("./sample_points.json")).text());
             this.posts = JSON.parse(await (await fetch("./sample_posts.json")).text());
             this.connection_conditions_count = 0;
-            this.connection_conditions_threshold = 2;
+            this.connection_conditions_threshold = 0;
             this.buildTreesFromPosts()
         } else {
             this.connection_conditions_count = 0;
-            this.connection_conditions_threshold = 3;
+            this.connection_conditions_threshold = 1;
 
-            this.socket = io()
+            this.socket = io("localhost")
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");

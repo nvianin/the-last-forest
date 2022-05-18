@@ -176,6 +176,8 @@ class FocusInterface {
         }
         this.container.appendChild(this.linkButton);
 
+        this.container.style.left = "-10000px"
+
 
         document.body.appendChild(this.container)
     }

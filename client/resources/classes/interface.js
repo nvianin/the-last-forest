@@ -33,6 +33,7 @@ class AppInterface {
         this.focused_backup = {
             mapControls: this.mapControls.enabled
         }
+        this.simplex = new THREE.SimplexNoise()
 
         this.settings = {
             fov: {
@@ -44,8 +45,6 @@ class AppInterface {
             focused_fog_multiplier: .08
         }
 
-        app.camera.fov = this.settings.fov.map;
-        app.camera.updateProjectionMatrix()
 
         this.setupListeners();
         this.domController = new DomController(this.mapControls);
@@ -59,7 +58,20 @@ class AppInterface {
         /* this.map_transform.zoom = parseFloat(this.domController.zoomSlider.dom.value) */
         this.map_transform.zoom = app.camera.position.y
 
-        this.simplex = new THREE.SimplexNoise()
+
+
+        app.camera.fov = this.settings.fov.map;
+        app.camera.updateProjectionMatrix()
+
+        this.MAP_FOG = {
+            near: app.settings.draw_distance - app.settings.fog_offset,
+            far: app.settings.draw_distance
+        }
+        this.WALKING_FOG = {
+            near: (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier,
+            far: app.settings.draw_distance * app.settings.walking_fog_multiplier
+        }
+        this.target.fog = this.MAP_FOG
     }
     setupListeners() {
         this.mouse = new THREE.Vector2;
@@ -180,19 +192,19 @@ class AppInterface {
 
 
     enter_focus(tree) {
+        if (!this.focused_mode) this.focused_backup.mapControls = this.mapControls.enabled
         this.focused_mode = true;
         this.focused_tree = tree;
-        this.focused_backup.mapControls = this.mapControls.enabled
         this.mapControls.enabled = false;
 
         this.domController.focusInterface.container.style.opacity = 1;
-        /* this.domController.focusInterface.container.style.pointerEvents = "all"; */
+        this.domController.focusInterface.container.style.left = "";
         this.domController.focusInterface.build(tree.userData.post);
     }
 
     exit_focus() {
         this.domController.focusInterface.container.style.opacity = 0;
-        /* this.domController.focusInterface.container.style.pointerEvents = "none"; */
+        this.domController.focusInterface.container.style.left = "-10000px";
         this.focused_mode = false;
         this.mapControls.enabled = this.focused_backup.mapControls;
     }
@@ -205,13 +217,11 @@ class AppInterface {
         this.domController.update()
         // Are we in focused mode ? Different state machines
         if (this.focused_mode) {
-
-
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, .1);
             app.camera.updateProjectionMatrix()
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt / 10)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt / 100)
 
 
             this.focused_target.position.set(
@@ -250,6 +260,7 @@ class AppInterface {
                     case CONTROLLER_STATES.WALKING:
                         this.target.state = "WALKING"
                         this.target.fov = this.settings.fov.walk
+                        this.target.fog = this.WALKING_FOG
                         /* app.renderer.domElement.requestPointerLock() */
 
                         if (this.prevState == "MAP") {
@@ -266,7 +277,8 @@ class AppInterface {
                                 this.target.position.copy(this.findPointOnGround())
                                 this.target.rotation.set(0, 0, 0)
                             }
-                            this.changeState("LERPING")
+                            this.target.fog =
+                                this.changeState("LERPING")
                         } else {
                             this.setFog(this.state)
                         }
@@ -276,6 +288,7 @@ class AppInterface {
                     case CONTROLLER_STATES.MAP:
                         this.target.state = "MAP"
                         this.target.fov = this.settings.fov.map
+                        this.target.fog = this.MAP_FOG
                         this.mapControls.enabled = true;
 
                         if (this.prevState != "LERPING") {
@@ -289,6 +302,7 @@ class AppInterface {
                     case CONTROLLER_STATES.PROMENADE:
                         this.target.state = "PROMENADE"
                         this.target.fov = this.settings.fov.walk
+                        this.target.fog = this.WALKING_FOG
                         this.mapControls.enabled = false;
 
                         if (this.prevState == "MAP") {
@@ -403,57 +417,18 @@ class AppInterface {
                         case "WALKING":
                             app.camera.position.lerp(this.target.position, .1)
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
-                            app.camera.updateProjectionMatrix()
-
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
 
                             dist = app.camera.position.distanceTo(this.target.position)
-                            if (dist < 2) {
-                                this.changeState(this.target.state)
-                            } else {
-                                /* log(dist) */
-                            }
+
                             break;
                         case "MAP":
                             app.camera.position.lerp(this.map_transform.position, .1)
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, dt))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
-                            app.camera.updateProjectionMatrix()
+
                             const currentzoom = this.domController.getDistance()
                             this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1));
 
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
-
                             dist = this.map_transform.position.distanceTo(app.camera.position) + Math.abs(currentzoom - this.map_transform.zoom);
-                            if (dist < 2) {
-                                this.changeState(this.target.state)
-                                /* app.camera.rotation.set(
-                                    this.mapControls.get
-                                    ) */
-                            } else {
-                                /* log(dist) */
-                            }
-                            break;
-
-
-                        case "FOCUSED":
-                            app.camera.position.lerp(this.target.position, .1)
-                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
-                            app.camera.updateProjectionMatrix()
-
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
-
-                            dist = this.app.camera.position.distanceTo(this.target.position)
-                            if (dist < 2) {
-                                this.changeState(this.target.state)
-                            }
-
-
 
                             break;
 
@@ -462,19 +437,18 @@ class AppInterface {
                             this.target.rotation.set(0, 0, 0)
                             app.camera.position.lerp(this.target.position, dt);
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
-                            app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
-                            app.camera.updateProjectionMatrix()
-
-                            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
-                            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
 
                             dist = app.camera.position.distanceTo(this.target.position)
-                            if (dist < 2) {
-                                this.changeState(this.target.state)
-                            } else {
-                                /* log(dist) */
-                            }
                     }
+                    if (dist < 2) {
+                        this.changeState(this.target.state)
+                    } else {
+                        /* log(dist) */
+                    }
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, dt)
+                    app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
+                    app.camera.updateProjectionMatrix()
                     /* this.domController.setZoomLevel(this.domController.getDistance()) */
                     /* this.mapControls.update() */
                     break;

@@ -73,7 +73,12 @@ class UserManager {
                 res.end(data);
             })
         });
-        this.io = require("socket.io")(this.server);
+        this.io = require("socket.io")(this.server, {
+            cors: {
+                origin: "http://localhost:5555",
+                methods: ["GET", "POST"]
+            }
+        });
         this.io.on("connection", client => {
             client.user = new User(client);
             this.users[client.user.id] = client;
