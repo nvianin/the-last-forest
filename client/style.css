@@ -400,7 +400,7 @@ canvas .text-input {
 
 #focus-media {
   max-width: 90%;
-  height: 0;
+  /* height: 0; */
   margin: 10px;
 }
 #focus-video {

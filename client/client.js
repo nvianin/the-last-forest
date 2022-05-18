@@ -101,6 +101,7 @@ class App {
         this.fog.far = this.settings.draw_distance; */
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
+        this.tsneRenderer = new TsneRegionRenderer(this.renderer)
 
         this.initSocket();
 
@@ -617,6 +618,7 @@ class App {
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
+                this.buildTSNEMap()
 
             })
             // this.socket.on("temperature_data", temperature_data => {
@@ -870,55 +872,8 @@ class App {
         )
     }
 
-    buildTreesFromPosts__old() {
-        let i = 0;
-        for (let post of Object.values(this.posts)) {
-            const d = new Date(post.date * 1000);
-            d.year = d.getFullYear();
-            d.month = d.getMonth();
-            while (this.temperature_data[d.year][d.month] == "***") {
-                if (d.month == 0) break;
-                d.month--
-            }
-            /* log(d.year, d.month, this.temperature_data[d.year][d.month]) */
-            let rules = this.baseRuleSet.clone();
-            rules.randomize(2, false);
-
-            let color = this.temperature_palette.start_tone.clone()
-                .lerpHSL(this.temperature_palette.end_tone,
-                    Math.map(parseFloat(this.temperature_data[d.year][d.month]),
-                        this.temperature_palette.start,
-                        this.temperature_palette.end,
-                        0,
-                        1
-                    ));
-
-            this.tree.build_generations(post.title, 35, rules, color);
-            let tree = this.tree.line.clone();
-            tree.text = post.title;
-            this.trees.push(tree)
-            /* const imposter = new THREE.Mesh(
-                new THREE.SphereGeometry(),
-                new THREE.MeshBasicMaterial({
-                    visible: false
-                })
-            );
-            imposter.position.copy(tree.position);
-            imposter.tree = tree;
-            this.scene.add(imposter)
-            this.tree_imposters.push(imposter) */
-            const point = this.baseLine.sampleOnGround(i / Object.keys(this.posts).length)
-            tree.position.copy(point);
-            /* log(point) */
-            /* const sample = this.baseLine.sample(Math.map(i / Object.keys(this.posts).length, 0, 1, .2, .8));
-            const disp = this.getDisplacementAt(sample.x, sample.y, sample.z);
-            tree.position.copy(sample);
-            tree.position.add(disp)
-            log(sample, disp, tree.position); */
-            this.scene.add(tree)
-            i++;
-            /* break; */
-        }
+    buildTSNEMap() {
+        this.tsneRenderer.update()
     }
 
     async render() {

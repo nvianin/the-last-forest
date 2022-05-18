@@ -75,6 +75,7 @@ class AppInterface {
             far: app.settings.draw_distance * app.settings.walking_fog_multiplier
         }
         this.target.fog = this.MAP_FOG
+        this.target.fov = app.camera.fov;
     }
     setupListeners() {
         this.mouse = new THREE.Vector2;
@@ -223,11 +224,12 @@ class AppInterface {
                 Math.abs(app.camera.fov - this.target.fov)
             if (dist > 1) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
-                app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, dt)
-                app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, dt)
-                app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
+                app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
+                app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
+                app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
             } else {
+                log(dist)
                 clearInterval(this.focus_exit_interval)
                 this.focused_mode = false;
                 this.focused_lerping = false;
@@ -412,8 +414,8 @@ class AppInterface {
 
 
                 case CONTROLLER_STATES.MAP:
-                    this.map_transform.position.set(app.camera.position)
-                    this.map_transform.rotation.set(app.camera.rotation)
+                    this.map_transform.position.copy(app.camera.position)
+                    this.map_transform.rotation.copy(app.camera.rotation)
                     /* if (app.camera.position.distanceTo(this.mapControls.target) > 2) {
                         this.mapControls.enabled = false;
                         app.camera.position.lerp(this.mapControls.target, dt)
@@ -447,20 +449,20 @@ class AppInterface {
                     log("lerping to state " + this.target.state)
                     switch (this.target.state) {
                         case "WALKING":
-                            app.camera.position.lerp(this.target.position, .1)
-                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, .1))
+                            app.camera.position.lerp(this.target.position, dt)
+                            app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
 
                             dist = app.camera.position.distanceTo(this.target.position)
 
                             break;
                         case "MAP":
-                            app.camera.position.lerp(this.map_transform.position, .1)
+                            app.camera.position.lerp(this.map_transform.position, dt)
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, dt))
 
-                            const currentzoom = this.domController.getDistance()
-                            this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1));
+                            /* const currentzoom = this.domController.getDistance()
+                            this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1)); */
 
-                            dist = this.map_transform.position.distanceTo(app.camera.position) + Math.abs(currentzoom - this.map_transform.zoom);
+                            dist = this.map_transform.position.distanceTo(app.camera.position) /* + Math.abs(currentzoom - this.map_transform.zoom) */ ;
 
                             break;
 
@@ -475,7 +477,7 @@ class AppInterface {
                     if (dist < 2) {
                         this.changeState(this.target.state)
                     } else {
-                        /* log(dist) */
+                        log(dist)
                     }
                     app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, dt)
                     app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, dt)
