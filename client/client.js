@@ -968,7 +968,8 @@ class App {
             this.mousecast.setFromCamera(this.pointer, this.camera);
             const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
             if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
-                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)) {
+                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+            ) {
 
                 /* log(intersects[0].object) */
                 /* intersects[0].object.geometry.attributes */
@@ -1156,17 +1157,20 @@ class App {
         this.thumbnailContainer.button.onclick = () => {
 
             if (this.thumbnailHidden) {
-                this.thumbnailContainer.style.right = "0%"
+                this.thumbnailContainer.className = "thumbnail-container"
+                /* this.thumbnailContainer.style.right = "0%" */
                 this.thumbnailContainer.button.style.transform = ""
                 this.thumbnailContainer.button.style.transformOrigin = "right"
             } else {
+                this.thumbnailContainer.className = "thumbnail-container-hidden"
                 this.thumbnailContainer.button.style.transform = "rotate(180deg)"
                 this.thumbnailContainer.button.style.transformOrigin = "left"
-                this.thumbnailContainer.style.right = "-6.5%"
+                /* this.thumbnailContainer.style.right = "-6.5%" */
             }
 
             this.thumbnailHidden = !this.thumbnailHidden;
         }
+        this.thumbnailContainer.button.click()
 
     }
 

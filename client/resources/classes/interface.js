@@ -31,8 +31,11 @@ class AppInterface {
         this.focused_target_distance = 900;
         this.focused_target_height = 200;
         this.focused_backup = {
-            mapControls: this.mapControls.enabled
+            mapControls: this.mapControls.enabled,
+            position: app.camera.position.clone()
         }
+        this.focused_lerping = false;
+
         this.simplex = new THREE.SimplexNoise()
 
         this.settings = {
@@ -200,13 +203,29 @@ class AppInterface {
         this.domController.focusInterface.container.style.opacity = 1;
         this.domController.focusInterface.container.style.left = "";
         this.domController.focusInterface.build(tree.userData.post);
+        this.focused_backup.position.copy(app.camera.position)
     }
 
     exit_focus() {
         this.domController.focusInterface.container.style.opacity = 0;
         this.domController.focusInterface.container.style.left = "-10000px";
-        this.focused_mode = false;
         this.mapControls.enabled = this.focused_backup.mapControls;
+        this.focused_lerping = true;
+
+        if (this.focus_exit_interval) {
+            clearInterval(this.focus_exit_interval)
+        }
+        this.focus_exit_interval = setInterval(() => {
+            log("lerping exit focus")
+            const dist = this.focused_backup.position.distanceTo(app.camera.position)
+            if (dist > 1) {
+                app.camera.position.lerp(this.focused_backup.position, .1);
+            } else {
+                clearInterval(this.focus_exit_interval)
+                this.focused_mode = false;
+                this.focused_lerping = false;
+            }
+        }, 16)
     }
 
 
@@ -216,7 +235,7 @@ class AppInterface {
         /* this.mapControls.target.y = 0; */
         this.domController.update()
         // Are we in focused mode ? Different state machines
-        if (this.focused_mode) {
+        if (this.focused_mode && !this.focused_lerping) {
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, .1);
             app.camera.updateProjectionMatrix()
 
@@ -240,7 +259,7 @@ class AppInterface {
             /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
             app.camera.lookAt(this.focused_tree.position)
 
-        } else {
+        } else if (!this.focused_mode) {
 
             app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
             app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
@@ -277,8 +296,7 @@ class AppInterface {
                                 this.target.position.copy(this.findPointOnGround())
                                 this.target.rotation.set(0, 0, 0)
                             }
-                            this.target.fog =
-                                this.changeState("LERPING")
+                            this.changeState("LERPING")
                         } else {
                             this.setFog(this.state)
                         }
@@ -387,12 +405,14 @@ class AppInterface {
 
 
                 case CONTROLLER_STATES.MAP:
-                    if (app.camera.position.distanceTo(mapControls.target) > 2) {
+                    this.map_transform.position.set(app.camera.position)
+                    this.map_transform.rotation.set(app.camera.rotation)
+                    /* if (app.camera.position.distanceTo(this.mapControls.target) > 2) {
                         this.mapControls.enabled = false;
-                        app.camera.position.lerp(this.mapControls.target.position, dt)
+                        app.camera.position.lerp(this.mapControls.target, dt)
                     } else {
                         this.mapControls.update()
-                    }
+                    } */
                     break;
 
                 case CONTROLLER_STATES.PROMENADE:

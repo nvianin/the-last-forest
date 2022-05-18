@@ -156,6 +156,9 @@ class FocusInterface {
 
         this.textContainer = document.createElement("div");
         this.textContainer.id = "focus-text"
+        this.textContainer.onwheel = e => {
+            e.preventDefault()
+        }
         this.container.appendChild(this.textContainer)
 
         this.exitButton = document.createElement("div");
@@ -187,7 +190,7 @@ class FocusInterface {
         log(post)
         this.title.textContent = post.title;
 
-        this.textContainer.textContent = post.selftext
+        this.textContainer.textContent = post.selftext.replaceAll("\n", "<br>")
 
         if (post.is_video) {
             log("post is video")
