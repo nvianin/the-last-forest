@@ -1,12 +1,24 @@
 class TsneRegionRenderer {
-    constructor(renderer) {
+    constructor(renderer, posts) {
         this.renderer = renderer;
         this.scene = new THREE.Scene()
         this.camera = new THREE.PerspectiveCamera()
 
+        this.posts = Object.values(posts);
+
         this.plane = new THREE.Mesh(
             new THREE.CircleGeometry(1, 3),
-            new THREE.ShaderMaterial()
+            new THREE.ShaderMaterial({
+                uniforms: {
+                    posts: {
+                        value: new Float32Array(this.posts.length * 2)
+                    },
+                    posts_colors: {
+                        value: new Uint8Array(this.posts.length * 3)
+                    }
+                },
+
+            })
         )
         this.material = this.plane.material
 
@@ -18,6 +30,9 @@ class TsneRegionRenderer {
         this.frametex = new THREE.FramebufferTexture(this.side, this.side, THREE.RGBAFormat)
 
         this.loadMaterial()
+
+
+        this.update();
 
     }
 
