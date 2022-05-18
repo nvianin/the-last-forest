@@ -168,7 +168,11 @@ class FocusInterface {
         this.linkButton = document.createElement("div")
         this.linkButton.id = "focus-link"
         this.linkButton.onclick = () => {
-            window.open(this.post.url)
+            window.open(
+                this.post.url.includes("/r/") ?
+                "https://reddit.com/" + this.post.url :
+                this.post.url
+            )
         }
         this.container.appendChild(this.linkButton);
 

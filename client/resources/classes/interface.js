@@ -22,6 +22,9 @@ class AppInterface {
         this.focused_angle = 0;
         this.focused_target_distance = 900;
         this.focused_target_height = 200;
+        this.focused_backup = {
+            mapControls: this.mapControls.enabled
+        }
 
 
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
@@ -179,9 +182,7 @@ class AppInterface {
     enter_focus(tree) {
         this.focused_mode = true;
         this.focused_tree = tree;
-        this.focused_backup = {
-            mapControls: this.mapControls.enabled
-        }
+        this.focused_backup.mapControls = this.mapControls.enabled
         this.mapControls.enabled = false;
 
         this.domController.focusInterface.container.style.opacity = 1;

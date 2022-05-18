@@ -403,11 +403,12 @@ canvas .text-input {
 }
 
 #focus-text {
+  font-family: Robotomono;
   margin: 10px;
   position: relative;
   max-width: 100%;
   overflow-y: scroll;
-  word-break: break-all;
+  word-break: break-word;
   pointer-events: all;
 }
 

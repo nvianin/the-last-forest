@@ -96,9 +96,9 @@ float snoise(vec4 v) {
 }
 
 vec3 snoiseAtPos(vec3 pos, float sc, float t, vec3 wind) {
-    float x = snoise(vec4((vec3(pos.x, pos.y, pos.z) + wind * t) * sc, t + 1.));
-    float y = snoise(vec4((vec3(pos.y, pos.x, pos.z) + wind * t) * sc, t + 3.));
-    float z = snoise(vec4((vec3(pos.z, pos.y, pos.x) + wind * t) * sc, t + 7.));
+    float x = snoise(vec4(vec3(pos.x, pos.y, pos.z) * sc + wind * t, t + 1.));
+    float y = snoise(vec4(vec3(pos.y, pos.x, pos.z) * sc + wind * t, t + 3.));
+    float z = snoise(vec4(vec3(pos.z, pos.y, pos.x) * sc + wind * t, t + 7.));
     return vec3(x, y, z);
 }
 uniform float time;
