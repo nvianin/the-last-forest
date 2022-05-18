@@ -32,7 +32,8 @@ class AppInterface {
         this.focused_target_height = 200;
         this.focused_backup = {
             mapControls: this.mapControls.enabled,
-            position: app.camera.position.clone()
+            position: app.camera.position.clone(),
+            rotation: app.camera.rotation.clone(),
         }
         this.focused_lerping = false;
 
@@ -205,6 +206,7 @@ class AppInterface {
         this.domController.focusInterface.container.style.left = "";
         this.domController.focusInterface.build(tree.userData.post);
         this.focused_backup.position.copy(app.camera.position)
+        this.focused_backup.rotation.copy(app.camera.position)
     }
 
     exit_focus() {
@@ -224,8 +226,11 @@ class AppInterface {
                 Math.abs(app.camera.fov - this.target.fov)
             if (dist > 1) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
+                app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation), .1)
+
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
+
                 app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
             } else {
