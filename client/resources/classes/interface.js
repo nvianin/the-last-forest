@@ -217,9 +217,16 @@ class AppInterface {
         }
         this.focus_exit_interval = setInterval(() => {
             log("lerping exit focus")
-            const dist = this.focused_backup.position.distanceTo(app.camera.position)
+            const dist =
+                this.focused_backup.position.distanceTo(app.camera.position) +
+                Math.abs(app.scene.fog.far - this.target.fog.far) +
+                Math.abs(app.camera.fov - this.target.fov)
             if (dist > 1) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
+                app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, dt)
+                app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, dt)
+                app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, dt);
+                app.camera.updateProjectionMatrix()
             } else {
                 clearInterval(this.focus_exit_interval)
                 this.focused_mode = false;
