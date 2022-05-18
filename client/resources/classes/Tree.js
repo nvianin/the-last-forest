@@ -118,6 +118,72 @@ const treeTypes = {
             "R->FFLS[RRLF[RFLF]LFLF]L"
         )
     },
+    "Diseases": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Water": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Resources": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Adaptation": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Science": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Energy": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Predictions": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Infrastructure": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Migration": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Shitpost Friday": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
+    "Funny & Sad": {
+        color: "brown",
+        rules: new Ruleset().parse(
+            "R->FFLS[RRLF[RFLF]LFLF]L"
+        )
+    },
 }
 
 const treeColors = {}

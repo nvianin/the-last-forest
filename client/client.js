@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: false,
     postprocessing: false,
-    tree_build_limit: 128,
+    tree_build_limit: 0,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -101,7 +101,6 @@ class App {
         this.fog.far = this.settings.draw_distance; */
         if (debug.fog) this.scene.fog = this.fog;
         this.renderer.setClearColor(bgCol);
-        this.tsneRenderer = new TsneRegionRenderer(this.renderer)
 
         this.initSocket();
 
@@ -873,7 +872,7 @@ class App {
     }
 
     buildTSNEMap() {
-        this.tsneRenderer.update()
+        this.tsneRenderer = new TsneRegionRenderer(this.renderer, this.posts)
     }
 
     async render() {
@@ -1101,8 +1100,11 @@ class App {
                 thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
             }
         }
+        /* this.selectedCategories = */
+
         this.thumbnailContainer.onclick = e => {
             log(e.target.parentElement.type)
+            this.show
         }
 
         this.thumbnailContainer.button = document.createElement("div");

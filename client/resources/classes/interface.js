@@ -88,7 +88,7 @@ class AppInterface {
             this.mouse_target_element = e.target
             if (this.focused_mode) {
                 if (app.pointer_is_down) {
-                    this.focused_angle += e.movementX * .01
+                    this.focused_angle += e.movementX * .003
                 }
             } else {
                 switch (this.state) {
@@ -206,13 +206,12 @@ class AppInterface {
         this.domController.focusInterface.container.style.left = "";
         this.domController.focusInterface.build(tree.userData.post);
         this.focused_backup.position.copy(app.camera.position)
-        this.focused_backup.rotation.copy(app.camera.position)
+        this.focused_backup.rotation.copy(app.camera.rotation)
     }
 
     exit_focus() {
         this.domController.focusInterface.container.style.opacity = 0;
         this.domController.focusInterface.container.style.left = "-10000px";
-        this.mapControls.enabled = this.focused_backup.mapControls;
         this.focused_lerping = true;
 
         if (this.focus_exit_interval) {
@@ -226,7 +225,7 @@ class AppInterface {
                 Math.abs(app.camera.fov - this.target.fov)
             if (dist > 1) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
-                app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation), .1)
+                app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation, .01))
 
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
@@ -238,6 +237,7 @@ class AppInterface {
                 clearInterval(this.focus_exit_interval)
                 this.focused_mode = false;
                 this.focused_lerping = false;
+                this.mapControls.enabled = this.focused_backup.mapControls;
             }
         }, 16)
     }
@@ -425,8 +425,8 @@ class AppInterface {
                         this.mapControls.enabled = false;
                         app.camera.position.lerp(this.mapControls.target, dt)
                     } else {
-                        this.mapControls.update()
                     } */
+                    this.mapControls.update()
                     break;
 
                 case CONTROLLER_STATES.PROMENADE:

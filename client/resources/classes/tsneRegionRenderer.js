@@ -22,7 +22,7 @@ class TsneRegionRenderer {
         )
         this.material = this.plane.material
 
-        this.side = 2 ** 64;
+        this.side = 64 ** 2;
         this.framebuffer = new THREE.WebGLRenderTarget(this.side, this.side, {
             depthBuffer: false,
             stencilBuffer: false
@@ -42,6 +42,23 @@ class TsneRegionRenderer {
     }
 
     update() {
+        let missing = 0;
+        for (let i = 0; i < this.posts.length; i++) {
+            if (this.posts[i].tsne_coordinates && Object.keys(treeTypes).includes(this.posts[i].flair)) {
+                this.material.uniforms.posts.value[i * 2] = this.posts[i].tsne_coordinates.x
+                this.material.uniforms.posts.value[i * 2 + 1] = this.posts[i].tsne_coordinates.y
+
+                this.material.uniforms.posts_colors.value[i * 3] = treeColors[this.posts[i].flair].color.r
+                this.material.uniforms.posts_colors.value[i * 3 + 1] = treeColors[this.posts[i].flair].color.g
+                this.material.uniforms.posts_colors.value[i * 3 + 2] = treeColors[this.posts[i].flair].color.b
+            } else {
+                missing++
+            }
+        }
+        log(missing + " missing tsne coordinates.")
+
+
+
         this.renderer.setRenderTarget(this.framebuffer)
         this.renderer.render(this.scene, this.camera)
         this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
