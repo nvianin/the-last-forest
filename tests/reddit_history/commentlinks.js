@@ -3,14 +3,19 @@ const fs = require("fs")
 
 const main = async () => {
     let text = fs.readFileSync("./commentlinktest.txt", "utf-8")
-    let in_bracket = false;
-    let last_element = ""
-
-    for (char of text.split(" ")) {
-        console.log(char)
-
-        if (char == "(" && last_element == "]") {
-            log("In link")
+    const words = text.split(" ");
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i]
+        if (word.includes("[") /* || word.includes("[") || word.includes("(") || word.includes(")") */ ) {
+            console.log("-----------")
+            log(word)
+            if (!word.includes(")")) {
+                let j = i + 1;
+                while (!words[j].includes(")")) {
+                    log(words[j])
+                    j++
+                }
+            }
         }
     }
 }
