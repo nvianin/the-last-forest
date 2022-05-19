@@ -7,26 +7,6 @@ class TsneRegionRenderer {
 
         this.posts = Object.values(posts);
 
-        this.plane = new THREE.Mesh(
-            new THREE.CircleGeometry(1, 3),
-            new THREE.ShaderMaterial({
-                uniforms: {
-                    postcount: {
-                        value: this.posts.length
-                    },
-                    posts: {
-                        value: new Float32Array(this.posts.length * 2)
-                    },
-                    posts_colors: {
-                        value: new Uint8Array(this.posts.length * 3)
-                    }
-                },
-
-            })
-        )
-        this.scene.add(this.plane)
-
-        this.material = this.plane.material
 
         this.side = 64 ** 2;
         this.framebuffer = new THREE.WebGLRenderTarget(this.side, this.side, {
@@ -35,28 +15,37 @@ class TsneRegionRenderer {
         })
         this.frametex = new THREE.FramebufferTexture(this.side, this.side, THREE.RGBAFormat)
 
+        this.plane = new THREE.Mesh(
+            new THREE.CircleGeometry(1, 3),
+            new THREE.ShaderMaterial({
+                uniforms: {
+                    tsne_map: {
+                        value: this.frametex
+                    },
+                    side: {
+                        value: this.side
+                    }
+                },
+
+            })
+        )
+        this.scene.add(this.plane)
+        this.plane.visible = false;
+
+        this.material = this.plane.material
+
         this.loadMaterial()
 
         this.spheres = new THREE.InstancedMesh(
             new THREE.CircleGeometry(1, 32),
             new THREE.MeshBasicMaterial({
                 transparent: true,
-                opacity: .5
+                opacity: .2
             }),
-            this.posts.length)
-
-        const dummy = new THREE.Matrix4();
-        for (let i = 0; i < this.spheres.count; i++) {
-            dummy.compose(
-                new THREE.Vector3(this.posts[i].tsne_coordinates.x, 0, this.posts[i].tsne_coordinates.y),
-                new THREE.Quaternion(),
-                new THREE.Vector3(1, 1, 1)
-            )
-            this.spheres.setMatrixAt(i, dummy)
-            this.spheres.setColorAt(i, new THREE.Color(treeColors[this.posts[i].flair].color))
-        }
-        this.spheres.instanceColor.needsUpdate =
-            this.spheres.instanceMatrix.needsUpdate = true
+            this.posts.length
+        )
+        this.spheres.position.z = -200
+        this.scene.add(this.spheres)
 
 
         this.displayPlane = new THREE.Mesh(
@@ -75,6 +64,11 @@ class TsneRegionRenderer {
             side: THREE.DoubleSide,
             wireframe: true
         }) */
+
+        this.backup = {
+            size: new THREE.Vector2,
+            ratio: app.renderer.getPixelRatio()
+        }
     }
 
     async loadMaterial() {
@@ -86,7 +80,7 @@ class TsneRegionRenderer {
     }
 
     update() {
-        let missing = 0;
+        /* let missing = 0;
         for (let i = 0; i < this.posts.length; i++) {
             if (this.posts[i].tsne_coordinates && Object.keys(treeTypes).includes(this.posts[i].flair)) {
                 this.material.uniforms.posts.value[i * 2] = this.posts[i].tsne_coordinates.x
@@ -98,15 +92,52 @@ class TsneRegionRenderer {
             } else {
                 missing++
             }
-        }
+        } */
         /* log(missing + " missing tsne coordinates.") */
 
-        this.displayPlane.rotation.x = app.time
 
+        // Build instance matrix from tsne map
+        const dummy = new THREE.Matrix4();
+        for (let i = 0; i < this.spheres.count; i++) {
+            if (treeColors[this.posts[i].flair] && this.posts[i].tsne_coordinates) {
+                const s = Math.clamp(this.posts[i].score / 3000, .3, 2)
+                /* const s = 1 */
+                dummy.compose(
+                    new THREE.Vector3(this.posts[i].tsne_coordinates.x, this.posts[i].tsne_coordinates.y, 0),
+                    new THREE.Quaternion(),
+                    new THREE.Vector3(s, s, s)
+                )
+                this.spheres.setMatrixAt(i, dummy)
+                this.spheres.setColorAt(i, new THREE.Color(treeColors[this.posts[i].flair].color))
+            }
+        }
+        this.spheres.instanceColor.needsUpdate =
+            this.spheres.instanceMatrix.needsUpdate = true
+
+        // Backup renderer parameters
+        this.renderer.getSize(this.backup.size)
+        this.backup.ratio = this.renderer.getPixelRatio()
+
+        // Set renderer to square
+        this.renderer.setSize(this.side, this.side)
+        this.renderer.setPixelRatio(1)
         /* this.renderer.setRenderTarget(this.framebuffer) */
+
         this.renderer.render(this.scene, this.camera)
-        /* this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
+        // Framebuffer to texture
+        /* this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex) */
+
+        /* // Turn on post-processing square
+        this.plane.visible = true;
+        this.renderer.setRenderTarget(null)
+        this.renderer.render(this.scene, this.camera)
+
+        // Reset renderer parameters
+        this.plane.visible = false; */
+        /* this.renderer.setSize(this.backup.size.x, this.backup.size.y)
+        this.renderer.setPixelRatio(this.backup.ratio)
         this.renderer.setRenderTarget(null) */
+
 
         /* log("TSNE rendered") */
     }

@@ -1,13 +1,10 @@
-#define MAX_POST_COUNT 512
+#define MAX_POST_COUNT 1
 
-uniform int postcount;
-uniform vec2 posts[MAX_POST_COUNT];
-uniform vec3 posts_colors[MAX_POST_COUNT];
+uniform sampler2D tsne_map;
+uniform float side;
 
 void main() {
-    vec2 st = gl_FragCoord.xy / pow(64., 2.);
-    vec4 result = vec4(0.);
-    int total = 0;
+    vec2 st = gl_FragCoord.xy / side;
     /* for(int i = 0;i < postcount;i++){
         if (posts[i * 2] != 0){
             
@@ -17,4 +14,5 @@ void main() {
 
     /* float circle = distance(); */
     gl_FragColor = vec4(1., 0., 1., 1.);
+    gl_FragColor = texture2D(tsne_map, st);
 }
