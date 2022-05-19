@@ -37,6 +37,27 @@ class TsneRegionRenderer {
 
         this.loadMaterial()
 
+        this.spheres = new THREE.InstancedMesh(
+            new THREE.CircleGeometry(1, 32),
+            new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: .5
+            }),
+            this.posts.length)
+
+        const dummy = new THREE.Matrix4();
+        for (let i = 0; i < this.spheres.count; i++) {
+            dummy.compose(
+                new THREE.Vector3(this.posts[i].tsne_coordinates.x, 0, this.posts[i].tsne_coordinates.y),
+                new THREE.Quaternion(),
+                new THREE.Vector3(1, 1, 1)
+            )
+            this.spheres.setMatrixAt(i, dummy)
+            this.spheres.setColorAt(i, new THREE.Color(treeColors[this.posts[i].flair].color))
+        }
+        this.spheres.instanceColor.needsUpdate =
+            this.spheres.instanceMatrix.needsUpdate = true
+
 
         this.displayPlane = new THREE.Mesh(
             new THREE.PlaneGeometry(app.settings.ground_side, app.settings.ground_side),
