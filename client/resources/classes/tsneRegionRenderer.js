@@ -37,19 +37,21 @@ class TsneRegionRenderer {
 
         this.material = this.plane.material
 
-        this.loadMaterial()
 
         this.spheres = new THREE.InstancedMesh(
             new THREE.CircleGeometry(1, 32),
             new THREE.MeshBasicMaterial({
                 transparent: true,
-                opacity: .2
+                opacity: .2,
+                color: 0xff00ff
             }),
             this.posts.length
         )
         /* this.spheres.position.z = -200 */
         this.scene.add(this.spheres)
+        log(this.spheres.instanceMatrix, this.spheres.instanceColor)
 
+        this.loadMaterial()
 
         this.displayPlane = new THREE.Mesh(
             new THREE.PlaneGeometry(1, 1),
@@ -82,6 +84,7 @@ class TsneRegionRenderer {
     }
 
     async loadMaterial() {
+        log("waited")
         const frag = await (await fetch("./resources/shaders/tsneRendererFrag.glsl")).text()
         this.material.fragmentShader = frag;
         this.material.needsUpdate = true
@@ -121,8 +124,8 @@ class TsneRegionRenderer {
                 this.spheres.setColorAt(i, new THREE.Color(treeColors[this.posts[i].flair].color))
             }
         }
-        this.spheres.instanceColor.needsUpdate =
-            this.spheres.instanceMatrix.needsUpdate = true
+        /* this.spheres.instanceColor.needsUpdate =
+            this.spheres.instanceMatrix.needsUpdate = true */
 
         // Backup renderer parameters
         this.renderer.getSize(this.backup.size)
