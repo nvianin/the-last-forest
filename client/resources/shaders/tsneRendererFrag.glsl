@@ -20,7 +20,10 @@ void main() {
 
         result /= float(total) * 12.;
     } else {
-        result = texture2D(tsne_map, vec2(st.x, 1. - st.y)) * 1.;
+        float x = 1. - st.y;
+        float y = st.x;
+        result = vec4(mix(texture2D(tsne_map, vec2(x, y)).xyz, normalize(texture2D(tsne_map, vec2(x, y)).xyz), .3), texture2D(tsne_map, vec2(x, y)).w);
+        result = texture2D(tsne_map, vec2(x, y));
         /* if(length(result) > 2.)
             result *= .2; */
     }
