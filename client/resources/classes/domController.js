@@ -141,6 +141,10 @@ class FocusInterface {
         this.title.innerText = "Title of the post"
         this.container.appendChild(this.title)
 
+        this.dateContainer = document.createElement("div");
+        this.dateContainer.id = "focus-date"
+        this.container.appendChild(this.dateContainer)
+
         this.mediaContainer = document.createElement("div");
         this.mediaContainer.id = "focus-media"
         this.container.appendChild(this.mediaContainer)
@@ -177,8 +181,10 @@ class FocusInterface {
                 this.post.url
             )
         }
-
         this.container.appendChild(this.linkButton);
+
+
+
 
         this.container.style.left = "-10000px"
 
@@ -192,6 +198,9 @@ class FocusInterface {
         this.title.textContent = post.title;
 
         this.textContainer.innerHTML = this.formatPost(post.selftext)
+        this.imgContainer.src = ""
+        this.videoContainer.src = ""
+        this.dateContainer.innerText = new Date(post.date * 1000).toLocaleString()
 
         if (post.is_video) {
             log("post is video")
@@ -208,10 +217,7 @@ class FocusInterface {
             } else if (post.url.includes("v.redd.it")) {
 
             }
-        } else {
-            this.imgContainer.src = ""
-            this.videoContainer.src = ""
-        }
+        } else {}
         /* this.linkButton.style.visibility = "visible" */
         this.linkButton.textContent = post.url;
     }

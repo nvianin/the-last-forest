@@ -15,7 +15,7 @@
 }
 @font-face {
   font-family: RobotoMono;
-  src: url("./resources/fonts/RobotoMono.ttf");
+  src: url("./resources/fonts/NotoSerif-Regular.ttf");
 }
 
 body {
@@ -344,7 +344,7 @@ canvas .text-input {
   transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .thumbnail-element:hover {
-  transform: scale(1.5);
+  transform: scale(1.5, 1);
   z-index: 1000;
   opacity: 1;
 }
@@ -372,7 +372,7 @@ canvas .text-input {
   left: 5%;
   top: 5%;
   max-height: 85%;
-  width: calc(100% - 100px - 10%);
+  max-width: calc(100% - 100px - 10%);
   z-index: 2000;
   color: white;
   pointer-events: none;
@@ -387,6 +387,7 @@ canvas .text-input {
 }
 
 #focus-title {
+  font-family: Avarabolditalic;
   /* position: fixed; */
   margin: 10px;
   top: 5%;
@@ -398,10 +399,16 @@ canvas .text-input {
   max-width: 95%;
 }
 
+#focus-date {
+  margin: 10px;
+  font-family: Robotomono;
+}
+
 #focus-media {
   max-width: 90%;
   /* height: 0; */
   margin: 10px;
+  border-radius: 10px;
 }
 #focus-video {
   width: 0%;
@@ -421,7 +428,7 @@ canvas .text-input {
   font-family: Robotomono;
   position: relative;
   /* max-width: 100%; */
-  /* max-height: 50vh; */
+  max-height: 50vh;
   overflow-y: scroll;
   word-break: break-word;
   pointer-events: all;

@@ -49,25 +49,25 @@ const treeTypes = {
     "Humor": {
         color: "teal",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "U->[++LD], +->+UFF, F->B{+L[]"
         )
     },
     "Society": {
         color: "lightyellow",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "B->+[+FB-], -->]{FU[}, F->FULUBF, "
         )
     },
     "Systemic": {
         color: "darkgreen",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "L->[], {->UBBD{SR, ]->F+[{L-], "
         )
     },
     "Conflict": {
         color: 0x8a0303,
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "[->+SRR{, +->{, S->[URBB], "
         )
     },
     "Politics": {
@@ -91,97 +91,97 @@ const treeTypes = {
     "Coping": {
         color: "orange",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "D->SULFD, }->}-B-[], R->D, "
         )
     },
     "Pollution": {
         color: "black",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "D->{[}+], +->[S+FR-], -->UU+S, "
         )
     },
     "Meta": {
         color: "lightblue",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "R->+L}R+], }->F, +->}++D"
         )
     },
     "Low Effort": {
         color: "darkred",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "+->F]S-+D, ]->B, B->-+S[R], "
         )
     },
     "Food": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "R->SU{, {->-DBS}L, S->]{FS[}, "
         )
     },
     "Diseases": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "[->B+U}[{], S->D-, -->{{}+F, "
         )
     },
     "Water": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "S->U-DL, L->[B+{+S], {->]SU}"
         )
     },
     "Resources": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "L->}LSS, F->SBUUF, +->+[+F[], "
         )
     },
     "Adaptation": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "]->FDF, +->+SL], F->L, "
         )
     },
     "Science": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "}->{SRL-], U->UBRF+U, "
         )
     },
     "Energy": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "[->BFSU[}], {->RRR{, +->-DLS, "
         )
     },
     "Predictions": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "+->}], F->F}[L+-], R->RLB}U{, "
         )
     },
     "Infrastructure": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "+->]+, R->FRL{F{, {->U-, "
         )
     },
     "Migration": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "F->B}{DD, L->}}RLD, +->[R+BS], "
         )
     },
     "Shitpost Friday": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "D->LL, F->F, R->RRBRB, "
         )
     },
     "Funny & Sad": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->FFLS[RRLF[RFLF]LFLF]L"
+            "F->BBFD, [->LRL]D, L->R{B{-, "
         )
     },
 }

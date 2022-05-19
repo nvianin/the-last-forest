@@ -207,9 +207,12 @@ class AppInterface {
         this.domController.focusInterface.build(tree.userData.post);
         this.focused_backup.position.copy(app.camera.position)
         this.focused_backup.rotation.copy(app.camera.rotation)
+
+        app.outlinePass.selectedObjects = [tree]
     }
 
     exit_focus() {
+        app.outlinePass.selectedObjects = []
         this.domController.focusInterface.container.style.opacity = 0;
         this.domController.focusInterface.container.style.left = "-10000px";
         this.focused_lerping = true;

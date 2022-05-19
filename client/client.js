@@ -39,8 +39,8 @@ const debug = {
     aggregate: false,
     show_imposters: true,
     particle: false,
-    postprocessing: false,
-    tree_build_limit: 0,
+    postprocessing: true,
+    tree_build_limit: 128,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -541,7 +541,7 @@ class App {
         this.composer.addPass(this.ssaoPass);
         /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
-        /* this.composer.addPass(this.outlinePass) */
+        this.composer.addPass(this.outlinePass)
     }
 
     initShadows() {
@@ -698,7 +698,7 @@ class App {
                     const z = post.tsne_coordinates.y * sc
                     /* const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20); */
                     const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
-                    const scale = 20 * upvote_factor;
+                    const scale = 32 * upvote_factor;
                     const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
 
                     let y = -100;
