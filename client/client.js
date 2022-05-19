@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: false,
     postprocessing: true,
-    tree_build_limit: 1024,
+    tree_build_limit: 0,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -887,6 +887,12 @@ class App {
             this.renderer.render(this.scene, this.camera);
 
         /* if (this.tsneRenderer) this.tsneRenderer.update() */
+
+        if (this.tsneRenderer) {
+            const t = Math.clamp(this.camera.position.y / 10000 - .2, 0, 1);
+            this.tsneRenderer.displayPlane.material.opacity = t
+            log(t)
+        }
 
         /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
 

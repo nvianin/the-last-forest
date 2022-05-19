@@ -2,7 +2,8 @@ class TsneRegionRenderer {
     constructor(renderer, posts) {
         this.renderer = renderer;
         this.scene = new THREE.Scene()
-        this.camera = new THREE.OrthographicCamera(-128, 128, 128, -128, )
+        this.width = 256
+        this.camera = new THREE.OrthographicCamera(-this.width / 2, this.width / 2, this.width / 2, -this.width / 2)
         this.camera.position.z = .1
 
         this.posts = Object.values(posts);
@@ -14,7 +15,8 @@ class TsneRegionRenderer {
             stencilBuffer: false
         })
         this.frametex = new THREE.FramebufferTexture(this.side, this.side, THREE.RGBAFormat)
-        this.frametex.magFilter = THREE.LinearMipMapLinearFilter;
+        this.frametex.magFilter = THREE.LinearFilter;
+        this.frametex.flipY = false;
 
         this.plane = new THREE.Mesh(
             new THREE.PlaneGeometry(256, 256),
@@ -62,8 +64,9 @@ class TsneRegionRenderer {
                 transparent: true
             })
         )
-        this.displayPlane.scale.set(app.tsneSize, app.tsneSize, app.tsneSize)
-        this.displayPlane.scale.set(app.tsneSize, app.tsneSize, app.tsneSize)
+        /* this.displayPlane.scale.set(app.tsneSize, app.tsneSize, app.tsneSize)
+        this.displayPlane.scale.set(app.tsneSize, app.tsneSize, app.tsneSize) */
+        this.displayPlane.scale.multiplyScalar(this.width * app.tsneSize)
         this.displayPlane.position.y = 10;
         this.displayPlane.rotation.x = -Math.HALF_PI
         /* this.scene.add(this.displayPlane); */
@@ -153,6 +156,7 @@ class TsneRegionRenderer {
         this.material.uniforms.blur_pass.value = false;
         // Turn on post-processing square
         this.renderer.render(this.scene, this.camera)
+        this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
 
         // Reset renderer parameters
         this.plane.visible = false;

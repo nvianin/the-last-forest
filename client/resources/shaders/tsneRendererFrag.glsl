@@ -20,9 +20,9 @@ void main() {
 
         result /= float(total) * 12.;
     } else {
-        result = texture2D(tsne_map, st) * 20.;
-        if(length(result) > 2.)
-            result *= .2;
+        result = texture2D(tsne_map, vec2(st.x, 1. - st.y)) * 1.;
+        /* if(length(result) > 2.)
+            result *= .2; */
     }
 
     gl_FragColor = result;
