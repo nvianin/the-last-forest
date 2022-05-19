@@ -1,18 +1,24 @@
-#define MAX_POST_COUNT 1
+#define TWO_PI 6.28318530718
 
 uniform sampler2D tsne_map;
 uniform float side;
+uniform bool blur_pass;
 
 void main() {
     vec2 st = gl_FragCoord.xy / side;
-    /* for(int i = 0;i < postcount;i++){
-        if (posts[i * 2] != 0){
-            
+    vec4 result = vec4(0.);
+    /* if(blur_pass) { */
+    int total = 32;
+    for(float d = 0.; d < 32.; d++) {
+        for(int i = 0; i < total; i++) {
+            float x = st.x + cos(float(i) / float(total) * TWO_PI) * (.0014 * d);
+            float y = st.y + sin(float(i) / float(total) * TWO_PI) * (.0014 * d);
+            result += texture2D(tsne_map, vec2(x, y));
         }
-    } */
-    /* result /= float(total); */
+    }
 
-    /* float circle = distance(); */
-    gl_FragColor = vec4(1., 0., 1., 1.);
-    gl_FragColor = texture2D(tsne_map, st);
+    result /= float(total) * 7.5;
+    /* } */
+    /* gl_FragColor = vec4(blur_pass); */
+    gl_FragColor = result;
 }

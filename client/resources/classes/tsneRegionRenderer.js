@@ -8,7 +8,7 @@ class TsneRegionRenderer {
         this.posts = Object.values(posts);
 
 
-        this.side = 64 ** 2;
+        this.side = 32 ** 2;
         this.framebuffer = new THREE.WebGLRenderTarget(this.side, this.side, {
             depthBuffer: false,
             stencilBuffer: false
@@ -58,6 +58,7 @@ class TsneRegionRenderer {
         )
         this.displayPlane.scale.set(app.settings.ground_scale, app.settings.ground_scale, app.settings.ground_scale)
         this.displayPlane.position.y = 10;
+        /* this.scene.add(this.displayPlane); */
         /* this.displayPlane.rotation.x = -Math.HALF_PI */
         /* this.plane.material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
@@ -65,9 +66,12 @@ class TsneRegionRenderer {
             wireframe: true
         }) */
 
+        const col = new THREE.Color()
+        app.renderer.getClearColor(col)
         this.backup = {
             size: new THREE.Vector2,
-            ratio: app.renderer.getPixelRatio()
+            ratio: app.renderer.getPixelRatio(),
+            bgcolor: col
         }
     }
 
@@ -121,22 +125,29 @@ class TsneRegionRenderer {
         // Set renderer to square
         this.renderer.setSize(this.side, this.side)
         this.renderer.setPixelRatio(1)
-        /* this.renderer.setRenderTarget(this.framebuffer) */
+        this.renderer.setClearColor(0x000000)
+        this.renderer.setRenderTarget(this.framebuffer)
 
         this.renderer.render(this.scene, this.camera)
         // Framebuffer to texture
-        /* this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex) */
+        this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
 
-        /* // Turn on post-processing square
+        //Blur multiple times
         this.plane.visible = true;
-        this.renderer.setRenderTarget(null)
+        for (let i = 0; i < 2; i++) {
+            this.renderer.render(this.scene, this.camera)
+            this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
+        }
+
+        // Turn on post-processing square
         this.renderer.render(this.scene, this.camera)
 
         // Reset renderer parameters
-        this.plane.visible = false; */
+        this.plane.visible = false;
         /* this.renderer.setSize(this.backup.size.x, this.backup.size.y)
         this.renderer.setPixelRatio(this.backup.ratio)
         this.renderer.setRenderTarget(null) */
+        this.renderer.setClearColor(this.backup.bgcolor)
 
 
         /* log("TSNE rendered") */
