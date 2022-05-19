@@ -890,7 +890,7 @@ class App {
 
         if (this.tsneRenderer) {
             const t = Math.clamp(this.camera.position.y / 10000 - .2, 0, 1);
-            this.tsneRenderer.displayPlane.material.opacity = t
+            this.tsneRenderer.displayPlane.material.opacity = t * .4
             log(t)
         }
 
