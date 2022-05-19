@@ -316,7 +316,7 @@ canvas .text-input {
   position: fixed;
   top: 2%;
   left: 50%;
-  transform: translate(-50%);
+  transform: translate(-50%) scale(1);
 
   background-clip: text;
 }

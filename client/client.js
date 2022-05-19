@@ -80,7 +80,7 @@ class App {
             ground_side: 64,
             ground_scale: 256 + 64,
             draw_distance: 20000,
-            fog_offset: 2000,
+            fog_offset: 7000,
             walking_fog_multiplier: .1,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
@@ -873,15 +873,19 @@ class App {
 
     buildTSNEMap() {
         this.tsneRenderer = new TsneRegionRenderer(this.renderer, this.posts)
+        this.scene.add(this.tsneRenderer.displayPlane)
     }
 
     async render() {
         this.frame_time = Date.now();
         this.time = this.clock.getElapsedTime()
 
-        debug.postprocessing ?
+        /* debug.postprocessing ?
             this.composer.render() :
-            this.renderer.render(this.scene, this.camera);
+            this.renderer.render(this.scene, this.camera); */
+
+        if (this.tsneRenderer) this.tsneRenderer.update()
+
         /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
 
         this.sun.position.copy(this.camera.position).add(new THREE.Vector3(50, 100, 50));

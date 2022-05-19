@@ -3,6 +3,7 @@ class TsneRegionRenderer {
         this.renderer = renderer;
         this.scene = new THREE.Scene()
         this.camera = new THREE.PerspectiveCamera()
+        this.camera.position.z = .1
 
         this.posts = Object.values(posts);
 
@@ -10,6 +11,9 @@ class TsneRegionRenderer {
             new THREE.CircleGeometry(1, 3),
             new THREE.ShaderMaterial({
                 uniforms: {
+                    postcount: {
+                        value: this.posts.length
+                    },
                     posts: {
                         value: new Float32Array(this.posts.length * 2)
                     },
@@ -20,6 +24,8 @@ class TsneRegionRenderer {
 
             })
         )
+        this.scene.add(this.plane)
+
         this.material = this.plane.material
 
         this.side = 64 ** 2;
@@ -32,13 +38,30 @@ class TsneRegionRenderer {
         this.loadMaterial()
 
 
-        this.update();
-
+        this.displayPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(app.settings.ground_side, app.settings.ground_side),
+            new THREE.MeshPhysicalMaterial({
+                map: this.frametex,
+                depthTest: false,
+                depthWrite: false
+            })
+        )
+        this.displayPlane.scale.set(app.settings.ground_scale, app.settings.ground_scale, app.settings.ground_scale)
+        this.displayPlane.position.y = 10;
+        /* this.displayPlane.rotation.x = -Math.HALF_PI */
+        /* this.plane.material = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            side: THREE.DoubleSide,
+            wireframe: true
+        }) */
     }
 
     async loadMaterial() {
-        const frag = await (await fetch("./resources/shaders/tsneRendererFrag.glsl")).text
+        const frag = await (await fetch("./resources/shaders/tsneRendererFrag.glsl")).text()
         this.material.fragmentShader = frag;
+        this.material.needsUpdate = true
+        log(this.material.fragmentShader)
+        this.update();
     }
 
     update() {
@@ -55,13 +78,15 @@ class TsneRegionRenderer {
                 missing++
             }
         }
-        log(missing + " missing tsne coordinates.")
+        /* log(missing + " missing tsne coordinates.") */
 
+        this.displayPlane.rotation.x = app.time
 
-
-        this.renderer.setRenderTarget(this.framebuffer)
+        /* this.renderer.setRenderTarget(this.framebuffer) */
         this.renderer.render(this.scene, this.camera)
-        this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
-        this.renderer.setRenderTarget(null)
+        /* this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
+        this.renderer.setRenderTarget(null) */
+
+        /* log("TSNE rendered") */
     }
 }
