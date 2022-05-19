@@ -35,7 +35,7 @@ const debug = {
         value: 5
     },
     treeSeparationArrows: false,
-    use_cached_data: false || debug_activated,
+    use_cached_data: true || debug_activated,
     aggregate: false,
     show_imposters: true,
     particle: false,
