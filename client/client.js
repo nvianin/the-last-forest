@@ -617,7 +617,6 @@ class App {
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
-                this.buildTSNEMap()
 
             })
             // this.socket.on("temperature_data", temperature_data => {
@@ -852,6 +851,8 @@ class App {
         log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
         log("Tree vertex: " + vertCount)
         if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
+
+        this.buildTSNEMap()
     }
 
     buildLODs() {
