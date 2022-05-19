@@ -206,7 +206,7 @@ class App {
             specularIntensity: .3,
             color: fakeBackCol
         })
-        this.ground_fakeBack.position.y -= .1
+        this.ground_fakeBack.position.y -= .2
         this.scene.add(this.ground_fakeBack)
         if (debug.particle) {
             fetch("/resources/shaders/dustFrag.glsl").then(resp => {
@@ -595,7 +595,7 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            this.socket = io("localhost")
+            this.socket = io("last-forest.ddns.net")
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
@@ -617,7 +617,6 @@ class App {
 
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
-                this.buildTSNEMap()
 
             })
             // this.socket.on("temperature_data", temperature_data => {
@@ -673,6 +672,7 @@ class App {
     }
 
     buildTreesFromPosts() {
+        this.tsneSize = Math.sqrt(Object.keys(this.posts).length * 15);
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
@@ -684,7 +684,7 @@ class App {
             document.querySelector("#loading-screen-text").style.transition = ".2s cubic-bezier(0.165, 0.84, 0.44, 1);" */
             log("Preparing to build " + Object.values(this.posts).length + " trees")
 
-            const sc = Math.sqrt(Object.keys(this.posts).length * 15);
+            const sc = this.tsneSize;
             log("Calculated scale: " + sc)
             const invisible_mat = new THREE.MeshBasicMaterial({
                 visible: debug.show_imposters,
@@ -852,6 +852,8 @@ class App {
         log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
         log("Tree vertex: " + vertCount)
         if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
+
+        this.buildTSNEMap()
     }
 
     buildLODs() {
@@ -880,11 +882,11 @@ class App {
         this.frame_time = Date.now();
         this.time = this.clock.getElapsedTime()
 
-        /* debug.postprocessing ?
+        debug.postprocessing ?
             this.composer.render() :
-            this.renderer.render(this.scene, this.camera); */
+            this.renderer.render(this.scene, this.camera);
 
-        if (this.tsneRenderer) this.tsneRenderer.update()
+        /* if (this.tsneRenderer) this.tsneRenderer.update() */
 
         /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
 

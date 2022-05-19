@@ -2,21 +2,22 @@ class TsneRegionRenderer {
     constructor(renderer, posts) {
         this.renderer = renderer;
         this.scene = new THREE.Scene()
-        this.camera = new THREE.PerspectiveCamera()
+        this.camera = new THREE.OrthographicCamera(-128, 128, 128, -128, )
         this.camera.position.z = .1
 
         this.posts = Object.values(posts);
 
+        this.side = 512;
 
-        this.side = 32 ** 2;
         this.framebuffer = new THREE.WebGLRenderTarget(this.side, this.side, {
             depthBuffer: false,
             stencilBuffer: false
         })
         this.frametex = new THREE.FramebufferTexture(this.side, this.side, THREE.RGBAFormat)
+        this.frametex.magFilter = THREE.LinearMipMapLinearFilter;
 
         this.plane = new THREE.Mesh(
-            new THREE.CircleGeometry(1, 3),
+            new THREE.PlaneGeometry(256, 256),
             new THREE.ShaderMaterial({
                 uniforms: {
                     tsne_map: {
@@ -24,9 +25,11 @@ class TsneRegionRenderer {
                     },
                     side: {
                         value: this.side
+                    },
+                    blur_pass: {
+                        value: true
                     }
                 },
-
             })
         )
         this.scene.add(this.plane)
@@ -44,22 +47,25 @@ class TsneRegionRenderer {
             }),
             this.posts.length
         )
-        this.spheres.position.z = -200
+        /* this.spheres.position.z = -200 */
         this.scene.add(this.spheres)
 
 
         this.displayPlane = new THREE.Mesh(
-            new THREE.PlaneGeometry(app.settings.ground_side, app.settings.ground_side),
+            new THREE.PlaneGeometry(1, 1),
             new THREE.MeshPhysicalMaterial({
                 map: this.frametex,
                 depthTest: false,
-                depthWrite: false
+                depthWrite: false,
+                opacity: .5,
+                transparent: true
             })
         )
-        this.displayPlane.scale.set(app.settings.ground_scale, app.settings.ground_scale, app.settings.ground_scale)
+        this.displayPlane.scale.set(app.tsneSize, app.tsneSize, app.tsneSize)
+        this.displayPlane.scale.set(app.tsneSize, app.tsneSize, app.tsneSize)
         this.displayPlane.position.y = 10;
+        this.displayPlane.rotation.x = -Math.HALF_PI
         /* this.scene.add(this.displayPlane); */
-        /* this.displayPlane.rotation.x = -Math.HALF_PI */
         /* this.plane.material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             side: THREE.DoubleSide,
@@ -128,25 +134,28 @@ class TsneRegionRenderer {
         this.renderer.setClearColor(0x000000)
         this.renderer.setRenderTarget(this.framebuffer)
 
+
         this.renderer.render(this.scene, this.camera)
         // Framebuffer to texture
         this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
 
+        this.material.uniforms.blur_pass.value = true;
         //Blur multiple times
         this.plane.visible = true;
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 8; i++) {
             this.renderer.render(this.scene, this.camera)
             this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
         }
 
+        this.material.uniforms.blur_pass.value = false;
         // Turn on post-processing square
         this.renderer.render(this.scene, this.camera)
 
         // Reset renderer parameters
         this.plane.visible = false;
-        /* this.renderer.setSize(this.backup.size.x, this.backup.size.y)
+        this.renderer.setSize(this.backup.size.x, this.backup.size.y)
         this.renderer.setPixelRatio(this.backup.ratio)
-        this.renderer.setRenderTarget(null) */
+        this.renderer.setRenderTarget(null)
         this.renderer.setClearColor(this.backup.bgcolor)
 
 
