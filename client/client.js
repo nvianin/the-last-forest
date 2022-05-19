@@ -35,12 +35,12 @@ const debug = {
         value: 5
     },
     treeSeparationArrows: false,
-    use_cached_data: true || debug_activated,
+    use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
     particle: false,
     postprocessing: true,
-    tree_build_limit: 128,
+    tree_build_limit: 1024,
 
     enable: () => {
         for (let key of Object.keys(debug)) {

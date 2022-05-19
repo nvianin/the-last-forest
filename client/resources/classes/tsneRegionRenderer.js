@@ -43,7 +43,6 @@ class TsneRegionRenderer {
             new THREE.MeshBasicMaterial({
                 transparent: true,
                 opacity: .2,
-                color: 0xff00ff
             }),
             this.posts.length
         )
@@ -59,7 +58,7 @@ class TsneRegionRenderer {
                 map: this.frametex,
                 depthTest: false,
                 depthWrite: false,
-                opacity: .5,
+                opacity: .2,
                 transparent: true
             })
         )
@@ -93,6 +92,7 @@ class TsneRegionRenderer {
     }
 
     update() {
+        log("Updating TSNE displaymap...")
         /* let missing = 0;
         for (let i = 0; i < this.posts.length; i++) {
             if (this.posts[i].tsne_coordinates && Object.keys(treeTypes).includes(this.posts[i].flair)) {
@@ -162,6 +162,6 @@ class TsneRegionRenderer {
         this.renderer.setClearColor(this.backup.bgcolor)
 
 
-        /* log("TSNE rendered") */
+        log("TSNE displaymap updated.")
     }
 }
