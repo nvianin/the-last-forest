@@ -208,7 +208,7 @@ const load_colors = async () => {
             linewidth: .002,
             vertexColors: false,
             alphaToCoverage: false,
-            depthTest: false
+            /* depthTest: false */
         })
 
         treeColors[key].onBeforeCompile = shader => {

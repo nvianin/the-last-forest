@@ -331,7 +331,8 @@ canvas .text-input {
   margin-bottom: 2px;
   user-select: none;
   -webkit-user-drag: none;
-  width: 100%;
+  width: 100px;
+  height: 10px;
   border-radius: 10px;
   /* box-shadow: #fff 0 0 1px; */
   background-color: rgba(0.6, 0.56, 0.56, 1);

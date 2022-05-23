@@ -741,9 +741,9 @@ class App {
                     this.tree_imposters.push(imposter)
                     imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position)); */
 
-                    const outerScale = 10;
+                    const outerScale = 100;
 
-                    tree.scale.set(10, 10, 10)
+                    tree.scale.set(outerScale, outerScale, outerScale)
                     tree.children[0].scale.set(scale / outerScale, scale / outerScale, scale / outerScale)
                     /* object.updateMatrix */
 
@@ -927,7 +927,7 @@ class App {
         if (this.built_trees) {
             if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = this.time
             Object.keys(treeTypes).forEach(type => {
-                if (treeColors[type] && treeColors[type].userData) {
+                if (treeColors[type] && treeColors[type].userData.time) {
                     treeColors[type].userData.time.value = this.time
 
                 }
@@ -1057,8 +1057,8 @@ class App {
         this.thumbnailContainer.content.id = "thumbnail-content"
         this.thumbnailContainer.appendChild(this.thumbnailContainer.content)
 
-        typeInfos.reverse()
-        for (let t of this.thumbnails) {
+
+        for (let info of typeInfos) {
             const info = typeInfos.pop()
             /* const img = document.createElement("img");
             img.src = t
@@ -1074,7 +1074,9 @@ class App {
             imgContainer.style.backgroundColor = info.color
             imgContainer.type = info.name;
 
-            imgContainer.appendChild(img)
+            this.thumbnails.push(imgLabel)
+
+            /* imgContainer.appendChild(img) */
             imgContainer.appendChild(imgLabel)
 
             this.thumbnailContainer.content.appendChild(imgContainer)
@@ -1116,31 +1118,31 @@ class App {
 
         this.thumbnailContainer.onclick = e => {
             log(e.target.parentElement.type)
-
-            this.showOnlyCategories([e.target.parentElement.type])
+            for (let i of this.thumbnails)
+                this.showOnlyCategories([e.target.parentElement.type])
         }
 
-        this.thumbnailContainer.button = document.createElement("div");
-        this.thumbnailContainer.button.id = "thumbnail-button"
-        this.thumbnailContainer.appendChild(this.thumbnailContainer.button)
-        this.thumbnailHidden = false;
-        this.thumbnailContainer.button.onclick = () => {
+        // this.thumbnailContainer.button = document.createElement("div");
+        // this.thumbnailContainer.button.id = "thumbnail-button"
+        // this.thumbnailContainer.appendChild(this.thumbnailContainer.button)
+        // this.thumbnailHidden = false;
+        // this.thumbnailContainer.button.onclick = () => {
 
-            if (this.thumbnailHidden) {
-                this.thumbnailContainer.className = "thumbnail-container"
-                /* this.thumbnailContainer.style.right = "0%" */
-                this.thumbnailContainer.button.style.transform = ""
-                this.thumbnailContainer.button.style.transformOrigin = "right"
-            } else {
-                this.thumbnailContainer.className = "thumbnail-container-hidden"
-                this.thumbnailContainer.button.style.transform = "rotate(180deg)"
-                this.thumbnailContainer.button.style.transformOrigin = "left"
-                /* this.thumbnailContainer.style.right = "-6.5%" */
-            }
+        //     if (this.thumbnailHidden) {
+        //         this.thumbnailContainer.className = "thumbnail-container"
+        //         /* this.thumbnailContainer.style.right = "0%" */
+        //         this.thumbnailContainer.button.style.transform = ""
+        //         this.thumbnailContainer.button.style.transformOrigin = "right"
+        //     } else {
+        //         this.thumbnailContainer.className = "thumbnail-container-hidden"
+        //         this.thumbnailContainer.button.style.transform = "rotate(180deg)"
+        //         this.thumbnailContainer.button.style.transformOrigin = "left"
+        //         /* this.thumbnailContainer.style.right = "-6.5%" */
+        //     }
 
-            this.thumbnailHidden = !this.thumbnailHidden;
-        }
-        this.thumbnailContainer.button.click()
+        //     this.thumbnailHidden = !this.thumbnailHidden;
+        // }
+        // this.thumbnailContainer.button.click()
 
     }
 
