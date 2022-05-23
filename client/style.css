@@ -321,8 +321,7 @@ canvas .text-input {
   /* font-family: AvaraBold; */
   font-weight: 600;
   letter-spacing: 0.2pt;
-  font-size: 9pt;
-  line-height: 12pt;
+  line-height: calc(100vh / 30 * 0.75);
   text-align: center;
   vertical-align: middle;
   width: 100%;
@@ -342,6 +341,7 @@ canvas .text-input {
 }
 
 .thumbnail-label:hover {
+  font-size: 9pt;
   opacity: 1;
 }
 
@@ -358,7 +358,8 @@ canvas .text-input {
   user-select: none;
   -webkit-user-drag: none;
   width: 120px;
-  height: 16pt;
+  font-size: 0pt;
+  height: calc(100vh / 30);
   /* border-radius: 6px; */
   border-radius: 3px 0px 0px 3px;
   /* box-shadow: #fff 0 0 1px; */
@@ -382,6 +383,7 @@ canvas .text-input {
 }
 
 .thumbnail-active {
+  font-size: 9pt;
   right: 0px;
   filter: saturate(1.5);
 }

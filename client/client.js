@@ -235,9 +235,9 @@ class App {
                                 let [prelude, main] = frag.split("////")
                                 shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
                                 shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + main)
-                                log(shader.fragmentShader)
+                                /* log(shader.fragmentShader)
 
-                                log(shader.vertexShader)
+                                log(shader.vertexShader) */
 
                                 prelude = vert.split("////")[0]
                                 main = vert.split("////")[1]
@@ -453,6 +453,8 @@ class App {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
 
+            this.MouseCast()
+
             if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
 
@@ -492,7 +494,7 @@ class App {
     }
 
     initPostprocess() {
-        this.renderScene = new THREE.RenderPass(this.scene, this.camera);
+        this.renderPass = new THREE.RenderPass(this.scene, this.camera);
         this.composer = new THREE.EffectComposer(this.renderer);
 
         this.bloomPass = new THREE.UnrealBloomPass(
@@ -501,8 +503,8 @@ class App {
                 innerHeight
             ),
             1.2, // strength
-            .7, // radius
-            .5 // threshold
+            1.5, // radius
+            .23 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -535,13 +537,13 @@ class App {
         /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
 
-        this.composer.addPass(this.renderScene);
+        this.composer.addPass(this.renderPass);
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.ssaoPass);
+        /* this.composer.addPass(this.ssaoPass); */
         /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
-        this.composer.addPass(this.outlinePass)
+        /* this.composer.addPass(this.outlinePass) */
     }
 
     initShadows() {
@@ -878,6 +880,10 @@ class App {
     buildTSNEMap() {
         this.tsneRenderer = new TsneRegionRenderer(this.renderer, this.posts)
         this.scene.add(this.tsneRenderer.displayPlane)
+
+        if (debug.postprocessing) {
+            this.tsneRenderer.displayPlane.material.color.multiplyScalar(.68)
+        }
     }
 
     async render() {
@@ -927,56 +933,14 @@ class App {
 
         if (this.built_trees) {
             if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = this.time
+            if (this.interface.fatMat.uniforms.time) this.interface.fatMat.uniforms.time.value = this.time;
             Object.keys(treeTypes).forEach(type => {
                 if (treeColors[type] && treeColors[type].userData.time) {
                     treeColors[type].userData.time.value = this.time
 
                 }
             })
-            this.mousecast.setFromCamera(this.pointer, this.camera);
-            const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
-            if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
-                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
-            ) {
 
-                /* log(intersects[0].object) */
-                /* intersects[0].object.geometry.attributes */
-                let object = intersects[0].object.parent;
-                /* this.outlinePass.selectedObjects = [object] */
-                object.active = true;
-
-
-                /* log("found tree ", intersects[0].object) */
-                /* log(intersects[0].object.parent.userData.post) */
-                const post = object.userData.post;
-                this.renderer.domElement.style.cursor = "pointer"
-                this.postDom.style.cursor = "pointer"
-
-                /* log(Math.round_to_decimal(post.sentiment.score)) */
-
-                this.postDom.innerHTML = post.title;
-                /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
-                this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
-                this.activeUrl = post.url;
-                this.activeTree = intersects[0].object.parent;
-                /* log(this.activeTree) */
-                this.postDom.style.visibility = "visible";
-
-            } else {
-                this.renderer.domElement.style.cursor = "default";
-                this.postDom.style.cursor = "default";
-                /* if (this.outlinePass.selectedObjects[0]) {
-                    this.outlinePass.selectedObjects[0].active = false;
-                } */
-                if (!waiting_to_release_tooltip) {
-                    waiting_to_release_tooltip = true;
-                    setTimeout(() => {
-                        this.postDom.style.visibility = "hidden";
-                        waiting_to_release_tooltip = false;
-                    }, 200)
-                }
-                /* this.outlinePass.selectedObjects = [] */
-            }
         }
 
 
@@ -992,6 +956,53 @@ class App {
         this.frameCount++;
         this.renderer.info.reset()
         this.dt = this.clock.getDelta()
+    }
+
+    MouseCast() {
+        this.mousecast.setFromCamera(this.pointer, this.camera);
+        const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
+        if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
+            (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+        ) {
+
+            /* log(intersects[0].object) */
+            /* intersects[0].object.geometry.attributes */
+            let object = intersects[0].object.parent;
+            /* this.outlinePass.selectedObjects = [object] */
+            object.active = true;
+
+
+            /* log("found tree ", intersects[0].object) */
+            /* log(intersects[0].object.parent.userData.post) */
+            const post = object.userData.post;
+            this.renderer.domElement.style.cursor = "pointer"
+            this.postDom.style.cursor = "pointer"
+
+            /* log(Math.round_to_decimal(post.sentiment.score)) */
+
+            this.postDom.innerHTML = post.title;
+            /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
+            this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
+            this.activeUrl = post.url;
+            this.activeTree = intersects[0].object.parent;
+            /* log(this.activeTree) */
+            this.postDom.style.visibility = "visible";
+
+        } else {
+            this.renderer.domElement.style.cursor = "default";
+            this.postDom.style.cursor = "default";
+            /* if (this.outlinePass.selectedObjects[0]) {
+                this.outlinePass.selectedObjects[0].active = false;
+            } */
+            if (!waiting_to_release_tooltip) {
+                waiting_to_release_tooltip = true;
+                setTimeout(() => {
+                    this.postDom.style.visibility = "hidden";
+                    waiting_to_release_tooltip = false;
+                }, 200)
+            }
+            /* this.outlinePass.selectedObjects = [] */
+        }
     }
 
     buildIndexThumbnails() {
@@ -1186,6 +1197,7 @@ class App {
 
         if (this.composer) {
             this.composer.setSize(innerWidth, innerHeight);
+            this.bloomPass.setSize(innerWidth, innerHeight)
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
         }

@@ -59,7 +59,7 @@ class TsneRegionRenderer {
         this.loadMaterial()
 
         this.displayPlane = new THREE.Mesh(
-            new THREE.PlaneGeometry(1, 1),
+            new THREE.PlaneGeometry(1, 1, 32, 32),
             new THREE.MeshPhysicalMaterial({
                 map: this.frametex,
                 depthTest: false,
@@ -98,7 +98,7 @@ class TsneRegionRenderer {
         const frag = await (await fetch("./resources/shaders/tsneRendererFrag.glsl")).text()
         this.material.fragmentShader = frag;
         this.material.needsUpdate = true
-        log(this.material.fragmentShader)
+        /* log(this.material.fragmentShader) */
         this.update();
     }
 

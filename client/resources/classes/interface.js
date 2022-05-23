@@ -86,7 +86,7 @@ class AppInterface {
             vertexColors: false,
 
             dashed: false,
-            alphaToCoverage: true,
+            alphaToCoverage: false,
         })
         const linegeo = new THREE.LineGeometry()
         linegeo.setPositions(new THREE.SphereGeometry().attributes.position.array)
@@ -94,7 +94,8 @@ class AppInterface {
             linegeo,
             this.fatMat
         )
-        this.fatTree.scale.multiplyScalar(1000)
+        /* this.fatTree.scale.multiplyScalar(1000) */
+        this.load_shader()
         app.scene.add(this.fatTree);
     }
     setupListeners() {
@@ -214,6 +215,29 @@ class AppInterface {
         })
     }
 
+    async load_shader() {
+        const shader = await (await fetch("../resources/shaders/fatLineVertex.glsl")).text()
+        /* log(shader) */
+        const [prelude, main] = shader.split("////")
+
+        /* const ori = this.fatMat
+        this.fatMat = ori.clone()
+        ori.dispose() */
+
+        this.fatMat
+
+
+        this.fatMat.vertexShader = this.fatMat.vertexShader.replace("attribute vec3 instanceColorEnd;", "attribute vec3 instanceColorEnd; \n" + prelude)
+        this.fatMat.vertexShader = this.fatMat.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
+        /* this.fatMat.uniforms.time = {
+            value: 0
+        } */
+        log(this.fatMat.vertexShader)
+
+        this.fatMat.needsUpdate = true;
+        log(this.fatMat.needsUpdate)
+    }
+
 
     enter_focus(tree) {
         if (!this.focused_mode) this.focused_backup.mapControls = this.mapControls.enabled
@@ -228,9 +252,18 @@ class AppInterface {
         this.focused_backup.rotation.copy(app.camera.rotation)
 
         log(tree)
-        this.fatTree.geometry.setPositions(tree.children[0].geometry.attributes.position.array)
+
+        const upvote_factor = Math.map(tree.userData.post.score, 300, 16000, 1, 100);
+        const scale = 32 * upvote_factor;
+
+        const positions = tree.children[0].geometry.attributes.position.array.map(x => {
+            return x * scale
+        })
+
+        this.fatTree.geometry.setPositions(positions)
         this.fatTree.position.copy(tree.position)
         this.fatTree.rotation.copy(tree.rotation)
+        this.fatMat.color = tree.children[0].material.color;
 
         app.outlinePass.selectedObjects = [tree]
     }
