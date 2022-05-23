@@ -189,7 +189,7 @@ const treeTypes = {
 const treeColors = {}
 const load_colors = async () => {
     const vertexShader = await (await fetch("/resources/shaders/lineVertex.glsl")).text()
-    log(vertexShader)
+    /*     log(vertexShader) */
 
     const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\r\n")
     let i = 0;
@@ -207,7 +207,8 @@ const load_colors = async () => {
             transparent: true,
             linewidth: .002,
             vertexColors: false,
-            alphaToCoverage: false
+            alphaToCoverage: false,
+            depthTest: false
         })
 
         treeColors[key].onBeforeCompile = shader => {

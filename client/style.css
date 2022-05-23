@@ -428,7 +428,7 @@ canvas .text-input {
   font-family: Robotomono;
   position: relative;
   /* max-width: 100%; */
-  max-height: 50vh;
+  max-height: 39vh;
   overflow-y: scroll;
   word-break: break-word;
   pointer-events: all;

@@ -1,5 +1,9 @@
 class TsneRegionRenderer {
     constructor(renderer, posts) {
+        if (app.tsneRenderer) {
+            throw new Error("TsneRenderer already exists !")
+        }
+        this.id = Math.floor((Math.random() * 0xffffff)).toString()
         this.renderer = renderer;
         this.scene = new THREE.Scene()
         this.width = 256
@@ -16,7 +20,7 @@ class TsneRegionRenderer {
         })
         this.frametex = new THREE.FramebufferTexture(this.side, this.side, THREE.RGBAFormat)
         this.frametex.magFilter = THREE.LinearFilter;
-        this.frametex.flipY = false;
+        /* this.frametex.flipY = false; */
 
         this.plane = new THREE.Mesh(
             new THREE.PlaneGeometry(256, 256),
@@ -44,7 +48,7 @@ class TsneRegionRenderer {
             new THREE.CircleGeometry(1, 32),
             new THREE.MeshBasicMaterial({
                 transparent: true,
-                opacity: .2,
+                opacity: .5,
             }),
             this.posts.length
         )
@@ -60,7 +64,7 @@ class TsneRegionRenderer {
                 map: this.frametex,
                 depthTest: false,
                 depthWrite: false,
-                opacity: .2,
+                opacity: 1,
                 transparent: true
             })
         )
@@ -69,6 +73,8 @@ class TsneRegionRenderer {
         this.displayPlane.scale.multiplyScalar(this.width * app.tsneSize)
         this.displayPlane.position.y = 10;
         this.displayPlane.rotation.x = -Math.HALF_PI
+        this.displayPlane.rotation.z = Math.PI
+        this.displayPlane.scale.x *= -1;
         /* this.scene.add(this.displayPlane); */
         /* this.plane.material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
@@ -83,6 +89,8 @@ class TsneRegionRenderer {
             ratio: app.renderer.getPixelRatio(),
             bgcolor: col
         }
+
+        this.built = false;
     }
 
     async loadMaterial() {
@@ -95,6 +103,7 @@ class TsneRegionRenderer {
     }
 
     update() {
+        if (this.built) return false;
         log("Updating TSNE displaymap...")
         /* let missing = 0;
         for (let i = 0; i < this.posts.length; i++) {
@@ -138,6 +147,7 @@ class TsneRegionRenderer {
         this.renderer.setSize(this.side, this.side)
         this.renderer.setPixelRatio(1)
         this.renderer.setClearColor(0x000000)
+        this.renderer.setClearAlpha(0)
         this.renderer.setRenderTarget(this.framebuffer)
 
 
@@ -155,6 +165,7 @@ class TsneRegionRenderer {
 
         this.material.uniforms.blur_pass.value = false;
         // Turn on post-processing square
+        this.renderer.clear()
         this.renderer.render(this.scene, this.camera)
         this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
 
@@ -164,8 +175,11 @@ class TsneRegionRenderer {
         this.renderer.setPixelRatio(this.backup.ratio)
         this.renderer.setRenderTarget(null)
         this.renderer.setClearColor(this.backup.bgcolor)
+        this.renderer.setClearAlpha(1)
 
 
-        log("TSNE displaymap updated.")
+        log("TSNE displaymap updated from " + this.id)
+        log(this)
+        this.built = true
     }
 }

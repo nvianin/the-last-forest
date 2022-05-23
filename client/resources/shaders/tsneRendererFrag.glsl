@@ -18,16 +18,18 @@ void main() {
             }
         }
 
-        result /= float(total) * 12.;
+        result /= float(total) * 14.;
     } else {
-        float x = 1. - st.y;
-        float y = st.x;
+        float x = st.x;
+        float y = st.y;
         result = vec4(mix(texture2D(tsne_map, vec2(x, y)).xyz, normalize(texture2D(tsne_map, vec2(x, y)).xyz), .3), texture2D(tsne_map, vec2(x, y)).w);
-        result = texture2D(tsne_map, vec2(x, y));
+        /* result = texture2D(tsne_map, vec2(x, y)); */
         /* if(length(result) > 2.)
             result *= .2; */
+        /* result = vec4(1., 0., 0., 1.); */
     }
 
     gl_FragColor = result;
-    /* gl_FragColor = vec4(1., 0., 0., 1.); */
+    /* gl_FragColor = vec4(0.);
+    gl_FragColor = vec4(1., 0., 0., 1.); */
 }
