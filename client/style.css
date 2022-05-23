@@ -247,6 +247,14 @@ canvas .text-input {
   user-select: none;
   pointer-events: none;
 }
+#loading-desc {
+}
+#loading-bar {
+}
+#loading-bar-inner {
+}
+#loading-button {
+}
 
 #thumbnail-button {
   position: relative;
@@ -436,15 +444,15 @@ canvas .text-input {
   /* font-family: AvaraBold; */
   font-weight: 600;
   letter-spacing: 0.2pt;
-  font-size: 9pt;
-  line-height: 12pt;
+  font-size: 11pt;
+  line-height: 13pt;
   text-align: center;
   vertical-align: middle;
 
   width: fit-content;
   /* position: absolute; */
   left: 0%;
-  padding: 4px;
+  padding: 5px;
   color: white;
   opacity: 1;
   border-radius: 3px;
@@ -467,9 +475,13 @@ canvas .text-input {
   font-family: Robotomono;
 }
 
+.focus-separator {
+  height: 45px;
+}
+
 #focus-media {
   max-width: 100%;
-  /* height: 0; */
+  height: fit-content;
   margin: 10px;
   border-radius: 10px;
 }
@@ -478,7 +490,6 @@ canvas .text-input {
   height: 0%;
 }
 #focus-img {
-  margin-top: 25px;
   max-width: 100%;
   max-height: 50vh;
   overflow-y: scroll;

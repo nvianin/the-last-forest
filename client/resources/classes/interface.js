@@ -78,6 +78,24 @@ class AppInterface {
         }
         this.target.fog = this.MAP_FOG
         this.target.fov = app.camera.fov;
+
+        this.fatMat = new THREE.LineMaterial({
+            color: 0xffffff,
+            linewidth: .01,
+            worldunits: true,
+            vertexColors: false,
+
+            dashed: false,
+            alphaToCoverage: true,
+        })
+        const linegeo = new THREE.LineGeometry()
+        linegeo.setPositions(new THREE.SphereGeometry().attributes.position.array)
+        this.fatTree = new THREE.Line2(
+            linegeo,
+            this.fatMat
+        )
+        this.fatTree.scale.multiplyScalar(100)
+        app.scene.add(this.fatTree);
     }
     setupListeners() {
         this.mouse = new THREE.Vector2;
@@ -208,6 +226,8 @@ class AppInterface {
         this.domController.focusInterface.build(tree.userData.post);
         this.focused_backup.position.copy(app.camera.position)
         this.focused_backup.rotation.copy(app.camera.rotation)
+
+        /* this.fatTree.position.copy(tree.position) */
 
         app.outlinePass.selectedObjects = [tree]
     }

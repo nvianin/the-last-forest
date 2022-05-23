@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    tree_build_limit: 16,
+    tree_build_limit: 256,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -855,7 +855,7 @@ class App {
         if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
 
         this.buildTSNEMap()
-        this.interface.enter_focus(this.trees[0])
+        this.interface.enter_focus(this.trees[14])
     }
 
     buildLODs() {

@@ -149,6 +149,10 @@ class FocusInterface {
         this.dateContainer.id = "focus-date"
         this.container.appendChild(this.dateContainer)
 
+        this.separator = document.createElement("div")
+        this.separator.className = "focus-separator"
+        this.container.appendChild(this.separator)
+
         this.mediaContainer = document.createElement("div");
         this.mediaContainer.id = "focus-media"
         this.container.appendChild(this.mediaContainer)
