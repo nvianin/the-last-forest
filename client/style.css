@@ -291,6 +291,7 @@ canvas .text-input {
   z-index: 200;
   transition: 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   transform-origin: left;
+  right: 0%;
 }
 .thumbnail-container {
   right: 0%;
@@ -306,17 +307,19 @@ canvas .text-input {
 }
 
 .thumbnail-label {
-  /* font-family: RobotoMono; */
-  font-family: AvaraBold;
+  font-family: RobotoMono;
+  /* font-family: AvaraBold; */
   font-weight: 200;
   font-size: 9pt;
-  line-height: 10pt;
+  line-height: 9pt;
   text-align: center;
+  vertical-align: middle;
   width: 100%;
   position: fixed;
   top: 2%;
   left: 50%;
   transform: translate(-50%) scale(1);
+  padding: 2px;
 
   background-clip: text;
 }
@@ -332,7 +335,7 @@ canvas .text-input {
   user-select: none;
   -webkit-user-drag: none;
   width: 100px;
-  height: 10px;
+  height: 10pt;
   border-radius: 10px;
   /* box-shadow: #fff 0 0 1px; */
   background-color: rgba(0.6, 0.56, 0.56, 1);

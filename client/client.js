@@ -38,9 +38,9 @@ const debug = {
     use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
-    particle: true,
-    postprocessing: true,
-    tree_build_limit: 512,
+    particle: false,
+    postprocessing: false,
+    tree_build_limit: 16,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
