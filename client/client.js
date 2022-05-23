@@ -38,9 +38,9 @@ const debug = {
     use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
-    particle: false,
+    particle: true,
     postprocessing: true,
-    tree_build_limit: 0,
+    tree_build_limit: 512,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -80,7 +80,7 @@ class App {
             ground_side: 64,
             ground_scale: 256 + 64,
             draw_distance: 20000,
-            fog_offset: 7000,
+            fog_offset: 3000,
             walking_fog_multiplier: .1,
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
@@ -214,7 +214,7 @@ class App {
                     fetch("/resources/shaders/dustVert.glsl").then(resp => {
                         resp.text().then(vert => {
                             this.dustParticles = new THREE.Points(
-                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 1, this.settings.ground_side * 1),
+                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 2, this.settings.ground_side * 2),
                                 /* new THREE.ShaderMaterial({
                                     vertexShader: vert,
                                     fragmentShader: frag
@@ -596,6 +596,7 @@ class App {
             this.connection_conditions_threshold = 1;
 
             this.socket = io("last-forest.ddns.net")
+            /* this.socket = io() */
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
@@ -891,7 +892,7 @@ class App {
         if (this.tsneRenderer) {
             const t = Math.clamp(this.camera.position.y / 10000 - .2, 0, 1);
             this.tsneRenderer.displayPlane.material.opacity = t * .4
-            log(t)
+            /* log(t) */
         }
 
         /* if (this.thumbnailCam) this.renderer.render(this.thumbnailScene, this.thumbnailCam) */
@@ -995,7 +996,7 @@ class App {
     buildIndexThumbnails() {
         this.thumbnails = []
 
-        const width = 256;
+        /* const width = 256;
         const height = 512;
 
         const thumbnailScene = new THREE.Scene()
@@ -1013,7 +1014,7 @@ class App {
         const thumbnailCanvas = document.createElement("canvas")
         thumbnailCanvas.width = width;
         thumbnailCanvas.height = height;
-        const ctx = thumbnailCanvas.getContext("2d")
+        const ctx = thumbnailCanvas.getContext("2d") */
 
         let tree;
         let typeInfos = []
@@ -1036,8 +1037,8 @@ class App {
             }
             log("Rendered thumbnail is black: " + all_black) */
 
-            const imgData = new ImageData(pixelBuffer, width, height)
-            ctx.putImageData(imgData, 0, 0)
+            /* const imgData = new ImageData(pixelBuffer, width, height)
+            ctx.putImageData(imgData, 0, 0) */
 
             /* log(pixelBuffer) */
             this.thumbnails.push(thumbnailCanvas.toDataURL())
@@ -1059,10 +1060,10 @@ class App {
         typeInfos.reverse()
         for (let t of this.thumbnails) {
             const info = typeInfos.pop()
-            const img = document.createElement("img");
+            /* const img = document.createElement("img");
             img.src = t
             img.className = "thumbnail-image"
-            img.setAttribute("draggable", false)
+            img.setAttribute("draggable", false) */
 
             const imgLabel = document.createElement("div")
             imgLabel.textContent = info.name
@@ -1116,7 +1117,8 @@ class App {
 
         this.thumbnailContainer.onclick = e => {
             log(e.target.parentElement.type)
-            this.show
+
+            this.showOnlyCategories([e.target.parentElement.type])
         }
 
         this.thumbnailContainer.button = document.createElement("div");
@@ -1147,6 +1149,8 @@ class App {
         for (let i = 0; i < this.trees.length; i++) {
             if (!multiCludes(this.trees[i].userData.post.flair, categories)) {
                 this.trees[i].visible = false;
+            } else {
+                this.trees[i].visible = true
             }
         }
 
