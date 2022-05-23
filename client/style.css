@@ -138,11 +138,11 @@ canvas .text-input {
   width: 90vh;
   height: 23px;
   transform: rotate(90deg) translate(50%);
-  opacity: 50%;
+  opacity: 90%;
   transition: 0.3s;
 }
 #zoom-slider-container:hover {
-  opacity: 90%;
+  opacity: 100%;
   /* transform: rotate(90deg) translate(50%) scale(110%); */
 }
 
@@ -153,12 +153,12 @@ canvas .text-input {
   width: 10%;
   min-width: 100px;
   transition: 0.3s;
-  opacity: 50%;
+  opacity: 90%;
 }
 
 #mode-slider-container:hover {
   /* transform: translate(-50%) scale(1.5); */
-  opacity: 90%;
+  opacity: 100%;
 }
 
 .label {
@@ -367,10 +367,12 @@ canvas .text-input {
   right: 0px;
   z-index: 1000;
   opacity: 1;
+  cursor: pointer;
 }
 
 .thumbnail-active {
   right: 0px;
+  filter: saturate(1.5);
 }
 
 .thumbnail-deactivated {
