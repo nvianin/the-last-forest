@@ -1020,7 +1020,7 @@ class App {
         let typeInfos = []
 
         Object.entries(treeTypes).forEach(([flair, type]) => {
-            thumbnailScene.remove(tree)
+            /* thumbnailScene.remove(tree)
             tree = this.tree.buildTreeType(flair, 4);
             log(tree)
             thumbnailScene.add(tree);
@@ -1029,7 +1029,7 @@ class App {
             this.renderer.clear()
             this.renderer.render(thumbnailScene, thumbnailCam);
 
-            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, width, height, pixelBuffer)
+            this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, width, height, pixelBuffer) */
 
             /* let all_black = true;
             for (let val of pixelBuffer) {
@@ -1041,14 +1041,14 @@ class App {
             ctx.putImageData(imgData, 0, 0) */
 
             /* log(pixelBuffer) */
-            this.thumbnails.push(thumbnailCanvas.toDataURL())
+            /* this.thumbnails.push(thumbnailCanvas.toDataURL()) */
             typeInfos.push({
                 color: treeTypes[flair].color,
                 name: flair,
             })
         })
-        this.renderer.setRenderTarget(null)
-        this.renderer.setClearAlpha(1)
+        /* this.renderer.setRenderTarget(null)
+        this.renderer.setClearAlpha(1) */
 
         this.thumbnailContainer = document.createElement("div")
         this.thumbnailContainer.id = "thumbnail-container"
@@ -1078,7 +1078,6 @@ class App {
             imgContainer.appendChild(imgLabel)
 
             this.thumbnailContainer.content.appendChild(imgContainer)
-
         }
 
         document.body.appendChild(this.thumbnailContainer)
