@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../node_modules/three/build/three.js"></script>
+    <script defer>
+        window.onload = () => {
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var geometry = new THREE.BoxGeometry(1, 1, 1);
+            var material = new THREE.MeshBasicMaterial({
+                color: 0x005E99
+            });
+
+            var cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+            cube.scale.multiplyScalar(.1)
+            var cam = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+                color: "red"
+            }))
+            var cam2 = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+                color: "blue"
+            }))
+            cam.scale.multiplyScalar(.1)
+            cam2.scale.multiplyScalar(.1)
+
+            scene.add(cam)
+            scene.add(cam2)
+
+            var clock = new THREE.Clock()
+
+
+            camera.position.z = 5;
+
+            var render = function () {
+                const time = clock.getElapsedTime()
+                requestAnimationFrame(render);
+                cam.position.set(
+                    Math.cos(time) * 1,
+                    Math.sin(time) * 1,
+                    0
+                )
+                cam.lookAt(cube.position)
+                cam2.position.copy(cam.position)
+                cam2.lookAt(cube.position)
+                cam2.position.add(new THREE.Vector3(Math.cos(time + Math.PI / 2), Math.sin(time + Math.PI / 2),
+                    0))
+                //cube.rotation.x += 0.1;
+                //cube.rotation.y += 0.1;
+
+                renderer.render(scene, camera);
+            };
+
+            render();
+
+        }
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

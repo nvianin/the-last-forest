@@ -254,25 +254,34 @@ class AppInterface {
         this.domController.update()
         // Are we in focused mode ? Different state machines
         if (this.focused_mode && !this.focused_lerping) {
-            app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, .1);
+            app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, dt);
             app.camera.updateProjectionMatrix()
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt / 10)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt / 100)
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt / 100000000)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt / 100000000)
+
+            log(app.scene.fog.near, app.scene.fog.far)
 
 
-            this.focused_target.position.set(
+            this.focused_target.position
+                .set(
                     Math.cos(app.time * .1 + this.focused_angle) * this.focused_target_distance,
                     2,
                     Math.sin(app.time * .1 + this.focused_angle) * this.focused_target_distance
-                ).add(this.focused_tree.position)
+                )
+                .add(this.focused_tree.position)
                 .add(new THREE.Vector3(0, this.focused_target_height + 100, 0))
+                .add(new THREE.Vector3(
+                    Math.cos(app.time * .1 + this.focused_angle + Math.HALF_PI) * this.focused_target_distance,
+                    0,
+                    Math.sin(app.time * .1 + this.focused_angle + Math.HALF_PI) * this.focused_target_distance
+                ))
 
             this.rotation_dummy.position.copy(app.camera.position)
             this.rotation_dummy.rotation.set(0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
 
             /* log(app.camera.position, this.focused_target.position, dt) */
-            app.camera.position.lerp(this.focused_target.position, dt)
+            app.camera.position.lerp(this.focused_target.position.clone(), dt)
             /* log(app.camera.position) */
             /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
             app.camera.lookAt(this.focused_tree.position)

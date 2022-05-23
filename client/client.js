@@ -38,8 +38,8 @@ const debug = {
     use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
-    particle: false,
-    postprocessing: false,
+    particle: true,
+    postprocessing: true,
     tree_build_limit: 16,
 
     enable: () => {
@@ -881,7 +881,7 @@ class App {
 
     async render() {
         this.frame_time = Date.now();
-        this.time = this.clock.getElapsedTime()
+        this.time = this.clock.getElapsedTime() * 10
 
         debug.postprocessing ?
             this.composer.render() :

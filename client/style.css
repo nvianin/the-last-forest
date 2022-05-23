@@ -398,7 +398,7 @@ canvas .text-input {
   left: 5%;
   top: 5%;
   max-height: 85%;
-  max-width: calc(100% - 100px - 10%);
+  max-width: 40%;
   z-index: 2000;
   color: white;
   pointer-events: none;
@@ -419,19 +419,22 @@ canvas .text-input {
   top: 5%;
   left: 5%;
   right: 10%;
-  font-size: 4vw;
-  line-height: 4.6vw;
+  font-size: 24pt;
+  line-height: 28pt;
   user-select: none;
   max-width: 95%;
 }
 
 #focus-date {
-  margin: 10px;
+  position: absolute;
+  right: 0;
+  /* margin: 10px; */
+  margin-right: 25px;
   font-family: Robotomono;
 }
 
 #focus-media {
-  max-width: 90%;
+  max-width: 100%;
   /* height: 0; */
   margin: 10px;
   border-radius: 10px;
