@@ -282,6 +282,7 @@ canvas .text-input {
 
 #thumbnail-container {
   user-select: none;
+  pointer-events: none;
   -webkit-user-drag: none;
   position: fixed;
   width: 120px;
@@ -307,6 +308,7 @@ canvas .text-input {
 }
 
 .thumbnail-label {
+  pointer-events: all;
   font-family: RobotoMono;
   /* font-family: AvaraBold; */
   font-weight: 600;
@@ -341,6 +343,7 @@ canvas .text-input {
 }
 
 .thumbnail-element {
+  pointer-events: all;
   position: relative;
   margin-top: 2px;
   margin-bottom: 2px;
@@ -403,7 +406,7 @@ canvas .text-input {
   color: white;
   pointer-events: none;
 
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(3px);
   border-radius: 13px;
 
@@ -413,23 +416,54 @@ canvas .text-input {
 }
 
 #focus-title {
-  font-family: Avarabolditalic;
+  font-family: Avarabold;
   /* position: fixed; */
   margin: 10px;
   top: 5%;
   left: 5%;
   right: 10%;
-  font-size: 24pt;
+  font-size: 25pt;
   line-height: 28pt;
   user-select: none;
   max-width: 95%;
+  hyphens: auto;
+}
+
+#focus-flair {
+  user-select: none;
+
+  font-family: RobotoMono;
+  /* font-family: AvaraBold; */
+  font-weight: 600;
+  letter-spacing: 0.2pt;
+  font-size: 9pt;
+  line-height: 12pt;
+  text-align: center;
+  vertical-align: middle;
+
+  width: fit-content;
+  /* position: absolute; */
+  left: 0%;
+  padding: 4px;
+  color: white;
+  opacity: 1;
+  border-radius: 3px;
+  margin: 10px;
+  float: left;
+
+  transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* mix-blend-mode: luminosity; */
+
+  background-clip: text;
 }
 
 #focus-date {
-  position: absolute;
+  /* position: absolute; */
   right: 0;
-  /* margin: 10px; */
-  margin-right: 25px;
+  float: right;
+  margin: 10px;
+  /* margin-right: 25px; */
   font-family: Robotomono;
 }
 

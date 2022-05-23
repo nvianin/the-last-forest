@@ -30,7 +30,7 @@ class AppInterface {
         this.focused_rotation_offset = Math.HALF_PI
         this.focused_angle = 0;
         this.focused_target_distance = 900;
-        this.focused_target_height = 200;
+        this.focused_target_height = 400;
         this.focused_backup = {
             mapControls: this.mapControls.enabled,
             position: app.camera.position.clone(),
@@ -229,7 +229,7 @@ class AppInterface {
                 Math.abs(app.camera.fov - this.target.fov)
             if (dist > 1) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
-                app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation, .01))
+                app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation, .1))
 
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
@@ -257,10 +257,17 @@ class AppInterface {
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, dt);
             app.camera.updateProjectionMatrix()
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt / 100000000)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt / 100000000)
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
 
-            log(app.scene.fog.near, app.scene.fog.far)
+            /* log(app.scene.fog.near, app.scene.fog.far) */
+
+
+            const tangent = new THREE.Vector3(
+                Math.cos(app.time * .1 + this.focused_angle + Math.QUARTER_PI) * this.focused_target_distance * .5,
+                0,
+                Math.sin(app.time * .1 + this.focused_angle + Math.QUARTER_PI) * this.focused_target_distance * .5
+            )
 
 
             this.focused_target.position
@@ -271,20 +278,16 @@ class AppInterface {
                 )
                 .add(this.focused_tree.position)
                 .add(new THREE.Vector3(0, this.focused_target_height + 100, 0))
-                .add(new THREE.Vector3(
-                    Math.cos(app.time * .1 + this.focused_angle + Math.HALF_PI) * this.focused_target_distance,
-                    0,
-                    Math.sin(app.time * .1 + this.focused_angle + Math.HALF_PI) * this.focused_target_distance
-                ))
+                .add(tangent)
 
             this.rotation_dummy.position.copy(app.camera.position)
             this.rotation_dummy.rotation.set(0, (-app.time * .1 - this.focused_angle + this.focused_rotation_offset) % Math.TWO_PI, 0)
 
             /* log(app.camera.position, this.focused_target.position, dt) */
-            app.camera.position.lerp(this.focused_target.position.clone(), dt)
+            app.camera.position.lerp(this.focused_target.position.clone(), dt * 1.5)
             /* log(app.camera.position) */
             /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
-            app.camera.lookAt(this.focused_tree.position)
+            app.camera.lookAt(this.focused_tree.position.clone().add(tangent).add(new THREE.Vector3(0, this.focused_target_height, 0)))
 
         } else if (!this.focused_mode) {
 

@@ -141,6 +141,10 @@ class FocusInterface {
         this.title.innerText = "Title of the post"
         this.container.appendChild(this.title)
 
+        this.flairContainer = document.createElement("div");
+        this.flairContainer.id = "focus-flair"
+        this.container.appendChild(this.flairContainer)
+
         this.dateContainer = document.createElement("div");
         this.dateContainer.id = "focus-date"
         this.container.appendChild(this.dateContainer)
@@ -183,9 +187,6 @@ class FocusInterface {
         }
         this.container.appendChild(this.linkButton);
 
-        this.flairContainer = document.createElement("div");
-        this.flairContainer.className = "focus-flair"
-        this.container.appendChild(this.flairContainer)
 
 
 
@@ -204,7 +205,16 @@ class FocusInterface {
         this.textContainer.innerHTML = this.formatPost(post.selftext)
         this.imgContainer.src = ""
         this.videoContainer.src = ""
-        this.dateContainer.innerText = new Date(post.date * 1000).toLocaleString()
+        this.flairContainer.innerText = post.flair
+        this.flairContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
+        const d = new Date(post.date * 1000)
+        /* this.dateContainer.innerText = d.toLocaleString() */
+        this.dateContainer.innerText =
+            (d.getDate() + "").padStart(2, "0") +
+            "/" +
+            (d.getMonth() + "").padStart(2, "0") +
+            "/" +
+            (d.getFullYear() + "").slice(2, 4)
 
         if (post.is_video) {
             log("post is video")

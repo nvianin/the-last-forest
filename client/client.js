@@ -855,6 +855,7 @@ class App {
         if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
 
         this.buildTSNEMap()
+        this.interface.enter_focus(this.trees[0])
     }
 
     buildLODs() {
@@ -881,7 +882,7 @@ class App {
 
     async render() {
         this.frame_time = Date.now();
-        this.time = this.clock.getElapsedTime() * 10
+        this.time = this.clock.getElapsedTime()
 
         debug.postprocessing ?
             this.composer.render() :
