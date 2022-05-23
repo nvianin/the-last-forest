@@ -81,8 +81,8 @@ class AppInterface {
 
         this.fatMat = new THREE.LineMaterial({
             color: 0xffffff,
-            linewidth: .01,
-            worldunits: true,
+            linewidth: 10,
+            worldUnits: true,
             vertexColors: false,
 
             dashed: false,
@@ -94,7 +94,7 @@ class AppInterface {
             linegeo,
             this.fatMat
         )
-        this.fatTree.scale.multiplyScalar(100)
+        this.fatTree.scale.multiplyScalar(1000)
         app.scene.add(this.fatTree);
     }
     setupListeners() {
@@ -227,7 +227,10 @@ class AppInterface {
         this.focused_backup.position.copy(app.camera.position)
         this.focused_backup.rotation.copy(app.camera.rotation)
 
-        /* this.fatTree.position.copy(tree.position) */
+        log(tree)
+        this.fatTree.geometry.setPositions(tree.children[0].geometry.attributes.position.array)
+        this.fatTree.position.copy(tree.position)
+        this.fatTree.rotation.copy(tree.rotation)
 
         app.outlinePass.selectedObjects = [tree]
     }
