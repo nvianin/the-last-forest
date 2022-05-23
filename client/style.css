@@ -15,7 +15,7 @@
 }
 @font-face {
   font-family: RobotoMono;
-  src: url("./resources/fonts/NotoSerif-Regular.ttf");
+  src: url("./resources/fonts/SpaceGrotesk.ttf");
 }
 
 body {
@@ -284,7 +284,7 @@ canvas .text-input {
   user-select: none;
   -webkit-user-drag: none;
   position: fixed;
-  width: 100px;
+  width: 120px;
   height: 100%;
   top: 0%;
   /* overflow: hidden; */
@@ -309,9 +309,10 @@ canvas .text-input {
 .thumbnail-label {
   font-family: RobotoMono;
   /* font-family: AvaraBold; */
-  font-weight: 200;
+  font-weight: 600;
+  letter-spacing: 0.2pt;
   font-size: 9pt;
-  line-height: 9pt;
+  line-height: 12pt;
   text-align: center;
   vertical-align: middle;
   width: 100%;
@@ -320,8 +321,18 @@ canvas .text-input {
   left: 50%;
   transform: translate(-50%) scale(1);
   padding: 2px;
+  color: white;
+  opacity: 1;
+
+  transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* mix-blend-mode: luminosity; */
 
   background-clip: text;
+}
+
+.thumbnail-label:hover {
+  opacity: 1;
 }
 
 .thumbnail-image {
@@ -330,26 +341,36 @@ canvas .text-input {
 }
 
 .thumbnail-element {
+  position: relative;
   margin-top: 2px;
   margin-bottom: 2px;
   user-select: none;
   -webkit-user-drag: none;
-  width: 100px;
-  height: 10pt;
-  border-radius: 10px;
+  width: 120px;
+  height: 16pt;
+  /* border-radius: 6px; */
+  border-radius: 3px 0px 0px 3px;
   /* box-shadow: #fff 0 0 1px; */
   background-color: rgba(0.6, 0.56, 0.56, 1);
+  right: -80px;
 
   backdrop-filter: blur(12px);
   /* opacity: 0.9; */
   transition: 0.3;
   z-index: 900;
   transform-origin: right;
-  transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
+  /* text-indent: 100vmax; */
 }
 .thumbnail-element:hover {
+  /* text-indent: 0px; */
+  right: 0px;
   z-index: 1000;
   opacity: 1;
+}
+
+.thumbnail-active {
+  right: 0px;
 }
 
 .thumbnail-deactivated {

@@ -1028,7 +1028,7 @@ class App {
             this.renderer.setRenderTarget(thumbnailBuffer)
             this.renderer.clear()
             this.renderer.render(thumbnailScene, thumbnailCam);
-
+            
             this.renderer.readRenderTargetPixels(thumbnailBuffer, 0, 0, width, height, pixelBuffer) */
 
             /* let all_black = true;
@@ -1057,9 +1057,11 @@ class App {
         this.thumbnailContainer.content.id = "thumbnail-content"
         this.thumbnailContainer.appendChild(this.thumbnailContainer.content)
 
+        log(typeInfos.length)
 
-        for (let info of typeInfos) {
-            const info = typeInfos.pop()
+        for (let i = 0; i < typeInfos.length; i++) {
+            const info = typeInfos[i]
+            log(info.name)
             /* const img = document.createElement("img");
             img.src = t
             img.className = "thumbnail-image"
@@ -1114,13 +1116,27 @@ class App {
                 thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
             }
         }
-        /* this.selectedCategories = */
+        this.selectedCategories = []
 
         this.thumbnailContainer.onclick = e => {
-            log(e.target.parentElement.type)
-            for (let i of this.thumbnails)
-                this.showOnlyCategories([e.target.parentElement.type])
+            const type = e.target.parentElement.type || e.target.type;
+            log(type)
+            if (e.target.parentElement.classList.contains("thumbnail-active")) {
+                e.target.parentElement.classList.remove("thumbnail-active")
+                this.selectedCategories.splice(this.selectedCategories.indexOf(type), 1)
+
+            } else {
+                this.selectedCategories.push(type)
+                e.target.parentElement.classList.add("thumbnail-active")
+            }
+
+            if (this.selectedCategories.length > 0) {
+                this.showOnlyCategories(this.selectedCategories)
+            } else {
+                this.showAllTrees()
+            }
         }
+
 
         // this.thumbnailContainer.button = document.createElement("div");
         // this.thumbnailContainer.button.id = "thumbnail-button"
