@@ -183,6 +183,10 @@ class FocusInterface {
         }
         this.container.appendChild(this.linkButton);
 
+        this.flairContainer = document.createElement("div");
+        this.flairContainer.className = "focus-flair"
+        this.container.appendChild(this.flairContainer)
+
 
 
 
