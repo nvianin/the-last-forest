@@ -40,6 +40,14 @@ canvas .text-input {
   text-align: center;
 }
 
+#three {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  right: 0px;
+  top: 0px;
+}
+
 #text-translation {
   bottom: 14%;
 }
@@ -215,12 +223,20 @@ canvas .text-input {
   right: 1%;
 }
 
+#loading-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+}
+
 #loading-screen-background {
   opacity: 1;
   position: fixed;
   width: 100%;
   height: 100%;
-  z-index: 1000;
+  z-index: 900;
   background-color: black;
   color: #eee;
   font-size: 10vh;
@@ -231,16 +247,17 @@ canvas .text-input {
 
 #loading-screen-text {
   font-family: Avarablack;
-  position: fixed;
-  width: 100%;
+  position: relative;
+  /* width: 100%; */
+  padding: 120px 0px 80px 0px;
 
   z-index: 1000;
-  top: 10%;
-  right: 50%;
-  transform: translate(50%, -50%);
+  /* top: 10%; */
+  /* right: 50%;
+  transform: translate(50%); */
   color: #eee;
   text-align: center;
-  font-size: 12vh;
+  font-size: 10vh;
   line-height: 13vh;
   transition: 3s cubic-bezier(0.165, 0.84, 0.44, 1);
   opacity: 1;
@@ -248,13 +265,14 @@ canvas .text-input {
   pointer-events: none;
 }
 #loading-desc {
-  position: fixed;
+  position: absolute;
   /* max-width: 500px; */
   width: 80%;
-  bottom: 30%;
-  height: 40%;
-  right: 50%;
-  transform: translate(50%);
+  right: 10%;
+  /* margin-top: 40px; */
+  bottom: 50%;
+  /* height: 40%; */
+  transform: translate(0%, 50%);
 
   font-family: Robotomono;
   z-index: 1001;
@@ -265,7 +283,7 @@ canvas .text-input {
 }
 #loading-bar {
   z-index: 1001;
-  position: fixed;
+  position: absolute;
   bottom: 5%;
   right: 50%;
   transform: translate(50%);
@@ -305,11 +323,11 @@ canvas .text-input {
 }
 
 #loading-button {
-  position: fixed;
+  position: absolute;
   z-index: 1001;
   right: 50%;
-  bottom: 12.5%;
-  transform: translate(50%, -50%);
+  bottom: 25%;
+  transform: translate(50%, 100%);
   width: 120px;
   height: 40px;
   border-radius: 100px;
@@ -326,6 +344,11 @@ canvas .text-input {
 
   user-select: none;
   cursor: pointer;
+  opacity: 0;
+}
+
+.loading-button-flash {
+  opacity: 1;
   animation: load-loop 1s;
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
   animation-direction: alternate;
@@ -341,8 +364,9 @@ canvas .text-input {
   }
 }
 
-#loading-button:hover {
-  box-shadow: 0 0 16px 16px #999;
+.loading-button-flash:hover {
+  box-shadow: 0 0 16px 16px #fff;
+  background-color: #101216;
 }
 
 #loading-button:active {
@@ -352,7 +376,7 @@ canvas .text-input {
 }
 
 #thumbnail-button {
-  position: relative;
+  /* position: relative; */
   top: 50%;
   right: 0;
   width: 20px;
@@ -372,7 +396,7 @@ canvas .text-input {
   width: 5px;
   height: 5px;
   top: -2px;
-  position: fixed;
+  /* position: fixed; */
   left: -13%;
 
   border: solid white;

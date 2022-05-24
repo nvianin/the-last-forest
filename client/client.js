@@ -675,7 +675,7 @@ class App {
     }
 
     async buildTreesFromPosts() {
-        /* return false; */
+        return false;
         this.tsneSize = Math.sqrt(Object.keys(this.posts).length * 15);
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
@@ -807,7 +807,8 @@ class App {
                     removed_trees++;
                 }
             }
-            document.querySelector("#loading-button").opacity = 1
+            document.querySelector("#loading-button").style.opacity = 1
+            document.querySelector("#loading-button").classList.add("loading-button-flash")
             document.querySelector("#loading-button").onclick = () => {
                 /* document.querySelector("#loading-screen-background").style.opacity = 0; */
                 document.querySelector("#loading-bar").style.opacity = 0;
@@ -826,15 +827,20 @@ class App {
                     document.querySelector("#loading-screen-text").style.display = "none"
                 }, 3700)
             }
+
+            let vertCount = 0;
+
+            this.trees.forEach(tree => {
+                vertCount += tree.children[0].geometry.attributes.position.count
+            })
+            log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
+            log("Tree vertex: " + vertCount)
+            if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
+
+            this.buildTSNEMap()
         } else {
             removed_trees++;
         }
-
-        let vertCount = 0;
-
-        this.trees.forEach(tree => {
-            vertCount += tree.children[0].geometry.attributes.position.count
-        })
         if (debug.aggregate) {
             const aggregated = new Float32Array(vertCount * 3)
 
@@ -868,11 +874,6 @@ class App {
             this.scene.add(this.aggregate)
         }
 
-        log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
-        log("Tree vertex: " + vertCount)
-        if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
-
-        this.buildTSNEMap()
         /* this.interface.enter_focus(this.trees[14]) */
     }
 
