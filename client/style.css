@@ -232,28 +232,123 @@ canvas .text-input {
 #loading-screen-text {
   font-family: Avarablack;
   position: fixed;
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+
   z-index: 1000;
-  top: 50%;
-  /* right: 50%; */
-  transform: translate(0%, -50%);
+  top: 10%;
+  right: 50%;
+  transform: translate(50%, -50%);
   color: #eee;
-  font-size: 12vmax;
   text-align: center;
-  line-height: 13vmax;
+  font-size: 12vh;
+  line-height: 13vh;
   transition: 3s cubic-bezier(0.165, 0.84, 0.44, 1);
   opacity: 1;
   user-select: none;
   pointer-events: none;
 }
 #loading-desc {
+  position: fixed;
+  /* max-width: 500px; */
+  width: 80%;
+  bottom: 30%;
+  height: 40%;
+  right: 50%;
+  transform: translate(50%);
+
+  font-family: Robotomono;
+  z-index: 1001;
+  color: white;
+  text-align: center;
+  /* background-color: black; */
+  transition: 1s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 #loading-bar {
+  z-index: 1001;
+  position: fixed;
+  bottom: 5%;
+  right: 50%;
+  transform: translate(50%);
+  width: 60%;
+  height: 20px;
+
+  border-radius: 50px;
+
+  /* background-color: grey; */
+  box-shadow: 0 0 10px 0.1px white;
 }
 #loading-bar-inner {
+  font-family: Avarabolditalic;
+  width: 0%;
+  height: 100%;
+  line-height: 150%;
+  background-color: white;
+  border-radius: 50px;
+  content: "fuck";
+  color: black;
+  text-align: center;
+
+  animation: load-anim 2s;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  animation-fill-mode: forwards;
 }
+
+@keyframes load-anim {
+  from {
+    width: 0%;
+    content: "0%";
+  }
+  to {
+    width: 100%;
+    content: "100%";
+  }
+}
+
 #loading-button {
+  position: fixed;
+  z-index: 1001;
+  right: 50%;
+  bottom: 12.5%;
+  transform: translate(50%, -50%);
+  width: 120px;
+  height: 40px;
+  border-radius: 100px;
+
+  font-family: Robotomono;
+  font-weight: 0;
+  text-align: center;
+  font-size: 16pt;
+  line-height: 40px;
+  color: white;
+  box-shadow: 0 0 16px 16px #333;
+
+  transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
+
+  user-select: none;
+  cursor: pointer;
+  animation: load-loop 1s;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+}
+
+@keyframes load-loop {
+  from {
+    box-shadow: 0 0 16px 16px #333;
+  }
+  to {
+    box-shadow: 0 0 18px 18px #999;
+  }
+}
+
+#loading-button:hover {
+  box-shadow: 0 0 16px 16px #999;
+}
+
+#loading-button:active {
+  transition: 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+  background-color: white;
+  box-shadow: 0 0 16px 16px #fff;
 }
 
 #thumbnail-button {

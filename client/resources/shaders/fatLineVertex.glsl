@@ -106,6 +106,7 @@ uniform float time;
 ////
 
 /* vec3 noise = vec3(sin(time * position.x), cos(time * position.y), sin(time * position.z)); */
-vec3 noise = snoiseAtPos(position * 10., .01, time * .4, vec3(.4, .6, 0.));
+/* vec3 noise = snoiseAtPos(position * 10., .01, time * .4, vec3(.4, .6, 0.)); */
+vec3 noise = vec3(time);
 noise *= position.y * .1;
 gl_Position = clip + vec4(noise, 1.0);

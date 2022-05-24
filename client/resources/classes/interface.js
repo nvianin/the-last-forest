@@ -95,7 +95,7 @@ class AppInterface {
             this.fatMat
         )
         /* this.fatTree.scale.multiplyScalar(1000) */
-        this.load_shader()
+        /* this.load_shader() */
         app.scene.add(this.fatTree);
     }
     setupListeners() {
@@ -229,9 +229,10 @@ class AppInterface {
 
         this.fatMat.vertexShader = this.fatMat.vertexShader.replace("attribute vec3 instanceColorEnd;", "attribute vec3 instanceColorEnd; \n" + prelude)
         this.fatMat.vertexShader = this.fatMat.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
-        /* this.fatMat.uniforms.time = {
-            value: 0
-        } */
+        this.fatMat.uniforms.time = {
+            value: 100
+        }
+        this.fatMat.uniforms
         log(this.fatMat.vertexShader)
 
         this.fatMat.needsUpdate = true;

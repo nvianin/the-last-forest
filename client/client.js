@@ -453,7 +453,7 @@ class App {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
 
-            this.MouseCast()
+            if (this.frameCount % 3 == 0) this.MouseCast()
 
             if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
@@ -674,13 +674,15 @@ class App {
         })
     }
 
-    buildTreesFromPosts() {
+    async buildTreesFromPosts() {
+        /* return false; */
         this.tsneSize = Math.sqrt(Object.keys(this.posts).length * 15);
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
         let removed_trees = 0
         let i = 0;
+        const postCount = Object.keys(this.posts).length
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
             this.buildIndexThumbnails()
             /* document.querySelector("#loading-screen-text").style.opacity = 1
@@ -763,7 +765,12 @@ class App {
                         log(post)
                     } */
                     i++;
+                    /* const percentage = i / (debug.tree_build_limit > 0 ? debug.tree_build_limit : postCount) * 100;
+                    document.querySelector("#loading-bar-inner").style.width = percentage + "%"
+                    document.querySelector("#loading-bar-inner").innerText = percentage + "%"
+                    log(document.querySelector("#loading-bar-inner").style.width) */
                     if (debug.tree_build_limit > 0 && i > debug.tree_build_limit) break;
+
                 }
             }
 
@@ -800,16 +807,25 @@ class App {
                     removed_trees++;
                 }
             }
-            document.querySelector("#loading-screen-background").style.opacity = 0
-            setTimeout(() => {
-                document.querySelector("#loading-screen-background").style.display = "none"
-            }, 1300)
-            setTimeout(() => {
-                document.querySelector("#loading-screen-text").style.opacity = 0
-            }, 700)
-            setTimeout(() => {
-                document.querySelector("#loading-screen-text").style.display = "none"
-            }, 3700)
+            document.querySelector("#loading-button").opacity = 1
+            document.querySelector("#loading-button").onclick = () => {
+                /* document.querySelector("#loading-screen-background").style.opacity = 0; */
+                document.querySelector("#loading-bar").style.opacity = 0;
+                document.querySelector("#loading-desc").style.opacity = 0;
+                document.querySelector("#loading-button").style.opacity = 0;
+                setTimeout(() => {
+                    document.querySelector("#loading-screen-background").style.display = "none"
+                    document.querySelector("#loading-bar").style.display = "none"
+                    document.querySelector("#loading-desc").style.display = "none"
+                    document.querySelector("#loading-button").style.display = "none"
+                }, 1300)
+                setTimeout(() => {
+                    document.querySelector("#loading-screen-text").style.opacity = 0
+                }, 700)
+                setTimeout(() => {
+                    document.querySelector("#loading-screen-text").style.display = "none"
+                }, 3700)
+            }
         } else {
             removed_trees++;
         }
@@ -857,7 +873,7 @@ class App {
         if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
 
         this.buildTSNEMap()
-        this.interface.enter_focus(this.trees[14])
+        /* this.interface.enter_focus(this.trees[14]) */
     }
 
     buildLODs() {
