@@ -47,7 +47,7 @@ class AppInterface {
                 focused: 50,
             },
             camera_ground_offset: 16,
-            focused_fog_multiplier: .08
+            focused_fog_multiplier: .13
         }
 
 
@@ -260,10 +260,18 @@ class AppInterface {
         const positions = tree.children[0].geometry.attributes.position.array.map(x => {
             return x * scale
         })
+        const colors = []
+        for (let i = 0; i < positions.length / 3; i++) {
+            const t = i / (positions.length / 3)
+            colors.push(t, t, t)
+        }
 
         this.fatTree.geometry.setPositions(positions)
+        this.fatTree.geometry.setColors(colors)
         this.fatTree.position.copy(tree.position)
         this.fatTree.rotation.copy(tree.rotation)
+
+
         this.fatMat.color = tree.children[0].material.color;
 
         app.outlinePass.selectedObjects = [tree]
@@ -475,8 +483,8 @@ class AppInterface {
                             /* log(x, y) */
                         } else {
                             // Advanced fps controller
-                            app.camera.translateZ(this.movement.z * .5);
-                            app.camera.translateX(this.movement.x * .5);
+                            app.camera.translateZ(this.movement.z * 1.5);
+                            app.camera.translateX(this.movement.x * 1.5);
                         }
 
                         // Cast to ground

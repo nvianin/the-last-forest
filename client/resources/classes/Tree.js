@@ -115,7 +115,7 @@ const treeTypes = {
     "Food": {
         color: "brown",
         rules: new Ruleset().parse(
-            "R->SU{, {->-DBS}L, S->]{FS[}, "
+            "R->SU{, {->-DBS}L, S->]{F[}, "
         )
     },
     "Diseases": {

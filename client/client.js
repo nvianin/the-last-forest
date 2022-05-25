@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    tree_build_limit: 256,
+    tree_build_limit: 128,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -77,11 +77,12 @@ class App {
         if (localstorage_points) this.points = localstorage_points;
 
         this.settings = {
-            ground_side: 64,
-            ground_scale: 256 + 64,
+            ground_side: 64 * 2,
+            ground_scale: 128 * 3,
             draw_distance: 20000,
             fog_offset: 3000,
             walking_fog_multiplier: .1,
+            focused_max_raycast_dist: 3000
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -313,6 +314,18 @@ class App {
             document.body.appendChild(this.frameRateDom)
         }
 
+        this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
+        this.bg_music = document.querySelector("#bg-music")
+        document.querySelector("#sound-toggle").onclick = () => {
+            if (document.querySelector("#sound-toggle").innerText == "volume_up") {
+                document.querySelector("#sound-toggle").innerText = "volume_off"
+                this.bg_music.pause()
+            } else {
+                document.querySelector("#sound-toggle").innerText = "volume_up"
+                this.bg_music.play()
+            }
+        }
+
         this.frameCount = 0;
         this.render()
 
@@ -453,7 +466,7 @@ class App {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
 
-            if (this.frameCount % 3 == 0) this.MouseCast()
+            if (this.frameCount % 10 == 0) this.MouseCast()
 
             if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
@@ -463,6 +476,13 @@ class App {
             /* log(e.button) */
             const URL = this.activeUrl;
             /* log(URL); */
+            log((
+                this.interface.state != "LERPING" &&
+                this.postDom.style.visibility == "visible" &&
+                e.button == 0 &&
+                !this.pointer_moved_while_down &&
+                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+            ))
             if (
                 this.interface.state != "LERPING" &&
                 this.postDom.style.visibility == "visible" &&
@@ -597,8 +617,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            this.socket = io("last-forest.ddns.net")
-            /* this.socket = io() */
+            /* this.socket = io("last-forest.ddns.net") */
+            this.socket = io()
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
@@ -675,7 +695,7 @@ class App {
     }
 
     async buildTreesFromPosts() {
-        return false;
+        /* return false; */
         this.tsneSize = Math.sqrt(Object.keys(this.posts).length * 15);
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
@@ -814,6 +834,10 @@ class App {
                 document.querySelector("#loading-bar").style.opacity = 0;
                 document.querySelector("#loading-desc").style.opacity = 0;
                 document.querySelector("#loading-button").style.opacity = 0;
+                if (document.querySelector("#sound-toggle").innerText == "volume_up") {
+                    this.bg_music.play()
+                }
+
                 setTimeout(() => {
                     document.querySelector("#loading-screen-background").style.display = "none"
                     document.querySelector("#loading-bar").style.display = "none"
@@ -827,6 +851,8 @@ class App {
                     document.querySelector("#loading-screen-text").style.display = "none"
                 }, 3700)
             }
+
+
 
             let vertCount = 0;
 
@@ -976,8 +1002,20 @@ class App {
     }
 
     MouseCast() {
+        let nearbyTrees = this.trees
+        if (this.interface.focused_mode) {
+            nearbyTrees = []
+            this.trees.forEach(t => {
+                if (t.position.distanceTo(this.camera.position) < this.settings.focused_max_raycast_dist) {
+                    nearbyTrees.push(t)
+                }
+            })
+            log(nearbyTrees.length)
+        }
+
+
         this.mousecast.setFromCamera(this.pointer, this.camera);
-        const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
+        const intersects = this.mousecast.intersectObjects(nearbyTrees);
         if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
             (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
         ) {
@@ -997,9 +1035,9 @@ class App {
 
             /* log(Math.round_to_decimal(post.sentiment.score)) */
 
-            this.postDom.innerHTML = post.title;
+            this.postDom.innerHTML = "<div id=\"tooltip-flair\" style=\"background-color: " + "#" + treeColors[post.flair].color.getHexString() + "\">" + post.flair + "</div>"
+            this.postDom.innerHTML += post.title;
             /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
-            this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
             this.activeUrl = post.url;
             this.activeTree = intersects[0].object.parent;
             /* log(this.activeTree) */

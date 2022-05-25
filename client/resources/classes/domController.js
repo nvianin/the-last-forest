@@ -106,6 +106,10 @@ class CoolSlider {
             step.ondragstart = this.dom.ondragstart;
             this.step_elements.push(step)
             this.container.appendChild(step)
+
+            step.onclick = () => {
+                this.targetValue = (this.max - this.min) / (this.steps - 1) * i;
+            }
         }
 
 
@@ -220,6 +224,7 @@ class FocusInterface {
             "/" +
             (d.getFullYear() + "").slice(2, 4)
 
+        this.mediaContainer.style.height = ""
         if (post.is_video) {
             log("post is video")
         } else if (post.media) {
@@ -235,7 +240,9 @@ class FocusInterface {
             } else if (post.url.includes("v.redd.it")) {
 
             }
-        } else {}
+        } else {
+            this.mediaContainer.style.height = "0px"
+        }
         /* this.linkButton.style.visibility = "visible" */
         this.linkButton.textContent = post.url;
     }
