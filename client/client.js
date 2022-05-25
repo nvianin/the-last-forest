@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    tree_build_limit: 128,
+    tree_build_limit: 0,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -79,8 +79,8 @@ class App {
         this.settings = {
             ground_side: 64 * 2,
             ground_scale: 128 * 3,
-            draw_distance: 20000,
-            fog_offset: 3000,
+            draw_distance: 30000,
+            fog_offset: 5000,
             walking_fog_multiplier: .1,
             focused_max_raycast_dist: 3000
         }
@@ -941,7 +941,7 @@ class App {
 
         if (this.tsneRenderer) {
             const t = Math.clamp(this.camera.position.y / 10000 - .2, 0, 1);
-            this.tsneRenderer.displayPlane.material.opacity = t * .4
+            this.tsneRenderer.displayPlane.material.opacity = t * .2
             /* log(t) */
         }
 
