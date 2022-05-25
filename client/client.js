@@ -40,7 +40,7 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    tree_build_limit: 0,
+    tree_build_limit: 1024,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -328,6 +328,8 @@ class App {
 
         this.frameCount = 0;
         this.render()
+
+        this.computeTsneBoundingBox()
 
     }
 
@@ -1318,6 +1320,32 @@ class App {
 
     sentimentToIdiom(sentiment) {
         return sentiment >= .9 ? "Perfect !" : sentiment >= .7 ? "Beautiful !" : sentiment >= .5 ? "Nice !" : sentiment >= .3 ? "I like it." : sentiment >= .1 ? "Good." : sentiment == 0 ? "I don't know what this means." : sentiment >= -.1 ? "Eh." : sentiment >= -.3 ? "Ouch." : sentiment >= -.5 ? "That's bad." : sentiment >= -.7 ? "That's very bad." : sentiment >= -.9 ? "Oh no !" : "Fuck."
+    }
+
+    computeTsneBoundingBox() {
+        let min = new THREE.Vector2()
+        let max = new THREE.Vector2()
+        for (let p of this.posts) {
+            if (p.tsne_coordinates) {
+                if (p.tsne_coordinates.x < min.x) {
+                    min.x = p.tsne_coordinates.x
+                }
+                if (p.tsne_coordinates.x > max.x) {
+                    max.x = p.tsne_coordinates.x
+                }
+                if (p.tsne_coordinates.y < min.y) {
+                    min.y = p.tsne_coordinates.y
+                }
+                if (p.tsne_coordinates.y > max.y) {
+                    max.y = p.tsne_coordinates.y
+                }
+            }
+        }
+        this.boundingBox = {
+            min,
+            max
+        }
+        return this.boundingBox
     }
 }
 
