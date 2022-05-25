@@ -158,6 +158,7 @@ canvas .text-input {
 }
 #zoom-slider {
   width: 99%;
+  display: none;
 }
 #mode-slider {
 }
