@@ -38,9 +38,11 @@ const debug = {
     use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
-    particle: true,
+    particle: false,
     postprocessing: true,
-    tree_build_limit: 1024,
+    autostart: true,
+    max_generation_level: 6,
+    tree_build_limit: 0,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -82,11 +84,12 @@ class App {
             draw_distance: 30000,
             fog_offset: 5000,
             walking_fog_multiplier: .1,
-            focused_max_raycast_dist: 3000
+            focused_max_raycast_dist: 3000,
+            tsne_scale_multiplier: 45
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
-        this.camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .01, debug.fog ? this.settings.draw_distance : 3000);
+        this.camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .01, debug.fog ? this.settings.draw_distance + 1000 : 3000);
         this.camera.position.set(0, .5, 1);
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
@@ -316,6 +319,7 @@ class App {
 
         this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
         this.bg_music = document.querySelector("#bg-music")
+        this.bg_music.volume = .8
         document.querySelector("#sound-toggle").onclick = () => {
             if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                 document.querySelector("#sound-toggle").innerText = "volume_off"
@@ -328,8 +332,6 @@ class App {
 
         this.frameCount = 0;
         this.render()
-
-        this.computeTsneBoundingBox()
 
     }
 
@@ -524,9 +526,9 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            1.2, // strength
-            1.5, // radius
-            .23 // threshold
+            .7, // strength
+            1.6, // radius
+            .19 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -698,7 +700,7 @@ class App {
 
     async buildTreesFromPosts() {
         /* return false; */
-        this.tsneSize = Math.sqrt(Object.keys(this.posts).length * 15);
+        this.tsneSize = Math.sqrt(Object.keys(this.posts).length * this.settings.tsne_scale_multiplier);
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
@@ -724,9 +726,9 @@ class App {
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
                     /* const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20); */
-                    const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
+                    const upvote_factor = Math.clamp(Math.map(post.score, 300, 16000, 1, 100), 10, Infinity);
                     const scale = 32 * upvote_factor;
-                    const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
+                    const development = Math.clamp(Math.floor(Math.map(post.score, 300, 16000, 1, 6)), 1, debug.max_generation_level > 0 ? debug.max_generation_level : 10)
 
                     let y = -100;
                     post.sentiment = {
@@ -854,6 +856,7 @@ class App {
                 }, 3700)
             }
 
+            if (debug.autostart) document.querySelector("#loading-button").click()
 
 
             let vertCount = 0;
@@ -866,6 +869,7 @@ class App {
             if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
 
             this.buildTSNEMap()
+            this.computeCategoryBarycenters()
         } else {
             removed_trees++;
         }
@@ -941,9 +945,13 @@ class App {
 
         /* if (this.tsneRenderer) this.tsneRenderer.update() */
 
+        const t = Math.clamp(this.camera.position.y / (this.settings.draw_distance / 3) + .2, 0, 1);
+        if (this.interface && this.interface.state == "MAP") {
+            /* this.fog.near = (this.settings.draw_distance - this.settings.fog_offset) * t * .85;
+            this.fog.far = this.settings.draw_distance * t */
+        }
         if (this.tsneRenderer) {
-            const t = Math.clamp(this.camera.position.y / 10000 - .2, 0, 1);
-            this.tsneRenderer.displayPlane.material.opacity = t * .2
+            this.tsneRenderer.displayPlane.material.opacity = t * .32
             /* log(t) */
         }
 
@@ -1190,8 +1198,15 @@ class App {
         this.thumbnailContainer.onclick = e => {
             const type = e.target.parentElement.type || e.target.type;
             log(type)
+            if (type == undefined) return -1
+
             if (e.target.parentElement.classList.contains("thumbnail-active")) {
                 e.target.parentElement.classList.remove("thumbnail-active")
+                if (this.selectedCategories.length == 2) {
+                    this.thumbnail_dont_focus = true;
+                } else {
+                    this.thumbnail_dont_focus = false;
+                }
                 this.selectedCategories.splice(this.selectedCategories.indexOf(type), 1)
 
             } else {
@@ -1201,6 +1216,13 @@ class App {
 
             if (this.selectedCategories.length > 0) {
                 this.showOnlyCategories(this.selectedCategories)
+
+                // Focus tree & region when single category is selected
+                if (this.selectedCategories.length == 1 && !this.thumbnail_dont_focus) {
+                    this.interface.enter_focus(
+                        this.trees_by_category[type]
+                        [Math.floor(this.trees_by_category[type].length * Math.random())])
+                }
             } else {
                 this.showAllTrees()
             }
@@ -1323,9 +1345,13 @@ class App {
     }
 
     computeTsneBoundingBox() {
+        const scale = this.tsneSize;
+
         let min = new THREE.Vector2()
         let max = new THREE.Vector2()
-        for (let p of this.posts) {
+        const barycenter = new THREE.Vector2()
+        const posts = Object.values(this.posts);
+        for (let p of posts) {
             if (p.tsne_coordinates) {
                 if (p.tsne_coordinates.x < min.x) {
                     min.x = p.tsne_coordinates.x
@@ -1339,13 +1365,48 @@ class App {
                 if (p.tsne_coordinates.y > max.y) {
                     max.y = p.tsne_coordinates.y
                 }
+                barycenter.add(new THREE.Vector2(p.tsne_coordinates.x, p.tsne_coordinates.y))
             }
         }
+        barycenter.divideScalar(posts.length)
+
+        const center = min.clone().lerp(max, .5);
+
+        min.multiplyScalar(scale)
+        max.multiplyScalar(scale)
+        center.multiplyScalar(scale)
+        barycenter.multiplyScalar(scale)
+
+        const extent = new THREE.Vector2(Math.abs(max.x - min.x), Math.abs(max.y - min.y))
+
         this.boundingBox = {
             min,
-            max
+            max,
+            center,
+            barycenter,
+            extent,
+            scale
         }
         return this.boundingBox
+    }
+
+    computeCategoryBarycenters() {
+        const categories = {}
+        app.trees.forEach(tree => {
+            if (categories[tree.userData.post.flair]) {
+                categories[tree.userData.post.flair].position.add(tree.position)
+                categories[tree.userData.post.flair].count++;
+            } else {
+                categories[tree.userData.post.flair] = {}
+                categories[tree.userData.post.flair].position = tree.position.clone()
+                categories[tree.userData.post.flair].count = 1
+            }
+        })
+        Object.values(categories).forEach(category => {
+            category.position.divideScalar(category.count)
+        })
+        this.categoriesBarycenters = categories
+        return categories
     }
 }
 

@@ -37,6 +37,8 @@ class Turtle {
         this.theta_offset = ((Math.PI * 2) / 360) * 1;
         this.instance_id = app.instanceManager.register(this);
         this.fruit_scale = .23;
+
+        this.buildSpheres = false;
     }
 
     build(instruction) {
@@ -129,34 +131,36 @@ class Turtle {
                     this.theta -= this.theta_offset;
                     break;
                 case "S":
-                    let i = app.instanceManager.borrow(
-                        this.instance_id,
-                        this.object.position.clone().add(
+                    if (this.buildSpheres) {
+                        let i = app.instanceManager.borrow(
+                            this.instance_id,
+                            this.object.position.clone().add(
+                                new THREE.Vector3(
+                                    0,
+                                    -distance_factor * this.fruit_scale,
+                                    0
+                                )
+                            ),
                             new THREE.Vector3(
-                                0,
-                                -distance_factor * this.fruit_scale,
-                                0
-                            )
-                        ),
-                        new THREE.Vector3(
-                            distance_factor * this.fruit_scale,
-                            distance_factor * this.fruit_scale,
-                            distance_factor * this.fruit_scale
-                        ),
-                        this.object.quaternion.clone()
-                    );
-                    let c = new THREE.Color(
-                        app.pearlPalette[
-                            Math.floor(
-                                Math.random() * app.pearlPalette.length
-                            )
-                        ]
-                    );
-                    app.instanceManager.instances.setColorAt(
-                        i,
-                        c
-                    )
-                    app.instanceManager.instances.instanceColor.needsUpdate = true;
+                                distance_factor * this.fruit_scale,
+                                distance_factor * this.fruit_scale,
+                                distance_factor * this.fruit_scale
+                            ),
+                            this.object.quaternion.clone()
+                        );
+                        let c = new THREE.Color(
+                            app.pearlPalette[
+                                Math.floor(
+                                    Math.random() * app.pearlPalette.length
+                                )
+                            ]
+                        );
+                        app.instanceManager.instances.setColorAt(
+                            i,
+                            c
+                        )
+                        app.instanceManager.instances.instanceColor.needsUpdate = true;
+                    }
                     break;
             }
             points.push(this.object.position.clone())

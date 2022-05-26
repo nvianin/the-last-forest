@@ -190,19 +190,29 @@ const treeColors = {}
 const load_colors = async () => {
     const vertexShader = await (await fetch("/resources/shaders/lineVertex.glsl")).text()
     /*     log(vertexShader) */
-
-    const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\r\n")
+    const paletteShift = 6;
+    const hexpalette = (await (await fetch("/resources/palettes/master-28.hex")).text()).split("\r\n")
+    hexpalette.reverse()
     let i = 0;
     for (key of Object.keys(treeTypes)) {
-        /* log(hexpalette[i]) */
-        treeTypes[key].color = "#" + hexpalette[i]
+        const col = new THREE.Color("#" + hexpalette[(i + paletteShift) % hexpalette.length])
+        const hsl = new THREE.Color()
+        col.getHSL(hsl)
+        log(hsl)
+        col.setHSL(hsl.h, hsl.s * 1.5, hsl.l * .8)
+        log(col)
+
+        treeTypes[key].color = "#" + col.getHexString()
+        log(treeTypes[key].color)
+
         /* log(treeTypes[key]) */
         i++;
     }
 
     Object.entries(treeTypes).forEach(([key, val]) => {
+        const col = new THREE.Color(val.color);
         treeColors[key] = new THREE.LineBasicMaterial({
-            color: new THREE.Color(val.color),
+            color: col,
             opacity: .7,
             transparent: true,
             linewidth: .002,

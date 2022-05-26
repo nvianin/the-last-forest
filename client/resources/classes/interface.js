@@ -94,6 +94,7 @@ class AppInterface {
             linegeo,
             this.fatMat
         )
+        this.fatTree.visible = false;
         /* this.fatTree.scale.multiplyScalar(1000) */
         /* this.load_shader() */
         app.scene.add(this.fatTree);
@@ -224,8 +225,6 @@ class AppInterface {
         this.fatMat = ori.clone()
         ori.dispose() */
 
-        this.fatMat
-
 
         this.fatMat.vertexShader = this.fatMat.vertexShader.replace("attribute vec3 instanceColorEnd;", "attribute vec3 instanceColorEnd; \n" + prelude)
         this.fatMat.vertexShader = this.fatMat.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
@@ -254,7 +253,7 @@ class AppInterface {
 
         log(tree)
 
-        const upvote_factor = Math.map(tree.userData.post.score, 300, 16000, 1, 100);
+        const upvote_factor = Math.clamp(Math.map(tree.userData.post.score, 300, 16000, 1, 100), 10, Infinity);
         const scale = 32 * upvote_factor;
 
         const positions = tree.children[0].geometry.attributes.position.array.map(x => {
@@ -271,6 +270,8 @@ class AppInterface {
         this.fatTree.position.copy(tree.position)
         this.fatTree.rotation.copy(tree.rotation)
 
+        this.fatTree.visible = true;
+
 
         this.fatMat.color = tree.children[0].material.color;
 
@@ -282,6 +283,7 @@ class AppInterface {
         this.domController.focusInterface.container.style.opacity = 0;
         this.domController.focusInterface.container.style.left = "-10000px";
         this.focused_lerping = true;
+        this.fatTree.visible = false;
 
         if (this.focus_exit_interval) {
             clearInterval(this.focus_exit_interval)
@@ -322,8 +324,8 @@ class AppInterface {
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, dt);
             app.camera.updateProjectionMatrix()
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
+            /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt) */
 
             /* log(app.scene.fog.near, app.scene.fog.far) */
 
@@ -356,8 +358,8 @@ class AppInterface {
 
         } else if (!this.focused_mode) {
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
+            /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt) */
 
 
             // Update state according to dom inputs
@@ -467,6 +469,10 @@ class AppInterface {
             let dist;
             switch (this.state) {
                 case CONTROLLER_STATES.WALKING:
+
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
+
                     if (this.mouse_is_in_screen && this.mouse_target_element == app.renderer.domElement) {
                         // Simple fps controller
                         if (!document.pointerLockElement) {
@@ -502,6 +508,10 @@ class AppInterface {
                 case CONTROLLER_STATES.MAP:
                     this.map_transform.position.copy(app.camera.position)
                     this.map_transform.rotation.copy(app.camera.rotation)
+
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
+
                     /* if (app.camera.position.distanceTo(this.mapControls.target) > 2) {
                         this.mapControls.enabled = false;
                         app.camera.position.lerp(this.mapControls.target, dt)
@@ -511,6 +521,9 @@ class AppInterface {
                     break;
 
                 case CONTROLLER_STATES.PROMENADE:
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
+
                     let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
                     x = Math.clamp(x, -.2, .2);
                     app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)

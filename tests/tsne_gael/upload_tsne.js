@@ -6,7 +6,7 @@ const fs = require("fs")
 
 const main = async () => {
 
-    let coords = fs.readFileSync("./coord_manhattan_100_0.7.csv", "utf-8")
+    let coords = fs.readFileSync("./coord_euclidean.csv", "utf-8")
     coords = coords.split("\r\n")
     coords = coords.map(c => {
         return c.split(",")

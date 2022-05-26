@@ -157,7 +157,7 @@ class FocusInterface {
         this.separator.className = "focus-separator"
         this.container.appendChild(this.separator)
 
-        this.mediaContainer = document.createElement("div");
+        /* this.mediaContainer = document.createElement("div");
         this.mediaContainer.id = "focus-media"
         this.container.appendChild(this.mediaContainer)
         this.videoContainer = document.createElement("video");
@@ -167,8 +167,9 @@ class FocusInterface {
         this.imgContainer.id = "focus-img"
         this.imgContainer.onclick = () => {
             open(this.post.url)
-        }
+        } 
         this.mediaContainer.appendChild(this.imgContainer)
+        */
 
         this.textContainer = document.createElement("div");
         this.textContainer.id = "focus-text"
@@ -184,6 +185,11 @@ class FocusInterface {
             app.interface.exit_focus()
         }
 
+
+        this.postContainer = document.createElement("div");
+        this.postContainer.className = "focus-post"
+        this.container.appendChild(this.postContainer)
+
         this.linkButton = document.createElement("div")
         this.linkButton.id = "focus-link"
         this.linkButton.onclick = () => {
@@ -193,8 +199,7 @@ class FocusInterface {
                 this.post.url
             )
         }
-        this.container.appendChild(this.linkButton);
-
+        this.postContainer.appendChild(this.linkButton);
 
 
 
@@ -209,10 +214,13 @@ class FocusInterface {
         this.post = post;
         log(post)
         this.title.textContent = post.title;
-
-        this.textContainer.innerHTML = this.formatPost(post.selftext)
-        this.imgContainer.src = ""
-        this.videoContainer.src = ""
+        try {
+            this.textContainer.innerHTML = this.formatPost(post.selftext)
+        } catch {
+            this.textContainer.innerHTML = post.selftext
+        }
+        /* this.imgContainer.src = ""
+        this.videoContainer.src = "" */
         this.flairContainer.innerText = post.flair
         this.flairContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
         const d = new Date(post.date * 1000)
@@ -220,31 +228,35 @@ class FocusInterface {
         this.dateContainer.innerText =
             (d.getDate() + "").padStart(2, "0") +
             "/" +
-            (d.getMonth() + "").padStart(2, "0") +
+            ((d.getMonth() + 1) + "").padStart(2, "0") +
             "/" +
             (d.getFullYear() + "").slice(2, 4)
 
-        this.mediaContainer.style.height = ""
-        if (post.is_video) {
-            log("post is video")
-        } else if (post.media) {
-            log("post has media", post.media)
-        } else if (post.has_media) {
-            if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
-                this.imgContainer.src = post.url;
-                /* if (post.url.includes(""))  */
-                /* this.textContainer.textContent = post */
-            }
-            if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
-                this.videoContainer.src = post.url;
-            } else if (post.url.includes("v.redd.it")) {
 
-            }
-        } else {
-            this.mediaContainer.style.height = "0px"
-        }
+
+        // this.mediaContainer.style.height = ""
+        // if (post.is_video) {
+        //     log("post is video")
+        // } else if (post.media) {
+        //     log("post has media", post.media)
+        // } else if (post.has_media) {
+        //     if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
+        //         this.imgContainer.src = post.url;
+        //         /* if (post.url.includes(""))  */
+        //         /* this.textContainer.textContent = post */
+        //     }
+        //     if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
+        //         this.videoContainer.src = post.url;
+        //     } else if (post.url.includes("v.redd.it")) {
+
+        //     }
+        // } else {
+        //     this.mediaContainer.style.height = "0px"
+        // }
         /* this.linkButton.style.visibility = "visible" */
         this.linkButton.textContent = post.url;
+
+        this.postContainer.innerText
     }
 
     formatPost(text) {
