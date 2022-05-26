@@ -115,9 +115,12 @@ canvas .text-input {
 #tooltip-flair {
   width: fit-content;
   font-size: 10pt;
+  font-weight: 600;
   padding: 2px;
   margin: 2px 0px 6px 0px;
   border-radius: 3px;
+  text-shadow: 0 0px 2px #555;
+  color: #223;
 }
 
 /* .tooltip-top {

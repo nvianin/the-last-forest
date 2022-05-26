@@ -245,6 +245,9 @@ class AppInterface {
         this.focused_tree = tree;
         this.mapControls.enabled = false;
 
+        app.camera.position.copy(tree.position.clone().add(new THREE.Vector3(0, 5000, 5000)))
+        app.camera.rotation.set(-.4, 0, 0);
+
         this.domController.focusInterface.container.style.opacity = 1;
         this.domController.focusInterface.container.style.left = "";
         this.domController.focusInterface.build(tree.userData.post);
@@ -324,10 +327,9 @@ class AppInterface {
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, dt);
             app.camera.updateProjectionMatrix()
 
-            /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt) */
-
             /* log(app.scene.fog.near, app.scene.fog.far) */
+            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
 
 
             const tangent = new THREE.Vector3(

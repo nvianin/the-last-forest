@@ -31,7 +31,7 @@ const treeTypes = {
     "Climate": {
         color: "lightblue",
         rules: new Ruleset().parse(
-            "F->RF[RF[LFRSLF]SRF]"
+            "F->RF{{[RF[L{{FRS++L}}}F]S{{+RF]"
         )
     },
     "Casual Friday": {
@@ -181,7 +181,7 @@ const treeTypes = {
     "Funny & Sad": {
         color: "brown",
         rules: new Ruleset().parse(
-            "F->BBFD, [->LRL]D, L->R{B{-, "
+            "F->FF[FUS, [->L[RL]U, L->R{B{-, "
         )
     },
 }
@@ -190,8 +190,8 @@ const treeColors = {}
 const load_colors = async () => {
     const vertexShader = await (await fetch("/resources/shaders/lineVertex.glsl")).text()
     /*     log(vertexShader) */
-    const paletteShift = 6;
-    const hexpalette = (await (await fetch("/resources/palettes/master-28.hex")).text()).split("\r\n")
+    const paletteShift = 12;
+    const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\r\n")
     hexpalette.reverse()
     let i = 0;
     for (key of Object.keys(treeTypes)) {
@@ -199,7 +199,7 @@ const load_colors = async () => {
         const hsl = new THREE.Color()
         col.getHSL(hsl)
         log(hsl)
-        col.setHSL(hsl.h, hsl.s * 1.5, hsl.l * .8)
+        col.setHSL(hsl.h, hsl.s * 1.3, hsl.l * (.86 + hsl.l ** 2))
         log(col)
 
         treeTypes[key].color = "#" + col.getHexString()

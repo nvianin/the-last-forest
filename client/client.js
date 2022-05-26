@@ -498,10 +498,8 @@ class App {
                 /* this.interface.nextState = "FOCUSED";
                 log(this.interface.nextState) */
 
-
                 /* log(this.activeTree) */
                 this.interface.enter_focus(this.activeTree)
-
             }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
             this.pointer_is_down = false;
@@ -769,7 +767,7 @@ class App {
                     this.tree_imposters.push(imposter)
                     imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position)); */
 
-                    const outerScale = 100;
+                    const outerScale = 66;
 
                     tree.scale.set(outerScale, outerScale, outerScale)
                     tree.children[0].scale.set(scale / outerScale, scale / outerScale, scale / outerScale)
@@ -1012,16 +1010,24 @@ class App {
     }
 
     MouseCast() {
-        let nearbyTrees = this.trees
-        if (this.interface.focused_mode) {
+        let nearbyTrees
+        if (this.selectedCategories.length > 0) {
             nearbyTrees = []
-            this.trees.forEach(t => {
-                if (t.position.distanceTo(this.camera.position) < this.settings.focused_max_raycast_dist) {
-                    nearbyTrees.push(t)
+            this.selectedCategories.forEach(category => {
+                nearbyTrees = nearbyTrees.concat(this.trees_by_category[category])
+            })
+        } else {
+            nearbyTrees = Object.values(this.trees)
+        }
+
+        if (this.interface.focused_mode) {
+            nearbyTrees.forEach(t => {
+                if (t.position.distanceTo(this.camera.position) > this.settings.focused_max_raycast_dist) {
+                    nearbyTrees.splice(nearbyTrees.indexOf(t), 1)
                 }
             })
-            log(nearbyTrees.length)
         }
+        log(nearbyTrees.length)
 
 
         this.mousecast.setFromCamera(this.pointer, this.camera);
@@ -1208,6 +1214,10 @@ class App {
                     this.thumbnail_dont_focus = false;
                 }
                 this.selectedCategories.splice(this.selectedCategories.indexOf(type), 1)
+
+                if (this.interface.focused_mode && this.selectedCategories.length == 0) {
+                    this.interface.exit_focus()
+                }
 
             } else {
                 this.selectedCategories.push(type)
