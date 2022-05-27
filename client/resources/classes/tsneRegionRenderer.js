@@ -19,7 +19,9 @@ class TsneRegionRenderer {
         this.id = Math.floor((Math.random() * 0xffffff)).toString()
         this.renderer = renderer;
         this.scene = new THREE.Scene()
+
         this.width = 256 + 64
+
         this.camera = new THREE.OrthographicCamera(-this.width / 2, this.width / 2, this.width / 2, -this.width / 2)
         this.camera.position.z = .1
 
@@ -101,6 +103,12 @@ class TsneRegionRenderer {
         this.debugPlane.position.y = 300
         this.debugPlane.rotation.x = -Math.PI / 2
         app.scene.add(this.debugPlane) */
+
+        /* this.canvas = document.createElement("canvas")
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.ctx = this.canvas.getContext("2d");
+        this.ctx.putImageData(this.renderer.readRenderTargetPixels()) */
 
         const col = new THREE.Color()
         app.renderer.getClearColor(col)
@@ -201,5 +209,9 @@ class TsneRegionRenderer {
         log("TSNE displaymap updated from " + this.id)
         log(this)
         this.built = true
+    }
+
+    generateImage() {
+
     }
 }

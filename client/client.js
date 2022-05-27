@@ -38,7 +38,7 @@ const debug = {
     use_cached_data: false || debug_activated,
     aggregate: false,
     show_imposters: true,
-    particle: false,
+    particle: true,
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
@@ -79,13 +79,13 @@ class App {
         if (localstorage_points) this.points = localstorage_points;
 
         this.settings = {
-            ground_side: 64 * 2,
-            ground_scale: 128 * 3,
+            ground_side: 96 * 2,
+            ground_scale: 128 * 6,
             draw_distance: 30000,
             fog_offset: 5000,
             walking_fog_multiplier: .1,
             focused_max_raycast_dist: 3000,
-            tsne_scale_multiplier: 45
+            tsne_scale_multiplier: 39
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -329,7 +329,7 @@ class App {
                 this.bg_music.play()
             }
         }
-
+        this.selectedCategories = []
         this.frameCount = 0;
         this.render()
 
@@ -545,7 +545,7 @@ class App {
         this.saoPass.params.saoScale = 3; */
 
 
-        this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera);
+        /* this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera); */
 
 
         this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight);
@@ -904,7 +904,7 @@ class App {
             this.scene.add(this.aggregate)
         }
 
-        /* this.interface.enter_focus(this.trees[14]) */
+        this.interface.enter_focus(this.trees[14])
     }
 
     buildLODs() {
@@ -1074,6 +1074,11 @@ class App {
             }
             /* this.outlinePass.selectedObjects = [] */
         }
+
+        /* const tsneTersects = this.mousecast.intersectObject(this.tsneRenderer.displayPlane);
+        if (tsneTersects.length > 0) {
+            log(tsneTersects[0])
+        } */
     }
 
     buildIndexThumbnails() {
@@ -1199,7 +1204,6 @@ class App {
                 thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
             }
         }
-        this.selectedCategories = []
 
         this.thumbnailContainer.onclick = e => {
             const type = e.target.parentElement.type || e.target.type;

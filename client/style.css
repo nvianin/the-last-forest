@@ -577,8 +577,8 @@ canvas .text-input {
   position: fixed;
   left: 40px;
   top: 5%;
-  max-height: 85%;
-  max-width: 40%;
+  max-height: 60%;
+  max-width: 36%;
   z-index: 2000;
   color: white;
   pointer-events: all;
@@ -591,7 +591,7 @@ canvas .text-input {
   opacity: 0;
   padding: 10px;
 
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 #focus-title {
@@ -637,11 +637,26 @@ canvas .text-input {
   background-clip: text;
 }
 
+.focus-post {
+  font-family: Robotomono;
+
+  border-radius: 5px;
+  min-height: 20vw;
+  margin: 10px;
+  padding: 5px;
+
+  user-select: none;
+  cursor: pointer;
+}
+
 #focus-date {
   /* position: absolute; */
   right: 0;
   float: right;
   margin: 10px;
+  font-size: 11pt;
+  line-height: 13pt;
+  padding: 5px;
   /* margin-right: 25px; */
   font-family: Robotomono;
 }

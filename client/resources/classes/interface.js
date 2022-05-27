@@ -46,7 +46,7 @@ class AppInterface {
                 map: 50,
                 focused: 50,
             },
-            camera_ground_offset: 16,
+            camera_ground_offset: 160,
             focused_fog_multiplier: .13
         }
 
@@ -243,10 +243,10 @@ class AppInterface {
         if (!this.focused_mode) this.focused_backup.mapControls = this.mapControls.enabled
         this.focused_mode = true;
         this.focused_tree = tree;
+        /* app.camera.position.copy(tree.position.clone().add(new THREE.Vector3(0, 5000, 5000)))
+        app.camera.rotation.set(-.4, 0, 0); */
         this.mapControls.enabled = false;
 
-        app.camera.position.copy(tree.position.clone().add(new THREE.Vector3(0, 5000, 5000)))
-        app.camera.rotation.set(-.4, 0, 0);
 
         this.domController.focusInterface.container.style.opacity = 1;
         this.domController.focusInterface.container.style.left = "";
@@ -278,11 +278,11 @@ class AppInterface {
 
         this.fatMat.color = tree.children[0].material.color;
 
-        app.outlinePass.selectedObjects = [tree]
+        /* app.outlinePass.selectedObjects = [tree] */
     }
 
     exit_focus() {
-        app.outlinePass.selectedObjects = []
+        /* app.outlinePass.selectedObjects = [] */
         this.domController.focusInterface.container.style.opacity = 0;
         this.domController.focusInterface.container.style.left = "-10000px";
         this.focused_lerping = true;
@@ -477,23 +477,23 @@ class AppInterface {
 
                     if (this.mouse_is_in_screen && this.mouse_target_element == app.renderer.domElement) {
                         // Simple fps controller
-                        if (!document.pointerLockElement) {
-                            const x = (this.mouse.x - innerWidth / 2) / innerWidth;
-                            if (Math.abs(x) > .4) {
-                                app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
-                            }
-                            const y = (this.mouse.y - innerHeight / 2) / innerHeight;
 
-                            if (Math.abs(y) > .35) {
-                                /* app.camera.rotateX(y * -.02) */
-                                app.camera.translateZ(y * 2)
-                            }
-                            /* log(x, y) */
-                        } else {
-                            // Advanced fps controller
-                            app.camera.translateZ(this.movement.z * 1.5);
-                            app.camera.translateX(this.movement.x * 1.5);
+                        const x = (this.mouse.x - innerWidth / 2) / innerWidth;
+                        if (Math.abs(x) > .4) {
+                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
                         }
+                        const y = (this.mouse.y - innerHeight / 2) / innerHeight;
+
+                        if (Math.abs(y) > .35) {
+                            /* app.camera.rotateX(y * -.02) */
+                            app.camera.translateZ(y * 2)
+                        }
+                        /* log(x, y) */
+
+                        //Advanced fps controller
+                        app.camera.translateZ(this.movement.z * 1.5);
+                        app.camera.translateX(this.movement.x * 1.5);
+
 
                         // Cast to ground
                         this.raycaster.set(app.camera.position, THREE.DOWN)
@@ -530,8 +530,8 @@ class AppInterface {
                     x = Math.clamp(x, -.2, .2);
                     app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
                     /* const y = this.simplex.noise(app.camera.position.y * .1, app.clock.getElapsedTime() * .01); */
-                    const y = .2;
-                    app.camera.translateZ(-y)
+
+                    app.camera.translateZ(-.6)
                     app.camera.position.lerp(this.target.target.clone().normalize().add(app.camera.position), .1);
                     if (app.camera.position.distanceTo(this.target.target) < 2) {
                         this.target.target = this.findPointOnGround();

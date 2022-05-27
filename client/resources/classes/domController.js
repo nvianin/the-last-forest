@@ -171,12 +171,6 @@ class FocusInterface {
         this.mediaContainer.appendChild(this.imgContainer)
         */
 
-        this.textContainer = document.createElement("div");
-        this.textContainer.id = "focus-text"
-        this.textContainer.onwheel = e => {
-            e.stopPropagation()
-        }
-        this.container.appendChild(this.textContainer)
 
         this.exitButton = document.createElement("div");
         this.exitButton.id = "focus-exit";
@@ -190,6 +184,18 @@ class FocusInterface {
         this.postContainer.className = "focus-post"
         this.container.appendChild(this.postContainer)
 
+
+        this.textContainer = document.createElement("div");
+        this.textContainer.id = "focus-text"
+        this.textContainer.onwheel = e => {
+            e.stopPropagation()
+        }
+        this.postContainer.appendChild(this.textContainer)
+
+        this.linkContainer = document.createElement("div");
+        this.linkContainer.id = "focus-link-container"
+        this.postContainer.appendChild(this.linkContainer)
+
         this.linkButton = document.createElement("div")
         this.linkButton.id = "focus-link"
         this.linkButton.onclick = () => {
@@ -199,15 +205,12 @@ class FocusInterface {
                 this.post.url
             )
         }
-        this.postContainer.appendChild(this.linkButton);
+        this.linkContainer.appendChild(this.linkButton);
 
-
-
-
-        this.container.style.left = "-10000px"
 
 
         document.body.appendChild(this.container)
+        this.container.style.left = "-10000px"
     }
 
     build(post) {
@@ -222,7 +225,9 @@ class FocusInterface {
         /* this.imgContainer.src = ""
         this.videoContainer.src = "" */
         this.flairContainer.innerText = post.flair
-        this.flairContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
+        this.flairContainer.style.backgroundColor = this.postContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
+        this.postContainer.innerText = ""
+
         const d = new Date(post.date * 1000)
         /* this.dateContainer.innerText = d.toLocaleString() */
         this.dateContainer.innerText =
@@ -233,26 +238,27 @@ class FocusInterface {
             (d.getFullYear() + "").slice(2, 4)
 
 
-
-        // this.mediaContainer.style.height = ""
-        // if (post.is_video) {
-        //     log("post is video")
-        // } else if (post.media) {
-        //     log("post has media", post.media)
-        // } else if (post.has_media) {
-        //     if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
-        //         this.imgContainer.src = post.url;
-        //         /* if (post.url.includes(""))  */
-        //         /* this.textContainer.textContent = post */
-        //     }
-        //     if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
-        //         this.videoContainer.src = post.url;
-        //     } else if (post.url.includes("v.redd.it")) {
-
-        //     }
-        // } else {
-        //     this.mediaContainer.style.height = "0px"
-        // }
+        if (post.is_video) {
+            this.focusContainer.innerText = "\n This post is a video."
+        } else if (post.media) {
+            log("post has media", post.media)
+        } else if (post.has_media) {
+            if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
+                this.postContainer.innerText = "This post is an image."
+            }
+            if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
+                this.postContainer.innerText = "This post is a video."
+            } else if (post.url.includes("v.redd.it")) {
+                this.postContainer.innerText = "This post is a video."
+            }
+        }
+        this.postContainer.onclick = () => {
+            window.open(
+                post.url.includes("/r/") ?
+                "https://reddit.com/" + post.url :
+                post.url
+            )
+        }
         /* this.linkButton.style.visibility = "visible" */
         this.linkButton.textContent = post.url;
 
