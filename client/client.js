@@ -903,8 +903,11 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-
-        this.interface.enter_focus(this.trees[14])
+        const default_focus_tree = this.trees.find(t => {
+            return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
+        });
+        log(default_focus_tree)
+        this.interface.enter_focus(default_focus_tree)
     }
 
     buildLODs() {
@@ -1222,10 +1225,12 @@ class App {
                 if (this.interface.focused_mode && this.selectedCategories.length == 0) {
                     this.interface.exit_focus()
                 }
+                e.target.parentElement.style.boxShadow = ""
 
             } else {
                 this.selectedCategories.push(type)
                 e.target.parentElement.classList.add("thumbnail-active")
+                e.target.parentElement.style.boxShadow = "0 0 12px #" + treeColors[e.target.innerText].color.getHexString()
             }
 
             if (this.selectedCategories.length > 0) {
