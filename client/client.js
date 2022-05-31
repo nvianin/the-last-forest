@@ -42,7 +42,7 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 0,
+    tree_build_limit: 128,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -211,7 +211,7 @@ class App {
             color: fakeBackCol
         })
         this.ground_fakeBack.position.y -= .2
-        this.scene.add(this.ground_fakeBack)
+        /* this.scene.add(this.ground_fakeBack) */
         if (debug.particle) {
             fetch("/resources/shaders/dustFrag.glsl").then(resp => {
                 resp.text().then(frag => {
@@ -724,8 +724,8 @@ class App {
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
                     /* const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20); */
-                    const upvote_factor = Math.clamp(Math.map(post.score, 300, 16000, 1, 100), 10, Infinity);
-                    const scale = 32 * upvote_factor;
+                    const upvote_factor = Math.clamp(Math.map(post.score, 300, 16000, 1, 100), 10, 30);
+                    const scale = 16 * upvote_factor;
                     const development = Math.clamp(Math.floor(Math.map(post.score, 300, 16000, 1, 6)), 1, debug.max_generation_level > 0 ? debug.max_generation_level : 10)
 
                     let y = -100;
@@ -737,7 +737,7 @@ class App {
                         console.warn("Tree type \"" + post.flair + "\" missing!")
                         post.flair = "Society"
                     }
-                    tree = this.tree.buildTreeType(post.flair, development)
+                    tree = this.tree.buildTreeType(post.flair, development, post.title.concat(post.title).concat(post.title).concat(post.title))
 
                     /* let tree = post.sentiment.score > 0 ? this.tree_model.clone() : this.dead_tree_model.clone(); */
                     raycaster.set(
@@ -773,6 +773,7 @@ class App {
                     tree.children[0].scale.set(scale / outerScale, scale / outerScale, scale / outerScale)
                     /* object.updateMatrix */
 
+                    tree.userData.scale = scale;
                     tree.userData.post = post;
                     if (!debug.aggregate) this.scene.add(tree)
                     this.trees.push(tree)

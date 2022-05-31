@@ -155,7 +155,7 @@ vec3 pos = position;
 float depth = - (modelViewMatrix * vec4(position, 1.)).z;
 
 /* vec3 noise = vec3(snoise((position.xy * sc) + (time * time_scale)), snoise((position.yz * sc) + (time * time_scale)), snoise((position.zx * sc) + (time * time_scale))); */
-vec3 wind = snoiseAtPos(position * 10., .01, time * .4, vec3(.4, .6, 0.));
+vec3 wind = snoiseAtPos(position * 10., .01, time * .2, vec3(.4, .6, 0.));
 wind *= position.y * .1;
 wind *= .4;
 

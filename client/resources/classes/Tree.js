@@ -369,10 +369,11 @@ class TreeManager {
         return this.object.clone();
     }
     // --------------------------------------------------------------------
-    buildTreeType(type = "Climate", generations = 1) {
+    buildTreeType(type = "Climate", generations = 1, sentence = false) {
         const ruleset = treeTypes[type].rules.clone();
         /* ruleset.randomize(2, false); */
-        const tree = this.build_generations(this.randomizeSentence(), generations, ruleset, new THREE.Color(treeTypes[type].color));
+        const tree = this.build_generations(sentence ? sentence : this.randomizeSentence(), generations, ruleset, new THREE.Color(treeTypes[type].color));
+        tree.spheres = this.turtle.spheres;
         tree.children[0].material = treeColors[type];
         tree.rotation.y = Math.random() * Math.TWO_PI
         return tree;
@@ -400,7 +401,7 @@ class TreeManager {
         /* log(this.object.children) */
         if (this.object.children.length > 1) throw new Error("Too many children on tree object")
 
-        this.setSizeRelativeToBoundingSphere();
+        /* this.setSizeRelativeToBoundingSphere(); */
 
         const o = this.object.children[0];
         /* log(o.scale.x) */

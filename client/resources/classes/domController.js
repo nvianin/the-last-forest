@@ -268,7 +268,7 @@ class FocusInterface {
         this.postContainer.onclick = () => {
             window.open(
                 post.url.includes("/r/") ?
-                "https://reddit.com/" + post.url :
+                "https://reddit.com" + post.permalink :
                 post.url
             )
         }

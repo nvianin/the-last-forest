@@ -169,6 +169,7 @@ class Turtle {
                             distance_factor * this.fruit_scale
                         )
                     )
+                    dummy.color = c;
                     this.spheres.push(dummy)
 
                     /* app.instanceManager.instances.setColorAt(

@@ -22,6 +22,8 @@ class AppInterface {
         this.mapControls.screenSpacePanning = false;
         this.mapControls.enabled = true;
 
+        this.instanceId = app.instanceManager.register(this);
+
 
         this.focused_mode = false;
         this.focused_tree = null;
@@ -236,10 +238,22 @@ class AppInterface {
 
         this.fatMat.needsUpdate = true;
         log(this.fatMat.needsUpdate)
+
+
     }
 
-
     enter_focus(tree) {
+
+        /* for (let t of Object.values(app.trees)) {
+            app.instanceManager.borrow(
+                this.instanceId,
+                t.position,
+                new THREE.Vector3(1000, 1000, 1000),
+                new THREE.Quaternion()
+            )
+        } */
+        app.instanceManager.return_all(this.instanceId)
+
         if (!this.focused_mode) this.focused_backup.mapControls = this.mapControls.enabled
         this.focused_mode = true;
         this.focused_tree = tree;
@@ -256,8 +270,8 @@ class AppInterface {
 
         log(tree)
 
-        const upvote_factor = Math.clamp(Math.map(tree.userData.post.score, 300, 16000, 1, 100), 10, Infinity);
-        const scale = 32 * upvote_factor;
+        const upvote_factor = Math.clamp(Math.map(tree.userData.post.score, 300, 16000, 1, 100), 10, 30);
+        const scale = 16 * upvote_factor;
 
         const positions = tree.children[0].geometry.attributes.position.array.map(x => {
             return x * scale
@@ -266,6 +280,23 @@ class AppInterface {
         for (let i = 0; i < positions.length / 3; i++) {
             const t = i / (positions.length / 3)
             colors.push(t, t, t)
+        }
+
+        for (let s of tree.spheres) {
+            log("---")
+            log(s.position, s.scale)
+            s.position.multiplyScalar(-10000).add(tree.position);
+            s.scale.multiply(tree.scale).multiplyScalar(10);
+            app.camera.lookAt(s)
+            log(s.position, s.scale, s.color)
+
+            const i = app.instanceManager.borrow(
+                this.instanceId,
+                s.position,
+                s.scale,
+                s.quaternion)
+            app.instanceManager.instances.setColorAt(i, s.color)
+            app.instanceManager.instances.instanceColor.needsUpdate = true;
         }
 
         this.fatTree.geometry.setPositions(positions)
@@ -306,8 +337,8 @@ class AppInterface {
 
                 app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
-            } else {
                 log(dist)
+            } else {
                 clearInterval(this.focus_exit_interval)
                 this.focused_mode = false;
                 this.focused_lerping = false;
