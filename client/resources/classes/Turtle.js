@@ -37,9 +37,11 @@ class Turtle {
         this.theta_offset = ((Math.PI * 2) / 360) * 1;
         this.instance_id = app.instanceManager.register(this);
         this.fruit_scale = .23;
+
     }
 
     build(instruction) {
+        this.spheres = []
         /* app.instanceManager.return_all(this.instance_id); */
         this.theta_backup = this.theta;
         this.object.position.copy(new THREE.Vector3());
@@ -129,7 +131,7 @@ class Turtle {
                     this.theta -= this.theta_offset;
                     break;
                 case "S":
-                    let i = app.instanceManager.borrow(
+                    /* let i = app.instanceManager.borrow(
                         this.instance_id,
                         this.object.position.clone().add(
                             new THREE.Vector3(
@@ -144,7 +146,7 @@ class Turtle {
                             distance_factor * this.fruit_scale
                         ),
                         this.object.quaternion.clone()
-                    );
+                    ); */
                     let c = new THREE.Color(
                         app.pearlPalette[
                             Math.floor(
@@ -152,11 +154,27 @@ class Turtle {
                             )
                         ]
                     );
-                    app.instanceManager.instances.setColorAt(
+                    const dummy = new THREE.Object3D()
+                    dummy.rotation.copy(this.object.rotation)
+                    dummy.position.copy(new THREE.Vector3(
+                        0,
+                        -distance_factor * this.fruit_scale,
+                        0
+                    ))
+                    dummy.scale.copy(
+                        new THREE.Vector3(
+                            distance_factor * this.fruit_scale,
+                            distance_factor * this.fruit_scale,
+                            distance_factor * this.fruit_scale
+                        )
+                    )
+                    this.spheres.push(dummy)
+
+                    /* app.instanceManager.instances.setColorAt(
                         i,
                         c
                     )
-                    app.instanceManager.instances.instanceColor.needsUpdate = true;
+                    app.instanceManager.instances.instanceColor.needsUpdate = true; */
                     break;
             }
             points.push(this.object.position.clone())
