@@ -106,6 +106,10 @@ class CoolSlider {
             step.ondragstart = this.dom.ondragstart;
             this.step_elements.push(step)
             this.container.appendChild(step)
+
+            step.onclick = () => {
+                this.targetValue = (this.max - this.min) / (this.steps - 1) * i;
+            }
         }
 
 
@@ -153,7 +157,7 @@ class FocusInterface {
         this.separator.className = "focus-separator"
         this.container.appendChild(this.separator)
 
-        this.mediaContainer = document.createElement("div");
+        /* this.mediaContainer = document.createElement("div");
         this.mediaContainer.id = "focus-media"
         this.container.appendChild(this.mediaContainer)
         this.videoContainer = document.createElement("video");
@@ -163,15 +167,10 @@ class FocusInterface {
         this.imgContainer.id = "focus-img"
         this.imgContainer.onclick = () => {
             open(this.post.url)
-        }
+        } 
         this.mediaContainer.appendChild(this.imgContainer)
+        */
 
-        this.textContainer = document.createElement("div");
-        this.textContainer.id = "focus-text"
-        this.textContainer.onwheel = e => {
-            e.stopPropagation()
-        }
-        this.container.appendChild(this.textContainer)
 
         this.exitButton = document.createElement("div");
         this.exitButton.id = "focus-exit";
@@ -180,64 +179,107 @@ class FocusInterface {
             app.interface.exit_focus()
         }
 
-        this.linkButton = document.createElement("div")
-        this.linkButton.id = "focus-link"
-        this.linkButton.onclick = () => {
-            window.open(
-                this.post.url.includes("/r/") ?
-                "https://reddit.com/" + this.post.url :
-                this.post.url
-            )
+
+        this.postContainer = document.createElement("div");
+        this.postContainer.className = "focus-post"
+        this.container.appendChild(this.postContainer)
+
+
+        /* this.textContainer = document.createElement("div");
+        this.textContainer.id = "focus-text"
+        this.textContainer.onwheel = e => {
+            e.stopPropagation()
         }
-        this.container.appendChild(this.linkButton);
+        this.postContainer.appendChild(this.textContainer) */
 
+        this.redditButton = document.createElement("div");
+        this.redditButton.id = "focus-reddit"
+        this.redditButton.textContent = "reddit"
+        this.container.appendChild(this.redditButton)
+        this.redditButton.onclick = () => {
+            window.open("https://reddit.com" + this.post.permalink)
+        }
 
+        /* this.linkContainer = document.createElement("div");
+        this.linkContainer.id = "focus-link-container"
+        this.postContainer.appendChild(this.linkContainer) */
 
+        /*     this.linkButton = document.createElement("div")
+                this.linkButton.id = "focus-link"
+                this.linkButton.onclick = () => {
+                    window.open(
+                        this.post.url.includes("/r/") ?
+                        "https://reddit.com/" + this.post.url :
+                        this.post.url
+                    )
+                }
+                this.linkContainer.appendChild(this.linkButton); */
 
-
-        this.container.style.left = "-10000px"
+        this.focusText = document.createElement("div")
+        this.focusText.id = "focus-selftext"
+        this.postContainer.appendChild(this.focusText)
 
 
         document.body.appendChild(this.container)
+        this.container.style.left = "-10000px"
     }
 
     build(post) {
         this.post = post;
         log(post)
         this.title.textContent = post.title;
-
-        this.textContainer.innerHTML = this.formatPost(post.selftext)
-        this.imgContainer.src = ""
-        this.videoContainer.src = ""
+        /* try {
+            this.textContainer.innerHTML = this.formatPost(post.selftext)
+        } catch {
+            this.textContainer.innerHTML = post.selftext
+        } */
+        /* this.imgContainer.src = ""
+        this.videoContainer.src = "" */
         this.flairContainer.innerText = post.flair
-        this.flairContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
+        this.flairContainer.style.backgroundColor = this.postContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
+        this.focusText.innerText = ""
+
         const d = new Date(post.date * 1000)
         /* this.dateContainer.innerText = d.toLocaleString() */
         this.dateContainer.innerText =
             (d.getDate() + "").padStart(2, "0") +
             "/" +
-            (d.getMonth() + "").padStart(2, "0") +
+            ((d.getMonth() + 1) + "").padStart(2, "0") +
             "/" +
             (d.getFullYear() + "").slice(2, 4)
 
+
         if (post.is_video) {
-            log("post is video")
+            this.focusText.innerText = "\n This post is a video."
         } else if (post.media) {
             log("post has media", post.media)
         } else if (post.has_media) {
             if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
-                this.imgContainer.src = post.url;
-                /* if (post.url.includes(""))  */
-                /* this.textContainer.textContent = post */
+                this.focusText.innerText = "This post is an image."
             }
             if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
-                this.videoContainer.src = post.url;
+                this.focusText.innerText = "This post is a video."
             } else if (post.url.includes("v.redd.it")) {
-
+                this.focusText.innerText = "This post is a video."
             }
-        } else {}
+        } else if (post.selftext.length > 0) {
+            this.focusText.innerText = post.selftext
+        }
+        this.postContainer.onclick = () => {
+            window.open(
+                post.url.includes("/r/") ?
+                "https://reddit.com/" + post.url :
+                post.url
+            )
+        }
         /* this.linkButton.style.visibility = "visible" */
-        this.linkButton.textContent = post.url;
+        if (post.url.includes("/r/")) {
+            this.redditButton.style.display = "none"
+        } else {
+            this.redditButton.style.display = "block"
+        }
+
+        this.postContainer.innerText
     }
 
     formatPost(text) {

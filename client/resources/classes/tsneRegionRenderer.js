@@ -3,16 +3,31 @@ class TsneRegionRenderer {
         if (app.tsneRenderer) {
             throw new Error("TsneRenderer already exists !")
         }
+
+        app.computeTsneBoundingBox()
+        log(app.boundingBox);
+
+        for (let t of app.trees) {
+            t.position.sub(new THREE.Vector3(app.boundingBox.barycenter.x, 0, app.boundingBox.barycenter.y));
+
+
+            /* const scale = 
+            t.position.multiplyScalar(scale) */
+        }
+
+
         this.id = Math.floor((Math.random() * 0xffffff)).toString()
         this.renderer = renderer;
         this.scene = new THREE.Scene()
-        this.width = 256
+
+        this.width = 256 + 64
+
         this.camera = new THREE.OrthographicCamera(-this.width / 2, this.width / 2, this.width / 2, -this.width / 2)
         this.camera.position.z = .1
 
         this.posts = Object.values(posts);
 
-        this.side = 512;
+        this.side = 1024;
 
         this.framebuffer = new THREE.WebGLRenderTarget(this.side, this.side, {
             depthBuffer: false,
@@ -23,7 +38,7 @@ class TsneRegionRenderer {
         /* this.frametex.flipY = false; */
 
         this.plane = new THREE.Mesh(
-            new THREE.PlaneGeometry(256, 256),
+            new THREE.PlaneGeometry(this.width, this.width),
             new THREE.ShaderMaterial({
                 uniforms: {
                     tsne_map: {
@@ -59,7 +74,7 @@ class TsneRegionRenderer {
         this.loadMaterial()
 
         this.displayPlane = new THREE.Mesh(
-            new THREE.PlaneGeometry(1, 1),
+            new THREE.PlaneGeometry(1, 1, 32, 32),
             new THREE.MeshPhysicalMaterial({
                 map: this.frametex,
                 depthTest: false,
@@ -82,6 +97,19 @@ class TsneRegionRenderer {
             wireframe: true
         }) */
 
+        /* this.debugPlane = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), new THREE.MeshBasicMaterial({
+            map: this.frametex
+        }))
+        this.debugPlane.position.y = 300
+        this.debugPlane.rotation.x = -Math.PI / 2
+        app.scene.add(this.debugPlane) */
+
+        /* this.canvas = document.createElement("canvas")
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.ctx = this.canvas.getContext("2d");
+        this.ctx.putImageData(this.renderer.readRenderTargetPixels()) */
+
         const col = new THREE.Color()
         app.renderer.getClearColor(col)
         this.backup = {
@@ -98,7 +126,7 @@ class TsneRegionRenderer {
         const frag = await (await fetch("./resources/shaders/tsneRendererFrag.glsl")).text()
         this.material.fragmentShader = frag;
         this.material.needsUpdate = true
-        log(this.material.fragmentShader)
+        /* log(this.material.fragmentShader) */
         this.update();
     }
 
@@ -128,7 +156,7 @@ class TsneRegionRenderer {
                 const s = Math.clamp(this.posts[i].score / 3000, .3, 2)
                 /* const s = 1 */
                 dummy.compose(
-                    new THREE.Vector3(this.posts[i].tsne_coordinates.x, this.posts[i].tsne_coordinates.y, 0),
+                    new THREE.Vector3(this.posts[i].tsne_coordinates.x - app.boundingBox.barycenter.x / app.boundingBox.scale, this.posts[i].tsne_coordinates.y - app.boundingBox.barycenter.y / app.boundingBox.scale, 0),
                     new THREE.Quaternion(),
                     new THREE.Vector3(s, s, s)
                 )
@@ -158,7 +186,7 @@ class TsneRegionRenderer {
         this.material.uniforms.blur_pass.value = true;
         //Blur multiple times
         this.plane.visible = true;
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 26; i++) {
             this.renderer.render(this.scene, this.camera)
             this.renderer.copyFramebufferToTexture(new THREE.Vector2, this.frametex)
         }
@@ -181,5 +209,9 @@ class TsneRegionRenderer {
         log("TSNE displaymap updated from " + this.id)
         log(this)
         this.built = true
+    }
+
+    generateImage() {
+
     }
 }

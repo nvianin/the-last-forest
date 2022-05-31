@@ -5,9 +5,9 @@
     <title>The Last Forest, a map of collapse</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=false">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <meta name="description"
-        content="The Last Forest is a system which organizes posts from the subreddit r/collapse into trees, which form a forest telling of the probable collapse of civilization.">
+        content="The Last Forest is a contemplative journey to raise awareness about climate change and the impact of our consumerist civilization.">
 
 
     <script src="./resources/classes/interface.js"></script>
@@ -70,19 +70,33 @@
     <script src="./client.js"></script>
     <!-- <link rel="stylesheet" href="style.css"> -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 
 <body>
+    <audio src="./resources/sounds/last-forest-bg.ogg" id="bg-music"></audio>
     <!-- <textarea value="" id="text-input" class="text-input"></textarea>
     <textarea id="rule-set" class="text-input"></textarea> -->
-    <div id="loading-screen-background"></div>
-    <div id="loading-screen-text""">The Last Forest</div>
-    <div id="loading-desc"></div>
-    <div id="loading-bar">
-        <div id="loading-bar-inner"></div>
+
+    <span class="material-symbols-outlined" id="sound-toggle">
+        volume_off
+        <!-- volume_up -->
+    </span>
+
+
+    <div id="loading-container">
+        <div id="loading-screen-background"></div>
+        <div id="loading-screen-text""">The Last Forest</div>
+        <div id="loading-desc">
+            A contemplative journey, to raise awareness about climate change and the impact of our consumerist
+            civilization.
+        </div>
+        <div id="loading-bar">
+            <div id="loading-bar-inner"></div>
+        </div>
+        <div id="loading-button">START</div>
     </div>
-    <div id="loading-button"></div>
-    <div id="text-translation" class="data-display"></div>
     <div id="post-tooltip">
         <!--     <div id=triangle-1></div>
         <div id=triangle-2></div> -->

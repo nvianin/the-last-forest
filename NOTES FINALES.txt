@@ -1,52 +1,61 @@
-onboarding
-	a map of collapse trop abstrait, il faut qu'il soit 
-	résumer description subreddit + dataviz collection d'articles au sujet du collapse
 
-tests utilisateurs (toi tu comprends quoi ?) puis combler les vides
-	très régulièrement, des gens différentss
 	
-thumbnails incompréhensibles
-menu trop transparent
 
 tie up loose ends
 
 statistiques: nombre d'arbres, etc
 
-nasa visual arts: auto pathfinder
-	points prédéfinis 
 
 texte highlighté à la zelda dans le auto mode 	
 
-date - hierarchisée dans le focus mode
-rajouter flair dans focus mode
+
+// NOT STARTED
+nasa visual arts: auto pathfinder
+	points prédéfinis 
+
+tests utilisateurs (toi tu comprends quoi ?) puis combler les vides
+	très régulièrement, des gens différentss
+
+flair first
+	entête du flair qui reste lorsqu'on est dans la zone
+
+tooltip: better flair identification
+
+// IN PROGRESS
+onboarding
+	a map of collapse trop abstrait, il faut qu'il soit 
+	résumer description subreddit + dataviz collection d'articles au sujet du collapse
 
 umap:better tsne
 clip: better bert
 
-tooltip: better flair identification
-flair first
-	entête du flair qui reste lorsqu'on est dans la zone
-
-
-fix camera lerping towards focus 
-
 kandinsky + fat lines sur arbres lorsque focus
-
 focus: 2 fenêtres de chaque côté ?
-
-texte: pas plus de 500px pour le tracking de l'oeil
-
 
 damander pour grapsime + hiérarchie dans le focus mode
 plusieurs blocs (image, text, scrol lsi nécessaire)
 focus mode plus petit, montrer la plante aussi
-
-
 thumbnails: onclick changer la caméra (caméra map ? )
-thumbnail images: pas besoin, activation d'un tag qui se déroule quand on click/hover
 
+// DONE
+thumbnails incompréhensibles
+menu trop transparent
+fix camera lerping towards focus 
+texte: pas plus de 500px pour le tracking de l'oeil
+thumbnail images: pas besoin, activation d'un tag qui se déroule quand on click/hover
 bouton ok après loading
+rajouter flair dans focus mode
+date - hierarchisée dans le focus mode
+
+
+
+
+
+
+
+
+
+
 
 pas optimiser, finir le visuel !!! interface + navigation
-
-lerp: regarder le smooth(très smooth) de nasa visual experience
+lerp: regarder le smooth de nasa visual experience

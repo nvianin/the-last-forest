@@ -38,6 +38,7 @@ class Turtle {
         this.instance_id = app.instanceManager.register(this);
         this.fruit_scale = .23;
 
+        this.buildSpheres = false;
     }
 
     build(instruction) {

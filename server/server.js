@@ -344,9 +344,9 @@ class Server {
             this.reddit_control.last_getDailyTop = Date.now();
             this.setRedditControl()
 
-            await Utils.wait(6000);
+            /* await Utils.wait(6000);
             log("Building TSNE !")
-            this.buildTSNE()
+            this.buildTSNE() */
             await Utils.wait(15000);
             this.reloadPostsDB();
         }

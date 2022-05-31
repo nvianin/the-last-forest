@@ -46,8 +46,8 @@ class AppInterface {
                 map: 50,
                 focused: 50,
             },
-            camera_ground_offset: 16,
-            focused_fog_multiplier: .08
+            camera_ground_offset: 160,
+            focused_fog_multiplier: .13
         }
 
 
@@ -86,7 +86,7 @@ class AppInterface {
             vertexColors: false,
 
             dashed: false,
-            alphaToCoverage: true,
+            alphaToCoverage: false,
         })
         const linegeo = new THREE.LineGeometry()
         linegeo.setPositions(new THREE.SphereGeometry().attributes.position.array)
@@ -94,7 +94,9 @@ class AppInterface {
             linegeo,
             this.fatMat
         )
-        this.fatTree.scale.multiplyScalar(1000)
+        this.fatTree.visible = false;
+        /* this.fatTree.scale.multiplyScalar(1000) */
+        /* this.load_shader() */
         app.scene.add(this.fatTree);
     }
     setupListeners() {
@@ -214,12 +216,37 @@ class AppInterface {
         })
     }
 
+    async load_shader() {
+        const shader = await (await fetch("../resources/shaders/fatLineVertex.glsl")).text()
+        /* log(shader) */
+        const [prelude, main] = shader.split("////")
+
+        /* const ori = this.fatMat
+        this.fatMat = ori.clone()
+        ori.dispose() */
+
+
+        this.fatMat.vertexShader = this.fatMat.vertexShader.replace("attribute vec3 instanceColorEnd;", "attribute vec3 instanceColorEnd; \n" + prelude)
+        this.fatMat.vertexShader = this.fatMat.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + main)
+        this.fatMat.uniforms.time = {
+            value: 100
+        }
+        this.fatMat.uniforms
+        log(this.fatMat.vertexShader)
+
+        this.fatMat.needsUpdate = true;
+        log(this.fatMat.needsUpdate)
+    }
+
 
     enter_focus(tree) {
         if (!this.focused_mode) this.focused_backup.mapControls = this.mapControls.enabled
         this.focused_mode = true;
         this.focused_tree = tree;
+        /* app.camera.position.copy(tree.position.clone().add(new THREE.Vector3(0, 5000, 5000)))
+        app.camera.rotation.set(-.4, 0, 0); */
         this.mapControls.enabled = false;
+
 
         this.domController.focusInterface.container.style.opacity = 1;
         this.domController.focusInterface.container.style.left = "";
@@ -228,18 +255,38 @@ class AppInterface {
         this.focused_backup.rotation.copy(app.camera.rotation)
 
         log(tree)
-        this.fatTree.geometry.setPositions(tree.children[0].geometry.attributes.position.array)
+
+        const upvote_factor = Math.clamp(Math.map(tree.userData.post.score, 300, 16000, 1, 100), 10, Infinity);
+        const scale = 32 * upvote_factor;
+
+        const positions = tree.children[0].geometry.attributes.position.array.map(x => {
+            return x * scale
+        })
+        const colors = []
+        for (let i = 0; i < positions.length / 3; i++) {
+            const t = i / (positions.length / 3)
+            colors.push(t, t, t)
+        }
+
+        this.fatTree.geometry.setPositions(positions)
+        this.fatTree.geometry.setColors(colors)
         this.fatTree.position.copy(tree.position)
         this.fatTree.rotation.copy(tree.rotation)
 
-        app.outlinePass.selectedObjects = [tree]
+        this.fatTree.visible = true;
+
+
+        this.fatMat.color = tree.children[0].material.color;
+
+        /* app.outlinePass.selectedObjects = [tree] */
     }
 
     exit_focus() {
-        app.outlinePass.selectedObjects = []
+        /* app.outlinePass.selectedObjects = [] */
         this.domController.focusInterface.container.style.opacity = 0;
         this.domController.focusInterface.container.style.left = "-10000px";
         this.focused_lerping = true;
+        this.fatTree.visible = false;
 
         if (this.focus_exit_interval) {
             clearInterval(this.focus_exit_interval)
@@ -280,10 +327,9 @@ class AppInterface {
             app.camera.fov = Math.lerp(app.camera.fov, this.settings.fov.focused, dt);
             app.camera.updateProjectionMatrix()
 
+            /* log(app.scene.fog.near, app.scene.fog.far) */
             app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * this.settings.focused_fog_multiplier, dt)
             app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
-
-            /* log(app.scene.fog.near, app.scene.fog.far) */
 
 
             const tangent = new THREE.Vector3(
@@ -314,8 +360,8 @@ class AppInterface {
 
         } else if (!this.focused_mode) {
 
-            app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
-            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
+            /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
+            app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt) */
 
 
             // Update state according to dom inputs
@@ -425,25 +471,29 @@ class AppInterface {
             let dist;
             switch (this.state) {
                 case CONTROLLER_STATES.WALKING:
+
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
+
                     if (this.mouse_is_in_screen && this.mouse_target_element == app.renderer.domElement) {
                         // Simple fps controller
-                        if (!document.pointerLockElement) {
-                            const x = (this.mouse.x - innerWidth / 2) / innerWidth;
-                            if (Math.abs(x) > .4) {
-                                app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
-                            }
-                            const y = (this.mouse.y - innerHeight / 2) / innerHeight;
 
-                            if (Math.abs(y) > .35) {
-                                /* app.camera.rotateX(y * -.02) */
-                                app.camera.translateZ(y * 2)
-                            }
-                            /* log(x, y) */
-                        } else {
-                            // Advanced fps controller
-                            app.camera.translateZ(this.movement.z * .5);
-                            app.camera.translateX(this.movement.x * .5);
+                        const x = (this.mouse.x - innerWidth / 2) / innerWidth;
+                        if (Math.abs(x) > .4) {
+                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
                         }
+                        const y = (this.mouse.y - innerHeight / 2) / innerHeight;
+
+                        if (Math.abs(y) > .35) {
+                            /* app.camera.rotateX(y * -.02) */
+                            app.camera.translateZ(y * 2)
+                        }
+                        /* log(x, y) */
+
+                        //Advanced fps controller
+                        app.camera.translateZ(this.movement.z * 1.5);
+                        app.camera.translateX(this.movement.x * 1.5);
+
 
                         // Cast to ground
                         this.raycaster.set(app.camera.position, THREE.DOWN)
@@ -460,6 +510,10 @@ class AppInterface {
                 case CONTROLLER_STATES.MAP:
                     this.map_transform.position.copy(app.camera.position)
                     this.map_transform.rotation.copy(app.camera.rotation)
+
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
+
                     /* if (app.camera.position.distanceTo(this.mapControls.target) > 2) {
                         this.mapControls.enabled = false;
                         app.camera.position.lerp(this.mapControls.target, dt)
@@ -469,12 +523,15 @@ class AppInterface {
                     break;
 
                 case CONTROLLER_STATES.PROMENADE:
+                    app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
+                    app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
+
                     let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
                     x = Math.clamp(x, -.2, .2);
                     app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
                     /* const y = this.simplex.noise(app.camera.position.y * .1, app.clock.getElapsedTime() * .01); */
-                    const y = .2;
-                    app.camera.translateZ(-y)
+
+                    app.camera.translateZ(-.6)
                     app.camera.position.lerp(this.target.target.clone().normalize().add(app.camera.position), .1);
                     if (app.camera.position.distanceTo(this.target.target) < 2) {
                         this.target.target = this.findPointOnGround();

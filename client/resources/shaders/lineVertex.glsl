@@ -102,7 +102,9 @@ vec3 snoiseAtPos(vec3 pos, float sc, float t, vec3 wind) {
     return vec3(x, y, z);
 }
 uniform float time;
-            ////
+
+ ////
+
 /* vec3 noise = vec3(sin(time * position.x), cos(time * position.y), sin(time * position.z)); */
 vec3 noise = snoiseAtPos(position * 10., .01, time * .4, vec3(.4, .6, 0.));
 noise *= position.y * .1;

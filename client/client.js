@@ -40,7 +40,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    tree_build_limit: 256,
+    autostart: true,
+    max_generation_level: 6,
+    tree_build_limit: 0,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -77,15 +79,17 @@ class App {
         if (localstorage_points) this.points = localstorage_points;
 
         this.settings = {
-            ground_side: 64,
-            ground_scale: 256 + 64,
-            draw_distance: 20000,
-            fog_offset: 3000,
+            ground_side: 96 * 2,
+            ground_scale: 128 * 6,
+            draw_distance: 30000,
+            fog_offset: 5000,
             walking_fog_multiplier: .1,
+            focused_max_raycast_dist: 3000,
+            tsne_scale_multiplier: 39
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
-        this.camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .01, debug.fog ? this.settings.draw_distance : 3000);
+        this.camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .01, debug.fog ? this.settings.draw_distance + 1000 : 3000);
         this.camera.position.set(0, .5, 1);
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
@@ -235,9 +239,9 @@ class App {
                                 let [prelude, main] = frag.split("////")
                                 shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
                                 shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + main)
-                                log(shader.fragmentShader)
+                                /* log(shader.fragmentShader)
 
-                                log(shader.vertexShader)
+                                log(shader.vertexShader) */
 
                                 prelude = vert.split("////")[0]
                                 main = vert.split("////")[1]
@@ -313,6 +317,19 @@ class App {
             document.body.appendChild(this.frameRateDom)
         }
 
+        this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
+        this.bg_music = document.querySelector("#bg-music")
+        this.bg_music.volume = .8
+        document.querySelector("#sound-toggle").onclick = () => {
+            if (document.querySelector("#sound-toggle").innerText == "volume_up") {
+                document.querySelector("#sound-toggle").innerText = "volume_off"
+                this.bg_music.pause()
+            } else {
+                document.querySelector("#sound-toggle").innerText = "volume_up"
+                this.bg_music.play()
+            }
+        }
+        this.selectedCategories = []
         this.frameCount = 0;
         this.render()
 
@@ -453,6 +470,8 @@ class App {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
 
+            if (this.frameCount % 10 == 0) this.MouseCast()
+
             if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
 
@@ -461,6 +480,13 @@ class App {
             /* log(e.button) */
             const URL = this.activeUrl;
             /* log(URL); */
+            log((
+                this.interface.state != "LERPING" &&
+                this.postDom.style.visibility == "visible" &&
+                e.button == 0 &&
+                !this.pointer_moved_while_down &&
+                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+            ))
             if (
                 this.interface.state != "LERPING" &&
                 this.postDom.style.visibility == "visible" &&
@@ -472,10 +498,8 @@ class App {
                 /* this.interface.nextState = "FOCUSED";
                 log(this.interface.nextState) */
 
-
                 /* log(this.activeTree) */
                 this.interface.enter_focus(this.activeTree)
-
             }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
             this.pointer_is_down = false;
@@ -492,7 +516,7 @@ class App {
     }
 
     initPostprocess() {
-        this.renderScene = new THREE.RenderPass(this.scene, this.camera);
+        this.renderPass = new THREE.RenderPass(this.scene, this.camera);
         this.composer = new THREE.EffectComposer(this.renderer);
 
         this.bloomPass = new THREE.UnrealBloomPass(
@@ -500,9 +524,9 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            1.2, // strength
-            .7, // radius
-            .5 // threshold
+            .7, // strength
+            1.6, // radius
+            .19 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -521,7 +545,7 @@ class App {
         this.saoPass.params.saoScale = 3; */
 
 
-        this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera);
+        /* this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera); */
 
 
         this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight);
@@ -535,13 +559,13 @@ class App {
         /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
 
-        this.composer.addPass(this.renderScene);
+        this.composer.addPass(this.renderPass);
         /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.ssaoPass);
+        /* this.composer.addPass(this.ssaoPass); */
         /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
-        this.composer.addPass(this.outlinePass)
+        /* this.composer.addPass(this.outlinePass) */
     }
 
     initShadows() {
@@ -672,13 +696,15 @@ class App {
         })
     }
 
-    buildTreesFromPosts() {
-        this.tsneSize = Math.sqrt(Object.keys(this.posts).length * 15);
+    async buildTreesFromPosts() {
+        /* return false; */
+        this.tsneSize = Math.sqrt(Object.keys(this.posts).length * this.settings.tsne_scale_multiplier);
         /* log(this.ground) */
         const raycaster = new THREE.Raycaster();
         log(this.connection_conditions_count, this.connection_conditions_threshold, " conditions")
         let removed_trees = 0
         let i = 0;
+        const postCount = Object.keys(this.posts).length
         if (!this.built_trees && this.connection_conditions_count == this.connection_conditions_threshold) {
             this.buildIndexThumbnails()
             /* document.querySelector("#loading-screen-text").style.opacity = 1
@@ -698,9 +724,9 @@ class App {
                     const x = post.tsne_coordinates.x * sc
                     const z = post.tsne_coordinates.y * sc
                     /* const upvote_factor = Math.sqrt(Math.map(post.score, 300, 16000, 1, 100) * 20); */
-                    const upvote_factor = Math.map(post.score, 300, 16000, 1, 100);
+                    const upvote_factor = Math.clamp(Math.map(post.score, 300, 16000, 1, 100), 10, Infinity);
                     const scale = 32 * upvote_factor;
-                    const development = Math.floor(Math.map(post.score, 300, 16000, 1, 6))
+                    const development = Math.clamp(Math.floor(Math.map(post.score, 300, 16000, 1, 6)), 1, debug.max_generation_level > 0 ? debug.max_generation_level : 10)
 
                     let y = -100;
                     post.sentiment = {
@@ -741,7 +767,7 @@ class App {
                     this.tree_imposters.push(imposter)
                     imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position)); */
 
-                    const outerScale = 100;
+                    const outerScale = 66;
 
                     tree.scale.set(outerScale, outerScale, outerScale)
                     tree.children[0].scale.set(scale / outerScale, scale / outerScale, scale / outerScale)
@@ -761,7 +787,12 @@ class App {
                         log(post)
                     } */
                     i++;
+                    /* const percentage = i / (debug.tree_build_limit > 0 ? debug.tree_build_limit : postCount) * 100;
+                    document.querySelector("#loading-bar-inner").style.width = percentage + "%"
+                    document.querySelector("#loading-bar-inner").innerText = percentage + "%"
+                    log(document.querySelector("#loading-bar-inner").style.width) */
                     if (debug.tree_build_limit > 0 && i > debug.tree_build_limit) break;
+
                 }
             }
 
@@ -798,25 +829,48 @@ class App {
                     removed_trees++;
                 }
             }
-            document.querySelector("#loading-screen-background").style.opacity = 0
-            setTimeout(() => {
-                document.querySelector("#loading-screen-background").style.display = "none"
-            }, 1300)
-            setTimeout(() => {
-                document.querySelector("#loading-screen-text").style.opacity = 0
-            }, 700)
-            setTimeout(() => {
-                document.querySelector("#loading-screen-text").style.display = "none"
-            }, 3700)
+            document.querySelector("#loading-button").style.opacity = 1
+            document.querySelector("#loading-button").classList.add("loading-button-flash")
+            document.querySelector("#loading-button").onclick = () => {
+                /* document.querySelector("#loading-screen-background").style.opacity = 0; */
+                document.querySelector("#loading-bar").style.opacity = 0;
+                document.querySelector("#loading-desc").style.opacity = 0;
+                document.querySelector("#loading-button").style.opacity = 0;
+                if (document.querySelector("#sound-toggle").innerText == "volume_up") {
+                    this.bg_music.play()
+                }
+
+                setTimeout(() => {
+                    document.querySelector("#loading-screen-background").style.display = "none"
+                    document.querySelector("#loading-bar").style.display = "none"
+                    document.querySelector("#loading-desc").style.display = "none"
+                    document.querySelector("#loading-button").style.display = "none"
+                }, 1300)
+                setTimeout(() => {
+                    document.querySelector("#loading-screen-text").style.opacity = 0
+                }, 700)
+                setTimeout(() => {
+                    document.querySelector("#loading-screen-text").style.display = "none"
+                }, 3700)
+            }
+
+            if (debug.autostart) document.querySelector("#loading-button").click()
+
+
+            let vertCount = 0;
+
+            this.trees.forEach(tree => {
+                vertCount += tree.children[0].geometry.attributes.position.count
+            })
+            log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
+            log("Tree vertex: " + vertCount)
+            if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
+
+            this.buildTSNEMap()
+            this.computeCategoryBarycenters()
         } else {
             removed_trees++;
         }
-
-        let vertCount = 0;
-
-        this.trees.forEach(tree => {
-            vertCount += tree.children[0].geometry.attributes.position.count
-        })
         if (debug.aggregate) {
             const aggregated = new Float32Array(vertCount * 3)
 
@@ -849,13 +903,11 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-
-        log("Successfully built " + (i - removed_trees) + " trees while removing " + removed_trees)
-        log("Tree vertex: " + vertCount)
-        if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
-
-        this.buildTSNEMap()
-        this.interface.enter_focus(this.trees[14])
+        const default_focus_tree = this.trees.find(t => {
+            return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
+        });
+        log(default_focus_tree)
+        this.interface.enter_focus(default_focus_tree)
     }
 
     buildLODs() {
@@ -878,6 +930,10 @@ class App {
     buildTSNEMap() {
         this.tsneRenderer = new TsneRegionRenderer(this.renderer, this.posts)
         this.scene.add(this.tsneRenderer.displayPlane)
+
+        if (debug.postprocessing) {
+            this.tsneRenderer.displayPlane.material.color.multiplyScalar(.68)
+        }
     }
 
     async render() {
@@ -890,9 +946,13 @@ class App {
 
         /* if (this.tsneRenderer) this.tsneRenderer.update() */
 
+        const t = Math.clamp(this.camera.position.y / (this.settings.draw_distance / 3) + .2, 0, 1);
+        if (this.interface && this.interface.state == "MAP") {
+            /* this.fog.near = (this.settings.draw_distance - this.settings.fog_offset) * t * .85;
+            this.fog.far = this.settings.draw_distance * t */
+        }
         if (this.tsneRenderer) {
-            const t = Math.clamp(this.camera.position.y / 10000 - .2, 0, 1);
-            this.tsneRenderer.displayPlane.material.opacity = t * .4
+            this.tsneRenderer.displayPlane.material.opacity = t * .32
             /* log(t) */
         }
 
@@ -927,56 +987,14 @@ class App {
 
         if (this.built_trees) {
             if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = this.time
+            if (this.interface.fatMat.uniforms.time) this.interface.fatMat.uniforms.time.value = this.time;
             Object.keys(treeTypes).forEach(type => {
                 if (treeColors[type] && treeColors[type].userData.time) {
                     treeColors[type].userData.time.value = this.time
 
                 }
             })
-            this.mousecast.setFromCamera(this.pointer, this.camera);
-            const intersects = this.mousecast.intersectObjects(this.trees.concat([this.ground]));
-            if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
-                (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
-            ) {
 
-                /* log(intersects[0].object) */
-                /* intersects[0].object.geometry.attributes */
-                let object = intersects[0].object.parent;
-                /* this.outlinePass.selectedObjects = [object] */
-                object.active = true;
-
-
-                /* log("found tree ", intersects[0].object) */
-                /* log(intersects[0].object.parent.userData.post) */
-                const post = object.userData.post;
-                this.renderer.domElement.style.cursor = "pointer"
-                this.postDom.style.cursor = "pointer"
-
-                /* log(Math.round_to_decimal(post.sentiment.score)) */
-
-                this.postDom.innerHTML = post.title;
-                /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
-                this.postDom.innerHTML += "<br> <i>" + post.flair + "</i>"
-                this.activeUrl = post.url;
-                this.activeTree = intersects[0].object.parent;
-                /* log(this.activeTree) */
-                this.postDom.style.visibility = "visible";
-
-            } else {
-                this.renderer.domElement.style.cursor = "default";
-                this.postDom.style.cursor = "default";
-                /* if (this.outlinePass.selectedObjects[0]) {
-                    this.outlinePass.selectedObjects[0].active = false;
-                } */
-                if (!waiting_to_release_tooltip) {
-                    waiting_to_release_tooltip = true;
-                    setTimeout(() => {
-                        this.postDom.style.visibility = "hidden";
-                        waiting_to_release_tooltip = false;
-                    }, 200)
-                }
-                /* this.outlinePass.selectedObjects = [] */
-            }
         }
 
 
@@ -992,6 +1010,78 @@ class App {
         this.frameCount++;
         this.renderer.info.reset()
         this.dt = this.clock.getDelta()
+    }
+
+    MouseCast() {
+        let nearbyTrees
+        if (this.selectedCategories.length > 0) {
+            nearbyTrees = []
+            this.selectedCategories.forEach(category => {
+                nearbyTrees = nearbyTrees.concat(this.trees_by_category[category])
+            })
+        } else {
+            nearbyTrees = Object.values(this.trees)
+        }
+
+        if (this.interface.focused_mode) {
+            nearbyTrees.forEach(t => {
+                if (t.position.distanceTo(this.camera.position) > this.settings.focused_max_raycast_dist) {
+                    nearbyTrees.splice(nearbyTrees.indexOf(t), 1)
+                }
+            })
+        }
+        log(nearbyTrees.length)
+
+
+        this.mousecast.setFromCamera(this.pointer, this.camera);
+        const intersects = this.mousecast.intersectObjects(nearbyTrees);
+        if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
+            (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+        ) {
+
+            /* log(intersects[0].object) */
+            /* intersects[0].object.geometry.attributes */
+            let object = intersects[0].object.parent;
+            /* this.outlinePass.selectedObjects = [object] */
+            object.active = true;
+
+
+            /* log("found tree ", intersects[0].object) */
+            /* log(intersects[0].object.parent.userData.post) */
+            const post = object.userData.post;
+            this.renderer.domElement.style.cursor = "pointer"
+            this.postDom.style.cursor = "pointer"
+
+            /* log(Math.round_to_decimal(post.sentiment.score)) */
+
+            this.postDom.innerHTML = "<div id=\"tooltip-flair\" style=\"background-color: " + "#" + treeColors[post.flair].color.getHexString() + "\">" + post.flair + "</div>"
+            this.postDom.innerHTML += post.title;
+            /* this.postDom.innerHTML += "<br> <i>" + this.sentimentToIdiom(Math.round_to_decimal(post.sentiment.score, 2)) + "</i>"; */
+            this.activeUrl = post.url;
+            this.activeTree = intersects[0].object.parent;
+            /* log(this.activeTree) */
+            this.postDom.style.visibility = "visible";
+
+        } else {
+            this.renderer.domElement.style.cursor = "default";
+            this.postDom.style.cursor = "default";
+            /* if (this.outlinePass.selectedObjects[0]) {
+                this.outlinePass.selectedObjects[0].active = false;
+            } */
+            if (!waiting_to_release_tooltip) {
+                waiting_to_release_tooltip = true;
+                setTimeout(() => {
+                    this.postDom.style.visibility = "hidden";
+                    waiting_to_release_tooltip = false;
+                }, 200)
+            }
+            /* this.outlinePass.selectedObjects = [] */
+        }
+
+        /* const tsneTersects = this.mousecast.intersectObject(this.tsneRenderer.displayPlane);
+        if (tsneTersects.length > 0) {
+            log(tsneTersects[0])
+        } */
     }
 
     buildIndexThumbnails() {
@@ -1117,22 +1207,41 @@ class App {
                 thumbnailSlider.dom.value = thumbnailSlider.targetValue + ""
             }
         }
-        this.selectedCategories = []
 
         this.thumbnailContainer.onclick = e => {
             const type = e.target.parentElement.type || e.target.type;
             log(type)
+            if (type == undefined) return -1
+
             if (e.target.parentElement.classList.contains("thumbnail-active")) {
                 e.target.parentElement.classList.remove("thumbnail-active")
+                if (this.selectedCategories.length == 2) {
+                    this.thumbnail_dont_focus = true;
+                } else {
+                    this.thumbnail_dont_focus = false;
+                }
                 this.selectedCategories.splice(this.selectedCategories.indexOf(type), 1)
+
+                if (this.interface.focused_mode && this.selectedCategories.length == 0) {
+                    this.interface.exit_focus()
+                }
+                e.target.parentElement.style.boxShadow = ""
 
             } else {
                 this.selectedCategories.push(type)
                 e.target.parentElement.classList.add("thumbnail-active")
+                e.target.parentElement.style.boxShadow = "0 0 12px #" + treeColors[e.target.innerText].color.getHexString()
             }
 
             if (this.selectedCategories.length > 0) {
                 this.showOnlyCategories(this.selectedCategories)
+
+                // Focus tree & region when single category is selected
+                if (this.selectedCategories.length == 1 && !this.thumbnail_dont_focus) {
+                    this.interface.enter_focus(
+                        this.trees_by_category[type]
+                        [Math.floor(this.trees_by_category[type].length * Math.random())])
+                }
             } else {
                 this.showAllTrees()
             }
@@ -1186,6 +1295,7 @@ class App {
 
         if (this.composer) {
             this.composer.setSize(innerWidth, innerHeight);
+            this.bloomPass.setSize(innerWidth, innerHeight)
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
         }
@@ -1251,6 +1361,71 @@ class App {
 
     sentimentToIdiom(sentiment) {
         return sentiment >= .9 ? "Perfect !" : sentiment >= .7 ? "Beautiful !" : sentiment >= .5 ? "Nice !" : sentiment >= .3 ? "I like it." : sentiment >= .1 ? "Good." : sentiment == 0 ? "I don't know what this means." : sentiment >= -.1 ? "Eh." : sentiment >= -.3 ? "Ouch." : sentiment >= -.5 ? "That's bad." : sentiment >= -.7 ? "That's very bad." : sentiment >= -.9 ? "Oh no !" : "Fuck."
+    }
+
+    computeTsneBoundingBox() {
+        const scale = this.tsneSize;
+
+        let min = new THREE.Vector2()
+        let max = new THREE.Vector2()
+        const barycenter = new THREE.Vector2()
+        const posts = Object.values(this.posts);
+        for (let p of posts) {
+            if (p.tsne_coordinates) {
+                if (p.tsne_coordinates.x < min.x) {
+                    min.x = p.tsne_coordinates.x
+                }
+                if (p.tsne_coordinates.x > max.x) {
+                    max.x = p.tsne_coordinates.x
+                }
+                if (p.tsne_coordinates.y < min.y) {
+                    min.y = p.tsne_coordinates.y
+                }
+                if (p.tsne_coordinates.y > max.y) {
+                    max.y = p.tsne_coordinates.y
+                }
+                barycenter.add(new THREE.Vector2(p.tsne_coordinates.x, p.tsne_coordinates.y))
+            }
+        }
+        barycenter.divideScalar(posts.length)
+
+        const center = min.clone().lerp(max, .5);
+
+        min.multiplyScalar(scale)
+        max.multiplyScalar(scale)
+        center.multiplyScalar(scale)
+        barycenter.multiplyScalar(scale)
+
+        const extent = new THREE.Vector2(Math.abs(max.x - min.x), Math.abs(max.y - min.y))
+
+        this.boundingBox = {
+            min,
+            max,
+            center,
+            barycenter,
+            extent,
+            scale
+        }
+        return this.boundingBox
+    }
+
+    computeCategoryBarycenters() {
+        const categories = {}
+        app.trees.forEach(tree => {
+            if (categories[tree.userData.post.flair]) {
+                categories[tree.userData.post.flair].position.add(tree.position)
+                categories[tree.userData.post.flair].count++;
+            } else {
+                categories[tree.userData.post.flair] = {}
+                categories[tree.userData.post.flair].position = tree.position.clone()
+                categories[tree.userData.post.flair].count = 1
+            }
+        })
+        Object.values(categories).forEach(category => {
+            category.position.divideScalar(category.count)
+        })
+        this.categoriesBarycenters = categories
+        return categories
     }
 }
 
