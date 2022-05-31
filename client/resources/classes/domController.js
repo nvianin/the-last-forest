@@ -250,7 +250,7 @@ class FocusInterface {
 
 
         if (post.is_video) {
-            this.focusContainer.innerText = "\n This post is a video."
+            this.focusText.innerText = "\n This post is a video."
         } else if (post.media) {
             log("post has media", post.media)
         } else if (post.has_media) {
