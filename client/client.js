@@ -40,9 +40,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: true,
+    autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 128,
+    tree_build_limit: 0,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -84,7 +84,7 @@ class App {
             draw_distance: 30000,
             fog_offset: 5000,
             walking_fog_multiplier: .1,
-            focused_max_raycast_dist: 3000,
+            focused_max_raycast_dist: 1000,
             tsne_scale_multiplier: 39
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
@@ -525,18 +525,20 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            .7, // strength
+            .2, // strength
             1.6, // radius
-            .19 // threshold
+            .12 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
-            focus: 2.0,
-            aperture: .000005,
-            maxblur: .1,
+            focus: 2000.0,
+            aperture: .00000025,
+            maxblur: .05,
             width: innerWidth,
             height: innerHeight,
         });
+        this.bokehPass.far_aperture = .000002
+        this.bokehPass.close_aperture = .0000002
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
         /* this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
@@ -557,12 +559,12 @@ class App {
         this.taaPass.unbiased = false;
         this.taaPass.sampleLevel = 1; */
 
-        /* this.composer.addPass(this.bokehPass); */
         /* this.composer.addPass(this.taaPass); */
 
         this.composer.addPass(this.renderPass);
-        /* this.composer.addPass(this.taaPass); */
         this.composer.addPass(this.bloomPass);
+        this.composer.addPass(this.bokehPass);
+        /* this.composer.addPass(this.taaPass); */
         /* this.composer.addPass(this.ssaoPass); */
         /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
@@ -905,29 +907,12 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-        const default_focus_tree = this.trees.find(t => {
+        /* const default_focus_tree = this.trees.find(t => {
             return (t.spheres.length > 30)
             return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
         });
         log(default_focus_tree)
-        this.interface.enter_focus(default_focus_tree)
-    }
-
-    buildLODs() {
-        const vertices = []
-        this.trees.forEach(tree => {
-            vertices.push(tree.position.clone());
-        })
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-
-        this.LODMaterial = new THREE.PointsMaterial({
-
-        })
-
-        this.LODs = new THREE.Points(
-
-        )
+        this.interface.enter_focus(default_focus_tree) */
     }
 
     buildTSNEMap() {
@@ -1301,6 +1286,9 @@ class App {
             this.bloomPass.setSize(innerWidth, innerHeight)
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
+            this.bokehPass.uniforms.aspect.value = innerWidth / innerHeight;
+            this.bokehPass.renderTargetDepth.setSize(innerWidth, innerHeight);
+            this.bokehPass.camera.aspect = innerWidth / innerHeight;
         }
     }
 

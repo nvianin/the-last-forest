@@ -264,6 +264,8 @@ class FocusInterface {
             }
         } else if (post.selftext.length > 0) {
             this.focusText.innerText = post.selftext
+        } else if (!post.url.includes("/r/")) {
+            this.focusText.innerText = "This post is a link."
         }
         this.postContainer.onclick = () => {
             window.open(
