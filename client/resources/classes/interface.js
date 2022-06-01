@@ -285,8 +285,9 @@ class AppInterface {
         for (let s of tree.spheres) {
             log("---")
             log(s.position, s.scale)
-            s.position.multiplyScalar(-10000).add(tree.position);
-            s.scale.multiply(tree.scale).multiplyScalar(10);
+            s.position.applyAxisAngle(THREE.UP, tree.rotation.y)
+            s.position.multiplyScalar(tree.userData.scale).add(tree.position);
+            s.scale.multiply(tree.scale).multiplyScalar(1);
             app.camera.lookAt(s)
             log(s.position, s.scale, s.color)
 
@@ -389,7 +390,10 @@ class AppInterface {
             /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
             app.camera.lookAt(this.focused_tree.position.clone().add(tangent).add(new THREE.Vector3(0, this.focused_target_height, 0)))
 
+            app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 0, dt)
         } else if (!this.focused_mode) {
+
+            app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, dt)
 
             /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
             app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt) */

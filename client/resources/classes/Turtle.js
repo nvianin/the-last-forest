@@ -157,11 +157,15 @@ class Turtle {
                     );
                     const dummy = new THREE.Object3D()
                     dummy.rotation.copy(this.object.rotation)
-                    dummy.position.copy(new THREE.Vector3(
-                        0,
-                        -distance_factor * this.fruit_scale,
-                        0
-                    ))
+                    dummy.position.copy(
+                        this.object.position
+                        .clone()
+                        .add(
+                            new THREE.Vector3(
+                                0,
+                                -distance_factor * this.fruit_scale,
+                                0
+                            )))
                     dummy.scale.copy(
                         new THREE.Vector3(
                             distance_factor * this.fruit_scale,

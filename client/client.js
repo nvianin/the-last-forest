@@ -208,10 +208,11 @@ class App {
         this.ground_fakeBack.material = new THREE.MeshPhysicalMaterial({
             roughness: .9,
             specularIntensity: .3,
-            color: fakeBackCol
+            color: fakeBackCol,
+            transparent: true
         })
         this.ground_fakeBack.position.y -= .2
-        /* this.scene.add(this.ground_fakeBack) */
+        this.scene.add(this.ground_fakeBack)
         if (debug.particle) {
             fetch("/resources/shaders/dustFrag.glsl").then(resp => {
                 resp.text().then(frag => {
@@ -767,7 +768,7 @@ class App {
                     this.tree_imposters.push(imposter)
                     imposter.position.copy(tree.children[0].geometry.boundingSphere.center.clone().multiplyScalar(scale).add(tree.position)); */
 
-                    const outerScale = 66;
+                    const outerScale = 50;
 
                     tree.scale.set(outerScale, outerScale, outerScale)
                     tree.children[0].scale.set(scale / outerScale, scale / outerScale, scale / outerScale)
@@ -905,6 +906,7 @@ class App {
             this.scene.add(this.aggregate)
         }
         const default_focus_tree = this.trees.find(t => {
+            return (t.spheres.length > 30)
             return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
         });
         log(default_focus_tree)
