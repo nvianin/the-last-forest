@@ -17,7 +17,7 @@ class AppInterface {
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
         this.mapControls.maxPolarAngle = Math.HALF_PI * .8
         this.mapControls.minPolarAngle = .05
-        this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset;
+        this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset - 1000;
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
         this.mapControls.enabled = true;
