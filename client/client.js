@@ -40,9 +40,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: false,
+    autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 0,
+    tree_build_limit: 256,
 
     save_tutorial_state: false,
 
@@ -335,6 +335,29 @@ class App {
                 this.bg_music.play()
             }
         }
+
+        this.contrast_enabled = true;
+        this.contrast_button = document.querySelector("#contrast-toggle")
+        this.contrast_button.onclick = () => {
+            if (this.contrast_enabled) {
+
+            } else {
+
+            }
+            this.contrast_enabled = !this.contrast_enabled
+        }
+
+        this.time_sorting = false;
+        this.time_button = document.querySelector("#time-toggle")
+        this.time_button.onclick = () => {
+            if (this.time_sorting) {
+
+            } else {
+
+            }
+            this.time_sorting = !this.time_sorting;
+        }
+
         this.selectedCategories = []
         this.frameCount = 0;
         this.render()

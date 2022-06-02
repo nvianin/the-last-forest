@@ -33,7 +33,7 @@ class AppInterface {
         this.rotation_dummy = new THREE.Object3D();
         this.focused_rotation_offset = Math.HALF_PI
         this.focused_angle = 0;
-        this.focused_target_distance = 10;
+        this.focused_target_distance = 50;
         this.focused_target_height = 400;
         this.focused_backup = {
             mapControls: this.mapControls.enabled,
@@ -159,7 +159,7 @@ class AppInterface {
                 this.mapControls.minDistance = this.domController.zoomSlider.dom.min
                 this.mapControls.maxDistance = this.domController.zoomSlider.dom.max
             } else if (this.focused_mode) {
-                this.focused_target_distance = Math.clamp(this.focused_target_distance + e.deltaY, 300, 1500)
+                this.focused_target_distance = Math.clamp(this.focused_target_distance + e.deltaY / 10, 50, 100)
             }
             /* log(zoom) */
         })
@@ -372,7 +372,8 @@ class AppInterface {
             app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * this.settings.focused_fog_multiplier, dt)
 
 
-            const target_distance = this.focused_target_distance * this.focused_tree.scale.x
+            const target_distance = this.focused_target_distance * (this.focused_tree.userData.scale / 10)
+            log(target_distance)
 
             this.target_focus = target_distance
 

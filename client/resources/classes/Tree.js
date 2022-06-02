@@ -401,7 +401,7 @@ class TreeManager {
         /* log(this.object.children) */
         if (this.object.children.length > 1) throw new Error("Too many children on tree object")
 
-        /* this.setSizeRelativeToBoundingSphere(); */
+        this.setSizeRelativeToBoundingSphere();
 
         const o = this.object.children[0];
         /* log(o.scale.x) */
@@ -418,7 +418,10 @@ class TreeManager {
         this.object.children[0].geometry.computeBoundingSphere()
         let r = 1 / this.object.children[0].geometry.boundingSphere.radius;
         /* log(r, 1 / r) */
-        this.object.children[0].scale.set(r, r, r);
+        /* this.object.children[0].scale.set(r, r, r); */
+
+        this.object.userData.trueScale = r;
+        return -1;
 
         let instancedStuff = app.instanceManager.get_owned(this.turtle.instance_id);
         /* log(instancedStuff) */
