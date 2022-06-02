@@ -67,6 +67,11 @@ canvas .text-input {
   transition: 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
   width: 50px;
 }
+
+.toggle-button-active {
+  color: white;
+  text-shadow: white 0 0 8px;
+}
 .toggle-button:hover {
   color: #eee;
   text-shadow: #eee 0 0 10px;
@@ -91,12 +96,18 @@ canvas .text-input {
   /* top: 0; */
   /* margin-left: 15px; */
 
-  /* animation: toggle-description-initial-fadeout 5s;
-  animation-delay: 0s;
-  animation-fill-mode: forwards; */
   transition: 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
-  opacity: 1;
+  opacity: 0;
+  transform: translate(10%, -0%);
+  pointer-events: none;
+}
+
+.toggle-description-active {
   transform: translate(10%, -100%);
+  opacity: 1;
+  animation: toggle-description-initial-fadeout 3s;
+  animation-delay: 1s;
+  animation-fill-mode: forwards;
 }
 
 @keyframes toggle-description-initial-fadeout {

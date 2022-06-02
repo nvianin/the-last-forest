@@ -1351,9 +1351,11 @@ class App {
     }
 
     reArrangeTrees(mode) {
+        log("Activating " + mode + " mode")
         let targetPositions = this.defaultTreePositions.map(x => x)
         switch (mode) {
-
+            case "default":
+                break;
             case "time":
                 break;
             case "score":
