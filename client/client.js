@@ -418,20 +418,23 @@ class App {
 
     reArrangeTrees(mode) {
         log("Activating " + mode + " mode")
-        let targetPositions;
+        let targetPositions = [];
+        const _posts = Object.values(this.posts).map(x => x);
         switch (mode) {
             case "default":
                 targetPositions = this.defaultTreePositions.map(x => x)
                 break;
             case "time":
-                targetPositions = []
-
+                _posts.sort((p, _p) => p.date - _p.date)
+                _posts.forEach(p => {
+                    targetPositions.push(p.tree.position);
+                })
                 break;
             case "score":
-                targetPositions = []
-                break;
-            case "contrast":
-                targetPositions = []
+                _posts.sort((p, _p) => p.score - _p.score)
+                _posts.forEach(p => {
+                    targetPositions.push(p.tree.position);
+                })
                 break;
         }
 
