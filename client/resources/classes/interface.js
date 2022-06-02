@@ -33,7 +33,7 @@ class AppInterface {
         this.rotation_dummy = new THREE.Object3D();
         this.focused_rotation_offset = Math.HALF_PI
         this.focused_angle = 0;
-        this.focused_target_distance = 900;
+        this.focused_target_distance = 10;
         this.focused_target_height = 400;
         this.focused_backup = {
             mapControls: this.mapControls.enabled,

@@ -262,7 +262,7 @@ class FocusInterface {
             } else if (post.url.includes("v.redd.it")) {
                 this.focusText.innerText = "This post is a video."
             }
-        } else if (post.selftext.length > 0) {
+        } else if (post.selftext && post.selftext.length > 0) {
             this.focusText.innerText = post.selftext
         } else if (!post.url.includes("/r/")) {
             this.focusText.innerText = "This post is a link."

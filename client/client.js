@@ -44,6 +44,8 @@ const debug = {
     max_generation_level: 6,
     tree_build_limit: 0,
 
+    save_tutorial_state: false,
+
     enable: () => {
         for (let key of Object.keys(debug)) {
             if (key != "enable" && key != "disable") debug[key] = true;
@@ -78,12 +80,15 @@ class App {
         const localstorage_points = localStorage.getItem("points");
         if (localstorage_points) this.points = localstorage_points;
 
+        this.tutorialController = new TutorialController()
+
         this.settings = {
             ground_side: 96 * 2,
             ground_scale: 128 * 6,
             draw_distance: 30000,
             fog_offset: 5000,
             walking_fog_multiplier: .1,
+            walking_speed_multiplier: 4,
             focused_max_raycast_dist: 1000,
             tsne_scale_multiplier: 39
         }
@@ -537,8 +542,8 @@ class App {
             width: innerWidth,
             height: innerHeight,
         });
-        this.bokehPass.far_aperture = .000002
-        this.bokehPass.close_aperture = .0000002
+        this.bokehPass.far_aperture = .000001
+        this.bokehPass.close_aperture = .00000025
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
         /* this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
@@ -1286,9 +1291,11 @@ class App {
             this.bloomPass.setSize(innerWidth, innerHeight)
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
             this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
+
             this.bokehPass.uniforms.aspect.value = innerWidth / innerHeight;
             this.bokehPass.renderTargetDepth.setSize(innerWidth, innerHeight);
             this.bokehPass.camera.aspect = innerWidth / innerHeight;
+            this.bokehPass.camera.updateProjectionMatrix();
         }
     }
 
