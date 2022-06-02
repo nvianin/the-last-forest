@@ -323,6 +323,8 @@ class App {
             document.body.appendChild(this.frameRateDom)
         }
 
+
+
         for (let b of document.getElementsByClassName("toggle-button")) {
             b.onpointerenter = () => {
                 b.parentElement.children[1].classList.add("toggle-description-active")
@@ -356,32 +358,92 @@ class App {
             }
         }
 
-        this.contrast_enabled = true;
+        this.contrast_enabled = false;
         this.contrast_button = document.querySelector("#contrast-toggle")
         this.contrast_button.onclick = () => {
-            if (this.contrast_enabled) {
-
-            } else {
-
-            }
             this.contrast_enabled = !this.contrast_enabled
+            if (this.contrast_enabled) {
+                this.contrastSort(true)
+            } else {
+                this.contrastSort(false)
+            }
         }
 
         this.time_sorting = false;
         this.time_button = document.querySelector("#time-toggle")
         this.time_button.onclick = () => {
-            if (this.time_sorting) {
-
-            } else {
-
-            }
             this.time_sorting = !this.time_sorting;
+            if (this.score_sorting) {
+                this.score_sorting = false;
+                this.score_button.classList.remove("toggle-button-active")
+            }
+            if (this.time_sorting) {
+                this.reArrangeTrees("default")
+            } else {
+                this.reArrangeTrees("time")
+            }
+        }
+
+        this.score_sorting = false;
+        this.score_button = document.querySelector("#score-toggle")
+        this.score_button.onclick = () => {
+            this.score_sorting = !this.score_sorting;
+            if (this.time_sorting) {
+                this.time_sorting = false;
+                this.time_button.classList.remove("toggle-button-active")
+            }
+            if (this.score_sorting) {
+                this.reArrangeTrees("default")
+            } else {
+                this.reArrangeTrees("score")
+            }
         }
 
         this.selectedCategories = []
         this.frameCount = 0;
         this.render()
 
+    }
+
+    contrastSort(flag) {
+
+        app.trees.forEach(t => {
+            if (flag) {
+                t.scale.multiplyScalar(t.userData.trueScale * 2)
+            } else {
+                t.scale.divideScalar(t.userData.trueScale * 2)
+            }
+        })
+    }
+
+    reArrangeTrees(mode) {
+        log("Activating " + mode + " mode")
+        let targetPositions;
+        switch (mode) {
+            case "default":
+                targetPositions = this.defaultTreePositions.map(x => x)
+                break;
+            case "time":
+                targetPositions = []
+
+                break;
+            case "score":
+                targetPositions = []
+                break;
+            case "contrast":
+                targetPositions = []
+                break;
+        }
+
+        const arrangeInterval = setInterval(() => {
+            let dist = 0;
+            for (let i = 0; i < this.trees.length; i++) {
+                this.trees[i].position.lerp(targetPositions[i], .1)
+                dist += this.trees[i].position.distanceTo(targetPositions[i]);
+            }
+            log(dist)
+            if (dist < 50) clearInterval(arrangeInterval)
+        }, 16);
     }
 
     init() {
@@ -1349,21 +1411,6 @@ class App {
             this.bokehPass.camera.updateProjectionMatrix();
         }
     }
-
-    reArrangeTrees(mode) {
-        log("Activating " + mode + " mode")
-        let targetPositions = this.defaultTreePositions.map(x => x)
-        switch (mode) {
-            case "default":
-                break;
-            case "time":
-                break;
-            case "score":
-                break;
-        }
-    }
-
-
 
     generateSpiral(r, t) {
         return new THREE.Vector3(
