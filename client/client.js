@@ -910,7 +910,7 @@ class App {
 
             this.defaultTreePositions = []
 
-            for (let t of Object.values(this.trees)) {
+            for (let t of this.trees) {
                 this.defaultTreePositions.push(t.position.clone());
             }
 
@@ -1340,9 +1340,9 @@ class App {
     }
 
     reArrangeTrees(mode) {
+        let targetPositions = this.defaultTreePositions.map(x => x)
         switch (mode) {
-            case "default":
-                break;
+
             case "time":
                 break;
             case "score":
