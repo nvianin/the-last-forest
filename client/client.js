@@ -325,18 +325,29 @@ class App {
 
         for (let b of document.getElementsByClassName("toggle-button")) {
             b.onpointerenter = () => {
-                b.parentElement.children[1].style.opacity = 1;
+                b.parentElement.children[1].classList.add("toggle-description-active")
             }
             b.onpointerleave = () => {
-                b.parentElement.children[1].style.opacity = 0;
+                b.parentElement.children[1].classList.remove("toggle-description-active")
             }
+            b.addEventListener("pointerdown", () => {
+                if (b.classList.contains("toggle-button-active")) {
+                    b.classList.remove("toggle-button-active")
+                } else {
+                    b.classList.add("toggle-button-active")
+                }
+            })
+
         }
+
 
         this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
         this.bg_music = document.querySelector("#bg-music")
         this.bg_music.volume = .8
+        if (document.querySelector("#sound-toggle").innerText == "volume_off") document.querySelector("#sound-toggle").classList.add("toggle-button-active")
         document.querySelector("#sound-toggle").onclick = () => {
             if (document.querySelector("#sound-toggle").innerText == "volume_up") {
+                document.querySelector("#sound-toggle").classList.add("toggle-button-active")
                 document.querySelector("#sound-toggle").innerText = "volume_off"
                 this.bg_music.pause()
             } else {
@@ -508,7 +519,7 @@ class App {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
 
-            if (this.frameCount % 20 == 0) this.MouseCast()
+            if (this.frameCount % 10 == 0) this.MouseCast()
 
             if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
