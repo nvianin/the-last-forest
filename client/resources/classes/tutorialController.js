@@ -22,12 +22,27 @@ class TutorialController {
     }
 
     changeState(state) {
+        for (let c of this.tutorialContainer.childNodes) {
+            c.style.display = "none"
+        }
         switch (state) {
             case "MAP":
+                if (!this.state.map) {
+                    this.tutorialContainer.querySelector("#tutorial-map-guide").style.display = "block"
+                }
+                if (!this.state.thumbnails) {
+                    this.tutorialContainer.querySelector("#tutorial-thumbnails").style.display = "block"
+                }
                 break;
             case "WALKING":
+                if (!this.state.walk) {
+                    this.tutorialContainer.querySelector("#tutorial-walk").style.display = "block"
+                }
                 break;
             case "PROMENADE":
+                if (!this.state.auto) {
+                    this.tutorialContainer.querySelector("#tutorial-promenade").style.display = "block"
+                }
                 break;
         }
     }
@@ -37,7 +52,8 @@ class TutorialController {
         const tutorial_resources = {
             "map-guide-01": "map",
             "thumbnails-01": "thumbnails",
-            "walk-01": "walk"
+            "walk-01": "walk",
+            "promenade-01": "auto"
         }
 
         this.tutorialContainer = document.createElement("div");

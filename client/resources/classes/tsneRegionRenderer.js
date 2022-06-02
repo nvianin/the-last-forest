@@ -152,11 +152,12 @@ class TsneRegionRenderer {
         // Build instance matrix from tsne map
         const dummy = new THREE.Matrix4();
         for (let i = 0; i < this.spheres.count; i++) {
-            if (treeColors[this.posts[i].flair] && this.posts[i].tsne_coordinates) {
+            if (treeColors[this.posts[i].flair] && this.posts[i].tsne_coordinates && this.posts[i].tree && this.posts[i].tree.visible) {
                 const s = Math.clamp(this.posts[i].score / 3000, .3, 2)
                 /* const s = 1 */
                 dummy.compose(
                     new THREE.Vector3(this.posts[i].tsne_coordinates.x - app.boundingBox.barycenter.x / app.boundingBox.scale, this.posts[i].tsne_coordinates.y - app.boundingBox.barycenter.y / app.boundingBox.scale, 0),
+                    /* new THREE.Vector3(this.posts[i].tree.position.x - app.boundingBox.barycenter.x / app.boundingBox.scale, this.posts[i].tree.position.z - app.boundingBox.barycenter.y / app.boundingBox.scale, 0), */
                     new THREE.Quaternion(),
                     new THREE.Vector3(s, s, s)
                 )

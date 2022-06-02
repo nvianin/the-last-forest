@@ -65,6 +65,7 @@ canvas .text-input {
   user-select: none;
   cursor: pointer;
   transition: 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+  width: 50px;
 }
 .toggle-button:hover {
   color: #eee;
@@ -73,6 +74,38 @@ canvas .text-input {
 .toggle-button:active {
   color: white;
   text-shadow: white 0 0 2px;
+}
+
+.toggle-description {
+  font-family: Robotomono;
+  font-size: 12pt;
+  color: white;
+  line-height: 19pt;
+  user-select: none;
+  /* text-align: right; */
+
+  z-index: 1001;
+  position: absolute;
+  left: 30px;
+  /* width: 250px; */
+  /* top: 0; */
+  /* margin-left: 15px; */
+
+  /* animation: toggle-description-initial-fadeout 5s;
+  animation-delay: 0s;
+  animation-fill-mode: forwards; */
+  transition: 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+  opacity: 1;
+  transform: translate(10%, -100%);
+}
+
+@keyframes toggle-description-initial-fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 #sound-toggle {
@@ -416,6 +449,10 @@ canvas .text-input {
 .loading-button-flash:hover {
   box-shadow: 0 0 16px 16px #fff;
   background-color: #101216;
+}
+
+.material-symbols-outlined:hover {
+  opacity: 1;
 }
 
 #loading-button:active {

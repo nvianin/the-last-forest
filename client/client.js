@@ -44,7 +44,7 @@ const debug = {
     max_generation_level: 6,
     tree_build_limit: 256,
 
-    save_tutorial_state: false,
+    save_tutorial_state: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -323,6 +323,15 @@ class App {
             document.body.appendChild(this.frameRateDom)
         }
 
+        for (let b of document.getElementsByClassName("toggle-button")) {
+            b.onpointerenter = () => {
+                b.parentElement.children[1].style.opacity = 1;
+            }
+            b.onpointerleave = () => {
+                b.parentElement.children[1].style.opacity = 0;
+            }
+        }
+
         this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
         this.bg_music = document.querySelector("#bg-music")
         this.bg_music.volume = .8
@@ -499,7 +508,7 @@ class App {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
 
-            if (this.frameCount % 10 == 0) this.MouseCast()
+            if (this.frameCount % 20 == 0) this.MouseCast()
 
             if (this.pointer_is_down) this.pointer_moved_while_down = true;
         })
@@ -806,6 +815,7 @@ class App {
 
                     tree.userData.scale = scale;
                     tree.userData.post = post;
+                    post.tree = tree;
                     if (!debug.aggregate) this.scene.add(tree)
                     this.trees.push(tree)
                     if (!this.trees_by_category[post.flair]) this.trees_by_category[post.flair] = []
@@ -898,6 +908,12 @@ class App {
             log("Tree vertex: " + vertCount)
             if (debug.aggregate) log("Succesfully built aggregated geometry: ", aggregated_geometry)
 
+            this.defaultTreePositions = []
+
+            for (let t of Object.values(this.trees)) {
+                this.defaultTreePositions.push(t.position.clone());
+            }
+
             this.buildTSNEMap()
             this.computeCategoryBarycenters()
         } else {
@@ -962,7 +978,7 @@ class App {
 
         /* if (this.tsneRenderer) this.tsneRenderer.update() */
 
-        const t = Math.clamp(this.camera.position.y / (this.settings.draw_distance / 3) + .2, 0, 1);
+        const t = Math.clamp(this.camera.position.y / (this.settings.draw_distance / 3) + .0, 0, 1);
         if (this.interface && this.interface.state == "MAP") {
             /* this.fog.near = (this.settings.draw_distance - this.settings.fog_offset) * t * .85;
             this.fog.far = this.settings.draw_distance * t */
@@ -1029,6 +1045,7 @@ class App {
     }
 
     MouseCast() {
+        /* log("casting mouse") */
         let nearbyTrees
         if (this.selectedCategories.length > 0) {
             nearbyTrees = []
@@ -1319,6 +1336,17 @@ class App {
             this.bokehPass.renderTargetDepth.setSize(innerWidth, innerHeight);
             this.bokehPass.camera.aspect = innerWidth / innerHeight;
             this.bokehPass.camera.updateProjectionMatrix();
+        }
+    }
+
+    reArrangeTrees(mode) {
+        switch (mode) {
+            case "default":
+                break;
+            case "time":
+                break;
+            case "score":
+                break;
         }
     }
 

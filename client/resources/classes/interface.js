@@ -142,7 +142,7 @@ class AppInterface {
             switch (this.state) {
                 case "WALKING":
                     setTimeout(() => {
-                        if (e.target.id == "three" && app.pointer_is_down) {
+                        if (e.target.id == "three" && app.pointer_is_down && !this.focused_mode) {
                             log("locking pointer")
                             app.renderer.domElement.requestPointerLock()
                         }
@@ -264,11 +264,13 @@ class AppInterface {
         this.mapControls.enabled = false;
 
 
+
         this.domController.focusInterface.container.style.opacity = 1;
         this.domController.focusInterface.container.style.left = "";
         this.domController.focusInterface.build(tree.userData.post);
         this.focused_backup.position.copy(app.camera.position)
         this.focused_backup.rotation.copy(app.camera.rotation)
+        this.focused_backup.focus = this.target_focus;
 
         log(tree)
 
@@ -285,13 +287,13 @@ class AppInterface {
         }
 
         for (let s of tree.spheres) {
-            log("---")
-            log(s.position, s.scale)
+            /* log("---")
+            log(s.position, s.scale) */
             s.position.applyAxisAngle(THREE.UP, tree.rotation.y)
             s.position.multiplyScalar(tree.userData.scale).add(tree.position);
             s.scale.multiply(tree.userData.scale).multiplyScalar(1);
             app.camera.lookAt(s)
-            log(s.position, s.scale, s.color)
+            /* log(s.position, s.scale, s.color) */
 
             const i = app.instanceManager.borrow(
                 this.instanceId,
@@ -321,6 +323,7 @@ class AppInterface {
         this.domController.focusInterface.container.style.left = "-10000px";
         this.focused_lerping = true;
         this.fatTree.visible = false;
+        this.target_focus = this.focused_backup.focus
 
         if (this.focus_exit_interval) {
             clearInterval(this.focus_exit_interval)
@@ -337,6 +340,7 @@ class AppInterface {
 
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
+
 
                 app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
@@ -373,7 +377,7 @@ class AppInterface {
 
 
             const target_distance = this.focused_target_distance * (this.focused_tree.userData.scale / 10)
-            log(target_distance)
+            /* log(target_distance) */
 
             this.target_focus = target_distance
 
@@ -530,14 +534,14 @@ class AppInterface {
                         // Simple fps controller
 
                         const x = (this.mouse.x - innerWidth / 2) / innerWidth;
-                        if (Math.abs(x) > .2) {
-                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.04)
+                        if (Math.abs(x) > .33) {
+                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.03)
                         }
                         const y = (this.mouse.y - innerHeight / 2) / innerHeight;
 
-                        if (Math.abs(y) > .2) {
+                        if (Math.abs(y) > .33) {
                             /* app.camera.rotateX(y * -.02) */
-                            app.camera.translateZ(y * 4)
+                            app.camera.translateZ(y * 8)
                         }
                         /* log(x, y) */
 
@@ -661,13 +665,13 @@ class AppInterface {
         this.nextState = state;
         switch (state) {
             case "WALKING":
-
+                app.tutorialController.changeState(state)
                 break;
             case "MAP":
-
+                app.tutorialController.changeState(state)
                 break;
             case "PROMENADE":
-
+                app.tutorialController.changeState(state)
                 break;
         }
     }
