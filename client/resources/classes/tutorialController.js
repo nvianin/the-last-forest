@@ -27,6 +27,7 @@ class TutorialController {
         }
         switch (state) {
             case "MAP":
+
                 if (!this.state.map) {
                     this.tutorialContainer.querySelector("#tutorial-map-guide").style.display = "block"
                 }
@@ -34,6 +35,7 @@ class TutorialController {
                     this.tutorialContainer.querySelector("#tutorial-thumbnails").style.display = "block"
                 }
                 break;
+
             case "WALKING":
                 if (!this.state.walk) {
                     this.tutorialContainer.querySelector("#tutorial-walk").style.display = "block"

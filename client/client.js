@@ -42,9 +42,9 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 256,
+    tree_build_limit: 0,
 
-    save_tutorial_state: true,
+    save_tutorial_state: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -372,7 +372,6 @@ class App {
         this.time_sorting = false;
         this.time_button = document.querySelector("#time-toggle")
         this.time_button.onclick = () => {
-            this.time_sorting = !this.time_sorting;
             if (this.score_sorting) {
                 this.score_sorting = false;
                 this.score_button.classList.remove("toggle-button-active")
@@ -382,12 +381,12 @@ class App {
             } else {
                 this.reArrangeTrees("time")
             }
+            this.time_sorting = !this.time_sorting;
         }
 
         this.score_sorting = false;
         this.score_button = document.querySelector("#score-toggle")
         this.score_button.onclick = () => {
-            this.score_sorting = !this.score_sorting;
             if (this.time_sorting) {
                 this.time_sorting = false;
                 this.time_button.classList.remove("toggle-button-active")
@@ -397,6 +396,7 @@ class App {
             } else {
                 this.reArrangeTrees("score")
             }
+            this.score_sorting = !this.score_sorting;
         }
 
         this.selectedCategories = []
@@ -418,34 +418,52 @@ class App {
 
     reArrangeTrees(mode) {
         log("Activating " + mode + " mode")
-        let targetPositions = [];
-        const _posts = Object.values(this.posts).map(x => x);
+
+        /* let i = -this.trees.length * 2.8 */
+        let i = 0
+        const _posts = this.trees.map(t => {
+            if (t.userData.post) return t.userData.post
+        })
         switch (mode) {
             case "default":
-                targetPositions = this.defaultTreePositions.map(x => x)
+                this.trees.forEach(t => t.targetPosition = t.defaultPosition)
+                this.tsneRenderer.displayPlane.visible = true;
                 break;
             case "time":
                 _posts.sort((p, _p) => p.date - _p.date)
                 _posts.forEach(p => {
-                    targetPositions.push(p.tree.position);
+                    if (p.tree) {
+                        const x = (Math.random() * 2 - 1) * 10000
+                        p.tree.targetPosition = new THREE.Vector3(i * 100 /* *  (1 / p.tree.userData.trueScale) */ - app.ground.geometry.boundingBox.max.x, 0, x);
+                    }
+                    i++;
                 })
+                this.tsneRenderer.displayPlane.visible = false;
                 break;
             case "score":
                 _posts.sort((p, _p) => p.score - _p.score)
                 _posts.forEach(p => {
-                    targetPositions.push(p.tree.position);
+                    if (p.tree) {
+                        const x = (Math.random() * 2 - 1) * 10000
+                        p.tree.targetPosition = new THREE.Vector3(i * 100 /* *  (1 / p.tree.userData.trueScale) */ - app.ground.geometry.boundingBox.max.x, 0, x)
+                    }
+                    i++;
                 })
+                this.tsneRenderer.displayPlane.visible = false;
                 break;
         }
+        log(_posts)
+        if (this.arrangeInterval) clearInterval(this.arrangeInterval)
 
-        const arrangeInterval = setInterval(() => {
+        this.arrangeInterval = setInterval(() => {
             let dist = 0;
             for (let i = 0; i < this.trees.length; i++) {
-                this.trees[i].position.lerp(targetPositions[i], .1)
-                dist += this.trees[i].position.distanceTo(targetPositions[i]);
+                this.trees[i].position.lerp(this.trees[i].targetPosition, .1)
+                dist += this.trees[i].position.distanceTo(this.trees[i].targetPosition);
+                /* if (dist == NaN) log(this.trees[i].position, targetPositions[i]) */
             }
             log(dist)
-            if (dist < 50) clearInterval(arrangeInterval)
+            if (dist < 50 || dist == NaN) clearInterval(this.arrangeInterval)
         }, 16);
     }
 
@@ -986,12 +1004,13 @@ class App {
 
             this.defaultTreePositions = []
 
-            for (let t of this.trees) {
-                this.defaultTreePositions.push(t.position.clone());
-            }
 
             this.buildTSNEMap()
             this.computeCategoryBarycenters()
+            for (let t of this.trees) {
+                /* this.defaultTreePositions.push(t.position.clone()); */
+                t.defaultPosition = t.position.clone()
+            }
         } else {
             removed_trees++;
         }

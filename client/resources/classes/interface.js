@@ -437,9 +437,9 @@ class AppInterface {
                         /* app.renderer.domElement.requestPointerLock() */
 
                         if (this.prevState == "MAP") {
-                            this.map_transform.position.copy(app.camera.position);
+                            /* this.map_transform.position.copy(app.camera.position);
                             this.map_transform.rotation.copy(app.camera.rotation)
-                            this.map_transform.zoom = this.domController.getDistance()
+                            this.map_transform.zoom = this.domController.getDistance() */
                         }
 
                         if (this.prevState != "LERPING") {
@@ -478,9 +478,9 @@ class AppInterface {
                         this.mapControls.enabled = false;
 
                         if (this.prevState == "MAP") {
-                            this.map_transform.position.copy(app.camera.position);
+                            /* this.map_transform.position.copy(app.camera.position);
                             this.map_transform.rotation.copy(app.camera.rotation)
-                            this.map_transform.zoom = this.domController.getDistance()
+                            this.map_transform.zoom = this.domController.getDistance() */
                         }
 
                         if (this.prevState != "LERPING") {
@@ -666,12 +666,15 @@ class AppInterface {
         switch (state) {
             case "WALKING":
                 app.tutorialController.changeState(state)
+                document.querySelector("#toggle-container").style.display = "none"
                 break;
             case "MAP":
                 app.tutorialController.changeState(state)
+                document.querySelector("#toggle-container").style.display = "flex"
                 break;
             case "PROMENADE":
                 app.tutorialController.changeState(state)
+                document.querySelector("#toggle-container").style.display = "none"
                 break;
         }
     }
