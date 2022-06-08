@@ -427,11 +427,21 @@ class App {
 
         app.trees.forEach(t => {
             if (flag) {
-                t.scale.multiplyScalar(t.userData.trueScale * 3)
+                t.userData.targetScale = t.userData.equalizedScale
             } else {
-                t.scale.divideScalar(t.userData.trueScale * 3)
+                t.userData.targetScale = t.userData.normalScale
             }
         })
+
+        if (this.contrastInterval) clearInterval(this.contrastInterval)
+        this.contrastInterval = setInterval(() => {
+            let dist = 0
+            app.trees.forEach(t => {
+                t.scale.lerp(t.userData.targetScale, .1)
+                dist += t.scale.distanceTo(t.userData.targetScale)
+            })
+            if (dist < 10) clearInterval(this.contrastInterval)
+        }, 16)
     }
 
     reArrangeTrees(mode) {

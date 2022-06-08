@@ -580,7 +580,7 @@ canvas .text-input {
   -webkit-user-drag: none;
   width: 120px;
   font-size: 0pt;
-  height: calc(100vh / 28);
+  height: calc((100vh + 4px * 4) / 28);
   /* border-radius: 6px; */
   border-radius: 3px 0px 0px 3px;
   /* box-shadow: #fff 0 0 1px; */
