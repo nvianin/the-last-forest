@@ -47,7 +47,7 @@ const debug = {
     postprocessing: true,
     autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 0,
+    tree_build_limit: 64,
 
     save_tutorial_state: true,
 
@@ -90,7 +90,7 @@ class App {
         this.settings = {
             ground_side: 96 * 2,
             ground_scale: 128 * 6,
-            draw_distance: 30000,
+            draw_distance: 60000,
             fog_offset: 5000,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
