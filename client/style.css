@@ -58,6 +58,16 @@ canvas .text-input {
   font-size: 20pt;
   color: #888;
 }
+#vertical-toggle-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  left: 0px;
+  top: 0px;
+  margin: 10px;
+  font-size: 20pt;
+  color: #888;
+}
 
 .toggle-button {
   position: relative;
@@ -65,11 +75,12 @@ canvas .text-input {
   user-select: none;
   cursor: pointer;
   transition: 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
-  width: 50px;
+  width: fit-content;
   opacity: 0.3;
 }
 
 .toggle-button-active {
+  opacity: 0.6;
   color: white;
   text-shadow: white 0 0 8px;
 }
@@ -559,7 +570,7 @@ canvas .text-input {
   /* font-family: AvaraBold; */
   font-weight: 600;
   letter-spacing: 0.2pt;
-  line-height: calc(100vh / 30);
+  line-height: calc(100vh / 32.5);
   text-align: center;
   vertical-align: middle;
   width: 100%;
@@ -602,7 +613,7 @@ canvas .text-input {
   -webkit-user-drag: none;
   width: 120px;
   font-size: 0pt;
-  height: calc(100vh / 28);
+  height: calc((100vh - 2px * 27) / 26);
   /* border-radius: 6px; */
   border-radius: 3px 0px 0px 3px;
   /* box-shadow: #fff 0 0 1px; */
@@ -619,6 +630,7 @@ canvas .text-input {
 }
 .thumbnail-element:hover {
   /* text-indent: 0px; */
+  border-radius: 30px 0px 0px 30px;
   right: 0px;
   z-index: 1000;
   opacity: 1;
@@ -626,6 +638,7 @@ canvas .text-input {
 }
 
 .thumbnail-active {
+  border-radius: 30px 0px 0px 30px;
   font-size: 9pt;
   right: 0px;
   filter: saturate(1.5);
@@ -965,7 +978,7 @@ canvas .text-input {
 #tutorial-thumbnails::before {
   position: fixed;
   content: "";
-  border: 0px solid #ff931e;
+  border: 0px solid white;
   border-width: 0 5px 5px 0;
   border-radius: 3px;
   /* background-color: red; */

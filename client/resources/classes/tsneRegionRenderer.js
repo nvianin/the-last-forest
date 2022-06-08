@@ -20,7 +20,7 @@ class TsneRegionRenderer {
         this.renderer = renderer;
         this.scene = new THREE.Scene()
 
-        this.width = 256 + 64
+        this.width = 512
 
         this.camera = new THREE.OrthographicCamera(-this.width / 2, this.width / 2, this.width / 2, -this.width / 2)
         this.camera.position.z = .1
