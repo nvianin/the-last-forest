@@ -58,6 +58,16 @@ canvas .text-input {
   font-size: 20pt;
   color: #888;
 }
+#vertical-toggle-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  left: 0px;
+  top: 0px;
+  margin: 10px;
+  font-size: 20pt;
+  color: #888;
+}
 
 .toggle-button {
   position: relative;
@@ -65,14 +75,17 @@ canvas .text-input {
   user-select: none;
   cursor: pointer;
   transition: 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
-  width: 50px;
+  width: fit-content;
+  opacity: 0.3;
 }
 
 .toggle-button-active {
+  opacity: 0.6;
   color: white;
   text-shadow: white 0 0 8px;
 }
 .toggle-button:hover {
+  opacity: 1;
   color: #eee;
   text-shadow: #eee 0 0 10px;
 }
@@ -247,7 +260,7 @@ canvas .text-input {
 #mode-slider-container {
   bottom: 5px;
   left: 50%;
-  transform: translate(-50%) scale(1.3);
+  transform: translate(-50%);
   width: 150px;
   min-width: 100px;
   transition: 0.3s;
@@ -357,6 +370,7 @@ canvas .text-input {
 }
 #loading-desc {
   user-select: none;
+  flex-grow: 1000px;
   position: relative;
   max-width: 600px;
   /* width: ; */
@@ -377,7 +391,7 @@ canvas .text-input {
 #loading-bar {
   z-index: 1001;
   position: absolute;
-  bottom: 5%;
+  bottom: 8%;
   right: 50%;
   transform: translate(50%);
   width: 60%;
@@ -387,6 +401,10 @@ canvas .text-input {
 
   /* background-color: grey; */
   box-shadow: 0 0 10px 0.1px white;
+
+  animation: load-disappear 2s;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  animation-fill-mode: forwards;
 }
 #loading-bar-inner {
   font-family: Avarabolditalic;
@@ -405,13 +423,28 @@ canvas .text-input {
 }
 
 @keyframes load-anim {
-  from {
+  0% {
     width: 0%;
     content: "0%";
   }
-  to {
+  75% {
     width: 100%;
     content: "100%";
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes load-disappear {
+  0% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
@@ -537,7 +570,7 @@ canvas .text-input {
   /* font-family: AvaraBold; */
   font-weight: 600;
   letter-spacing: 0.2pt;
-  line-height: calc(100vh / 30);
+  line-height: calc(100vh / 32.5);
   text-align: center;
   vertical-align: middle;
   width: 100%;
@@ -580,12 +613,12 @@ canvas .text-input {
   -webkit-user-drag: none;
   width: 120px;
   font-size: 0pt;
-  height: calc((100vh + 4px * 4) / 28);
+  height: calc((100vh - 2px * 27) / 26);
   /* border-radius: 6px; */
   border-radius: 3px 0px 0px 3px;
   /* box-shadow: #fff 0 0 1px; */
   background-color: rgba(0.6, 0.56, 0.56, 1);
-  right: -100px;
+  right: -90px;
 
   backdrop-filter: blur(12px);
   /* opacity: 0.9; */
@@ -597,6 +630,7 @@ canvas .text-input {
 }
 .thumbnail-element:hover {
   /* text-indent: 0px; */
+  border-radius: 30px 0px 0px 30px;
   right: 0px;
   z-index: 1000;
   opacity: 1;
@@ -604,6 +638,7 @@ canvas .text-input {
 }
 
 .thumbnail-active {
+  border-radius: 30px 0px 0px 30px;
   font-size: 9pt;
   right: 0px;
   filter: saturate(1.5);
@@ -943,7 +978,7 @@ canvas .text-input {
 #tutorial-thumbnails::before {
   position: fixed;
   content: "";
-  border: 0px solid #ff931e;
+  border: 0px solid white;
   border-width: 0 5px 5px 0;
   border-radius: 3px;
   /* background-color: red; */

@@ -167,5 +167,6 @@ pos += movement; */
 
 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos + wind, 1.0);
 sin_time = (sin(t) + (sin(t * 3.) / 3.) + (sin(t * 5.) / 5.) + 1.) / 2.;
-gl_PointSize = sin_time;
+gl_PointSize = sin_time - gl_Position.w;
 gl_PointSize *= 8. - depth / 1000.;
+gl_PointSize = clamp(gl_PointSize, 0., 1.);

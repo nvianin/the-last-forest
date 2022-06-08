@@ -22,6 +22,8 @@ if (debug_activated) {
     log("Debug deactivated by url")
 }
 
+const texLoader = new THREE.TextureLoader()
+
 const crunchy_sounds = []
 for (let i = 0; i < 4; i++) {
     crunchy_sounds.push(new Audio(`./resources/sounds/crunchy_wood-0${i+1}.ogg`))
@@ -45,11 +47,11 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: false,
+    autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 64,
+    tree_build_limit: 512,
 
-    save_tutorial_state: true,
+    save_tutorial_state: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -88,10 +90,10 @@ class App {
         this.tutorialController = new TutorialController()
 
         this.settings = {
-            ground_side: 96 * 2,
+            ground_side: 128 * 2,
             ground_scale: 128 * 6,
-            draw_distance: 60000,
-            fog_offset: 5000,
+            draw_distance: 100000,
+            fog_offset: 40000,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
             focused_max_raycast_dist: 1000,
@@ -104,10 +106,13 @@ class App {
         /* if (debug)  */
         this.camera.position.set(50, 100, 50)
         this.camera.position.set(0, this.settings.draw_distance - this.settings.fog_offset, 0)
+        this.camera.position.set(5000, 10000, 30000)
+        this.camera.rotation.set(-.3, .2, .06)
         this.scene = new THREE.Scene();
         this.clock = new THREE.Clock();
 
-        let bgCol = new THREE.Color(0x000510);
+        /* let bgCol = new THREE.Color(0x000510); */
+        let bgCol = new THREE.Color(0x010002);
         let fakeBackCol = bgCol.clone()
         this.fog = new THREE.Fog(bgCol, this.settings.draw_distance - this.settings.fog_offset, this.settings.draw_distance);
         /* this.fog = new THREE.FogExp2(bgCol, 1.);
@@ -180,9 +185,14 @@ class App {
             new THREE.MeshStandardMaterial({
                 color: 0x111133,
                 wireframe: true,
+                transparent: true,
+                alphaTest: 0,
                 side: 0,
             })
         )
+
+
+
         this.ground.name = "ground"
 
         /* this.csm.setupMaterial(this.ground.material); */
@@ -219,10 +229,19 @@ class App {
             roughness: .9,
             specularIntensity: .3,
             color: fakeBackCol,
-            transparent: true
+            transparent: true,
+            alphaTest: 0,
         })
         this.ground_fakeBack.position.y -= .2
         this.scene.add(this.ground_fakeBack)
+
+        texLoader.loadAsync("./resources/textures/squware vignette.jpg").then(tex => {
+            this.ground.material.alphaMap = tex;
+            this.ground_fakeBack.material.alphaMap = tex
+            this.ground.material.needsUpdate = true;
+            this.ground_fakeBack.material.needsUpdate = true
+        })
+
         if (debug.particle) {
             fetch("/resources/shaders/dustFrag.glsl").then(resp => {
                 resp.text().then(frag => {
@@ -692,11 +711,11 @@ class App {
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
             focus: 2000.0,
             aperture: .00000025,
-            maxblur: .05,
+            maxblur: .01,
             width: innerWidth,
             height: innerHeight,
         });
-        this.bokehPass.far_aperture = .000001
+        this.bokehPass.far_aperture = .0000003
         this.bokehPass.close_aperture = .00000025
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
 
@@ -1040,6 +1059,21 @@ class App {
                 /* this.defaultTreePositions.push(t.position.clone()); */
                 t.defaultPosition = t.position.clone()
             }
+
+            if (false) {
+                const ex = new THREE.GLTFExporter();
+                const gltf = ex.parse(this.scene)
+                log(gltf)
+                var a = document.createElement("a");
+                var file = new Blob([gltf], {
+                    type: "text/plain"
+                })
+                a.href = URL.createObjectURL(file);
+                a.download = "scene.ply"
+                a.click()
+
+
+            }
         } else {
             removed_trees++;
         }
@@ -1082,6 +1116,9 @@ class App {
         log(default_focus_tree)
         this.interface.enter_focus(default_focus_tree) */
     }
+
+
+
 
     buildTSNEMap() {
         this.tsneRenderer = new TsneRegionRenderer(this.renderer, this.posts)

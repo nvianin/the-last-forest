@@ -338,7 +338,7 @@ class AppInterface {
                 this.focused_backup.position.distanceTo(app.camera.position) +
                 Math.abs(app.scene.fog.far - this.target.fog.far) +
                 Math.abs(app.camera.fov - this.target.fov)
-            if (dist > 1) {
+            if (dist > 10) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
                 app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation, .1))
 
