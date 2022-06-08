@@ -348,8 +348,8 @@ canvas .text-input {
   transform: translate(50%); */
   color: #eee;
   text-align: center;
-  font-size: 10vw;
-  line-height: 13vh;
+  font-size: 5.6vw;
+  line-height: 6vh;
   transition: 3s cubic-bezier(0.165, 0.84, 0.44, 1);
   opacity: 1;
   user-select: none;
@@ -358,10 +358,10 @@ canvas .text-input {
 #loading-desc {
   user-select: none;
   position: relative;
-  max-width: 60%;
+  max-width: 600px;
   /* width: ; */
   left: 50%;
-  font-size: 1.5vw;
+  font-size: 1vw;
   /* margin-top: 40px; */
   /* top: 30%; */
   /* height: 40%; */
@@ -419,7 +419,7 @@ canvas .text-input {
   position: absolute;
   z-index: 1001;
   right: 50%;
-  bottom: 15%;
+  bottom: 19%;
   transform: translate(50%, 100%);
   width: 120px;
   height: 40px;
@@ -537,7 +537,7 @@ canvas .text-input {
   /* font-family: AvaraBold; */
   font-weight: 600;
   letter-spacing: 0.2pt;
-  line-height: calc(100vh / 30 * 0.8);
+  line-height: calc(100vh / 30);
   text-align: center;
   vertical-align: middle;
   width: 100%;
@@ -580,7 +580,7 @@ canvas .text-input {
   -webkit-user-drag: none;
   width: 120px;
   font-size: 0pt;
-  height: calc(100vh / 30);
+  height: calc(100vh / 28);
   /* border-radius: 6px; */
   border-radius: 3px 0px 0px 3px;
   /* box-shadow: #fff 0 0 1px; */

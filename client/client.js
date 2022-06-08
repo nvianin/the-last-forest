@@ -22,6 +22,11 @@ if (debug_activated) {
     log("Debug deactivated by url")
 }
 
+const crunchy_sounds = []
+for (let i = 0; i < 4; i++) {
+    crunchy_sounds.push(new Audio(`./resources/sounds/crunchy_wood-0${i+1}.ogg`))
+}
+
 const debug = {
     shadow_helper: false,
     sun_helper: false,
@@ -40,11 +45,11 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: true,
+    autostart: false,
     max_generation_level: 6,
     tree_build_limit: 0,
 
-    save_tutorial_state: false,
+    save_tutorial_state: true,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -399,6 +404,19 @@ class App {
             this.score_sorting = !this.score_sorting;
         }
 
+        this.show_tutorials = false;
+        this.tutorial_button = document.querySelector("#info-toggle")
+        this.tutorial_button.onclick = () => {
+            if (this.show_tutorials) {
+                this.tutorial_button.classList.remove("toggle-button-active");
+                this.tutorialController.hideAll();
+            } else {
+                this.tutorial_button.classList.add("toggle-button-active");
+                this.tutorialController.changeState(this.interface.state)
+            }
+            this.show_tutorials = !this.show_tutorials;
+        }
+
         this.selectedCategories = []
         this.frameCount = 0;
         this.render()
@@ -409,9 +427,9 @@ class App {
 
         app.trees.forEach(t => {
             if (flag) {
-                t.scale.multiplyScalar(t.userData.trueScale * 2)
+                t.scale.multiplyScalar(t.userData.trueScale * 3)
             } else {
-                t.scale.divideScalar(t.userData.trueScale * 2)
+                t.scale.divideScalar(t.userData.trueScale * 3)
             }
         })
     }
@@ -966,6 +984,7 @@ class App {
                 }
             }
             document.querySelector("#loading-button").style.opacity = 1
+            document.querySelector("#loading-screen-background").style.opacity = 0;
             document.querySelector("#loading-button").classList.add("loading-button-flash")
             document.querySelector("#loading-button").onclick = () => {
                 /* document.querySelector("#loading-screen-background").style.opacity = 0; */

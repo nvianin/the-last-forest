@@ -14,11 +14,18 @@ class TutorialController {
         }
 
         this.buildTutorials()
+        this.hideAll();
     }
 
     tickTutorial(tutorialName) {
         this.state[tutorialName] = true;
         localStorage.setItem("tutorial", JSON.stringify(this.state))
+    }
+
+    hideAll() {
+        for (let c of this.tutorialContainer.childNodes) {
+            c.style.display = "none"
+        }
     }
 
     changeState(state) {

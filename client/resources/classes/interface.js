@@ -246,6 +246,10 @@ class AppInterface {
 
     enter_focus(tree) {
 
+        const sound = crunchy_sounds[Math.floor(crunchy_sounds.length * Math.random())];
+        sound.playbackRate = .5 + Math.random() * .6
+        sound.play()
+
         /* for (let t of Object.values(app.trees)) {
             app.instanceManager.borrow(
                 this.instanceId,
@@ -665,15 +669,15 @@ class AppInterface {
         this.nextState = state;
         switch (state) {
             case "WALKING":
-                app.tutorialController.changeState(state)
+                if (app.show_tutorials) app.tutorialController.changeState(state)
                 document.querySelector("#toggle-container").style.display = "none"
                 break;
             case "MAP":
-                app.tutorialController.changeState(state)
+                if (app.show_tutorials) app.tutorialController.changeState(state)
                 document.querySelector("#toggle-container").style.display = "flex"
                 break;
             case "PROMENADE":
-                app.tutorialController.changeState(state)
+                if (app.show_tutorials) app.tutorialController.changeState(state)
                 document.querySelector("#toggle-container").style.display = "none"
                 break;
         }

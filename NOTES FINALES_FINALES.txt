@@ -1,0 +1,27 @@
+pimp loading screen
+	code grapique / particules 
+	titre plus petit
+	ref marshmallow laser fist
+	cacher loading screen on load
+	meilleur transition noir -> app
+	particules partent ;spring up de la map; petit travelling/spin puis controle
+
+enlever tutoriels au start
+	walk controls tro obtus
+	bouton info pour activer tuto
+
+plus de zoom
+
+thumbnails occupy whole height
+
+focus mode:
+	image en background rectangle, désaturée, blurée
+	sentir qu'il ya image, bouton reddit pour consulter
+	NON
+	picto image/video
+	bouton next tree
+
+corriger bug fat line
+
+mode by score/by time -> labellisation des axes
+	tri par mois -> rajouter score ou date dans tooltip
