@@ -49,7 +49,7 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 16,
+    tree_build_limit: 128,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -235,6 +235,8 @@ class App {
         })
         this.ground_fakeBack.position.y -= .2
         this.scene.add(this.ground_fakeBack)
+
+        this.textRenderer = new TextRenderer()
 
         texLoader.loadAsync("./resources/textures/squware vignette.jpg").then(tex => {
             this.ground.material.alphaMap = tex;
@@ -962,6 +964,8 @@ class App {
 
                     tree.userData.scale = scale;
                     tree.userData.post = post;
+                    tree.userData.normalScale = tree.scale.clone()
+                    tree.userData.equalizedScale = tree.scale.clone().multiplyScalar(tree.userData.trueScale).multiplyScalar(4)
                     post.tree = tree;
                     if (!debug.aggregate) this.scene.add(tree)
                     this.trees.push(tree)
@@ -1238,7 +1242,7 @@ class App {
         this.mousecast.setFromCamera(this.pointer, this.camera);
         const intersects = this.mousecast.intersectObjects(nearbyTrees);
         if (intersects[0] && intersects[0].object && intersects[0].object.name != "ground" && intersects[0].distance < this.scene.fog.far + 10 &&
-            (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
+            (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom) && intersects[0] != this.interface.focused_tree
         ) {
 
             /* log(intersects[0].object) */

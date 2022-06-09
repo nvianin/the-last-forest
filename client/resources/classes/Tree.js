@@ -421,8 +421,8 @@ class TreeManager {
         /* this.object.children[0].scale.set(r, r, r); */
 
         this.object.userData.trueScale = r;
-        this.object.userData.normalScale = this.object.scale.clone()
-        this.object.userData.equalizedScale = this.object.scale.clone().multiplyScalar(r)
+        /* this.object.userData.normalScale = this.object.children[0].scale.clone()
+        this.object.userData.equalizedScale = this.object.children[0].scale.clone().multiplyScalar(r) */
         return -1;
 
         let instancedStuff = app.instanceManager.get_owned(this.turtle.instance_id);

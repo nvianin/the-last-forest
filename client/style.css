@@ -705,7 +705,7 @@ canvas .text-input {
   text-shadow: 0px 0px 2px;
   user-select: none;
   max-width: 95%;
-  hyphens: auto;
+  /* hyphens: auto; */
 }
 
 #focus-flair {
@@ -730,7 +730,7 @@ canvas .text-input {
   margin: 10px;
   float: left;
 
-  transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* mix-blend-mode: luminosity; */
 
@@ -783,6 +783,7 @@ canvas .text-input {
   line-height: 14pt;
   opacity: 0.7;
   transition: inherit;
+  text-overflow: ellipsis;
 }
 #focus-selftext:hover {
   font-size: 11pt;

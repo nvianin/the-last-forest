@@ -205,7 +205,11 @@ class AppInterface {
                     case "ArrowRight":
                         this.advancePost(true)
                         break;
+                    case "Escape":
+                        this.exit_focus()
+                        break;
                 }
+                log(e.key)
             }
         })
         document.addEventListener("keyup", e => {
@@ -267,6 +271,7 @@ class AppInterface {
         }
         this.domController.focusInterface.nextButton.style.display = "block"
         this.domController.focusInterface.prevButton.style.display = "block"
+        document.querySelector("#toggle-container").style.visibility = "hidden"
 
         /* for (let t of Object.values(app.trees)) {
             app.instanceManager.borrow(
@@ -380,9 +385,11 @@ class AppInterface {
         }
         this.domController.focusInterface.nextButton.style.display = "none"
         this.domController.focusInterface.prevButton.style.display = "none"
+        document.querySelector("#toggle-container").style.visibility = "visible"
     }
 
-    advancePost(direction = true) {
+    advancePost(direction) {
+        /* log("going " + (direction ? "forwards" : "backwards"), direction) */
         const sorted_trees = app.trees.map(t => t);
         sorted_trees.sort((a, b) => {
             if (a.visible && b.visible) {
@@ -391,8 +398,8 @@ class AppInterface {
                 return -Infinity
             }
         })
-        let i = (sorted_trees.indexOf(this) + direction ? 1 : -1);
-        log(i)
+        let i = (sorted_trees.indexOf(this.focused_tree) + (direction ? 1 : -1));
+        /* log(i) */
         if (i < 0) i += sorted_trees.length
         if (i >= sorted_trees.length) i -= sorted_trees.length
         log(i, sorted_trees.length)
