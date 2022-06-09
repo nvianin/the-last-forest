@@ -20,7 +20,6 @@ class DomController {
                 this.modeSlider.targetValue = Math.floor(val / 333) * 500;
                 if (app.interface.focused_mode) {
                     app.interface.exit_focus()
-
                 }
             }
         })
