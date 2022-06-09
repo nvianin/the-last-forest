@@ -49,7 +49,7 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 512,
+    tree_build_limit: 16,
 
     save_tutorial_state: false,
 
@@ -96,7 +96,7 @@ class App {
             fog_offset: 40000,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
-            focused_max_raycast_dist: 1000,
+            focused_max_raycast_dist: 500,
             tsne_scale_multiplier: 39
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */

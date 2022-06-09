@@ -197,7 +197,7 @@ class FocusInterface {
         this.redditButton.textContent = "reddit"
         this.container.appendChild(this.redditButton)
         this.redditButton.onclick = () => {
-            window.open("https://reddit.com" + this.post.permalink)
+            window.open("https://reddit.com" + this.post.permalink, "external", `width=${innerWidth / 2},height=${innerHeight},top=${innerHeight/4},left=${innerWidth/ 4}`)
         }
 
         /* this.linkContainer = document.createElement("div");
@@ -271,7 +271,9 @@ class FocusInterface {
             window.open(
                 post.url.includes("/r/") ?
                 "https://reddit.com" + post.permalink :
-                post.url
+                post.url,
+                "external",
+                `width=${innerWidth / 2},height=${innerHeight},top=${innerHeight / 4},left=${innerWidth / 4}`
             )
         }
         /* this.linkButton.style.visibility = "visible" */

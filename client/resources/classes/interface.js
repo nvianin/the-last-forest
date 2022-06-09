@@ -538,20 +538,20 @@ class AppInterface {
                         // Simple fps controller
 
                         const x = (this.mouse.x - innerWidth / 2) / innerWidth;
-                        if (Math.abs(x) > .33) {
-                            app.camera.rotateOnWorldAxis(THREE.UP, x * -.03)
+                        if (Math.abs(x) > .2) {
+                            app.camera.rotateOnWorldAxis(THREE.UP, (x + (.2 * Math.sign(-x))) * -.12)
                         }
                         const y = (this.mouse.y - innerHeight / 2) / innerHeight;
 
-                        if (Math.abs(y) > .33) {
+                        if (Math.abs(y) > .2) {
                             /* app.camera.rotateX(y * -.02) */
-                            app.camera.translateZ(y * 8)
+                            app.camera.translateZ((y + (.2 * Math.sign(-y))) * 32)
                         }
                         /* log(x, y) */
 
                         //Advanced fps controller
-                        app.camera.translateZ(this.movement.z * 3);
-                        app.camera.translateX(this.movement.x * 1.5);
+                        app.camera.translateZ(this.movement.z * 10);
+                        app.camera.translateX(this.movement.x * 10);
 
 
                         this.target_focus = 6000
