@@ -61,6 +61,7 @@ canvas .text-input {
 #vertical-toggle-container {
   display: flex;
   flex-direction: row;
+  height: 24px;
   gap: 10px;
   left: 0px;
   top: 0px;
@@ -102,7 +103,7 @@ canvas .text-input {
   user-select: none;
   /* text-align: right; */
 
-  z-index: 1001;
+  z-index: 9001;
   position: absolute;
   left: 30px;
   /* width: 250px; */
@@ -130,6 +131,11 @@ canvas .text-input {
   100% {
     opacity: 0;
   }
+}
+
+#info-tutorial {
+  position: relative;
+  left: 15px;
 }
 
 #sound-toggle {
@@ -251,6 +257,7 @@ canvas .text-input {
   transform: rotate(90deg) translate(50%);
   opacity: 90%;
   transition: 0.3s;
+  display: none;
 }
 #zoom-slider-container:hover {
   opacity: 100%;
@@ -912,6 +919,35 @@ canvas .text-input {
 }
 #focus-exit::after {
   transform: rotate(-45deg);
+}
+.focus-next-button {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: solid white;
+  /* background-color: orange; */
+  top: 50%;
+  transform: translate(0, -50%) rotate(45deg);
+  /* transition: 0.2s; */
+  opacity: 0.5;
+  /* margin: 10px; */
+  border-radius: 2px;
+}
+.focus-next-button:hover {
+  cursor: pointer;
+  opacity: 1;
+  filter: blur(0.5px);
+}
+.focus-next-button:active {
+  border-color: #999;
+}
+#focus-next {
+  border-width: 3.5px 3.5px 0px 0px;
+  right: 20px;
+}
+#focus-prev {
+  border-width: 0px 0px 3.5px 3.5px;
+  left: 20px;
 }
 
 #tutorial-container {

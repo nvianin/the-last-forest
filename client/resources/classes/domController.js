@@ -185,6 +185,23 @@ class FocusInterface {
         this.container.appendChild(this.postContainer)
 
 
+        this.nextButton = document.createElement("div");
+        this.nextButton.className = "focus-next-button"
+        this.nextButton.id = "focus-next"
+        this.nextButton.onclick = () => {
+            app.interface.advancePost(true)
+        }
+        document.body.appendChild(this.nextButton)
+
+        this.prevButton = document.createElement("div");
+        this.prevButton.className = "focus-next-button"
+        this.prevButton.id = "focus-prev"
+        this.prevButton.onclick = () => {
+            app.interface.advancePost(false)
+        }
+        document.body.appendChild(this.prevButton)
+
+
         /* this.textContainer = document.createElement("div");
         this.textContainer.id = "focus-text"
         this.textContainer.onwheel = e => {

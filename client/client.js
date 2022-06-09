@@ -52,6 +52,7 @@ const debug = {
     tree_build_limit: 16,
 
     save_tutorial_state: false,
+    thumbnails_during_focus: false,
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -431,6 +432,11 @@ class App {
                 this.tutorialController.hideAll();
             } else {
                 this.tutorial_button.classList.add("toggle-button-active");
+                Object.keys(this.tutorialController.state).forEach(key => {
+                    if (this.tutorialController.state[key] === true) {
+                        this.tutorialController.state[key] = false;
+                    }
+                })
                 this.tutorialController.changeState(this.interface.state)
             }
             this.show_tutorials = !this.show_tutorials;
@@ -1109,12 +1115,12 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-        /* const default_focus_tree = this.trees.find(t => {
+        const default_focus_tree = this.trees.find(t => {
             return (t.spheres.length > 30)
             return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
         });
         log(default_focus_tree)
-        this.interface.enter_focus(default_focus_tree) */
+        this.interface.enter_focus(default_focus_tree)
     }
 
 
@@ -1158,23 +1164,25 @@ class App {
         if (this.interface) this.interface.update(this.dt)
         /* this.csm.update(this.camera.matrix) */
 
-        this.postDom.style.left = this.mouse.x + 20 + "px";
-        this.postDom.style.top = this.mouse.y + 20 + "px";
-        if (this.mouse.x > innerWidth - 200) {
-            this.postDom.style.left = this.mouse.x - 200 + "px"
+        if (this.postDom.style.visibility == "visible") {
+            this.postDom.style.left = this.mouse.x + 20 + "px";
+            this.postDom.style.top = this.mouse.y + 20 + "px";
+            if (this.mouse.x > innerWidth - 200) {
+                this.postDom.style.left = this.mouse.x - 200 + "px"
+            }
+            /*  else if (this.mouse.x < 200) {
+                        this.postDom.style.left = this.mouse.x + 200 + "px"
+                    } */
+
+            if (this.mouse.y > innerHeight - 200) {
+                this.postDom.style.top = this.mouse.y - this.postDom.clientHeight + "px"
+            }
+
+
+            /* else if (this.mouse.y < 200) {
+                this.postDom.style.top = this.mouse.y + 200 + "px"
+            } */
         }
-        /*  else if (this.mouse.x < 200) {
-                    this.postDom.style.left = this.mouse.x + 200 + "px"
-                } */
-
-        if (this.mouse.y > innerHeight - 200) {
-            this.postDom.style.top = this.mouse.y - this.postDom.clientHeight + "px"
-        }
-
-
-        /* else if (this.mouse.y < 200) {
-            this.postDom.style.top = this.mouse.y + 200 + "px"
-        } */
 
 
 

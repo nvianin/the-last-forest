@@ -175,6 +175,7 @@ class AppInterface {
         this.movement = new THREE.Vector3();
 
         document.addEventListener("keydown", e => {
+            /* log(e) */
             switch (this.state) {
                 case "WALKING":
                     if (document.pointerLockElement) {
@@ -194,6 +195,17 @@ class AppInterface {
                         }
                     }
                     break;
+            }
+
+            if (this.focused_mode && !this.focused_lerping) {
+                switch (e.key) {
+                    case "ArrowLeft":
+                        this.advancePost(false)
+                        break;
+                    case "ArrowRight":
+                        this.advancePost(true)
+                        break;
+                }
             }
         })
         document.addEventListener("keyup", e => {
@@ -249,6 +261,12 @@ class AppInterface {
         const sound = crunchy_sounds[Math.floor(crunchy_sounds.length * Math.random())];
         sound.playbackRate = .5 + Math.random() * .6
         sound.play()
+
+        if (!debug.thumbnails_during_focus) {
+            document.querySelector("#thumbnail-container").style.right = "-120px"
+        }
+        this.domController.focusInterface.nextButton.style.display = "block"
+        this.domController.focusInterface.prevButton.style.display = "block"
 
         /* for (let t of Object.values(app.trees)) {
             app.instanceManager.borrow(
@@ -356,8 +374,30 @@ class AppInterface {
                 this.mapControls.enabled = this.focused_backup.mapControls;
             }
         }, 16)
+
+        if (!debug.thumbnails_during_focus) {
+            document.querySelector("#thumbnail-container").style.right = ""
+        }
+        this.domController.focusInterface.nextButton.style.display = "none"
+        this.domController.focusInterface.prevButton.style.display = "none"
     }
 
+    advancePost(direction = true) {
+        const sorted_trees = app.trees.map(t => t);
+        sorted_trees.sort((a, b) => {
+            if (a.visible && b.visible) {
+                return a.position.x - b.position.x
+            } else {
+                return -Infinity
+            }
+        })
+        let i = (sorted_trees.indexOf(this) + direction ? 1 : -1);
+        log(i)
+        if (i < 0) i += sorted_trees.length
+        if (i >= sorted_trees.length) i -= sorted_trees.length
+        log(i, sorted_trees.length)
+        this.enter_focus(sorted_trees[i])
+    }
 
 
     update(dt) {
