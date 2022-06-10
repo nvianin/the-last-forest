@@ -460,10 +460,22 @@ class AppInterface {
             /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
             app.camera.lookAt(this.focused_tree.position.clone().add(tangent).add(new THREE.Vector3(0, this.focused_target_height, 0)))
 
-            app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 0, dt)
+
+            if (app.ground_fakeBack.material.opacity > .1) {
+                app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 0, dt)
+            } else {
+                app.ground_fakeBack.material.opacity = 0;
+                app.ground_fakeBack.visible = false;
+            }
         } else if (!this.focused_mode) {
 
-            app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, dt)
+            if (!app.ground_fakeBack.visible) app.ground_fakeBack.visible = true;
+
+            if (app.ground_fakeBack.material.opacity < .9) {
+                app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, dt)
+            } else {
+                app.ground_fakeBack.material.opacity = 1;
+            }
 
             /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
             app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt) */

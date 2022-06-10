@@ -236,8 +236,6 @@ class App {
         this.ground_fakeBack.position.y -= .2
         this.scene.add(this.ground_fakeBack)
 
-        this.textRenderer = new TextRenderer()
-
         texLoader.loadAsync("./resources/textures/squware vignette.jpg").then(tex => {
             this.ground.material.alphaMap = tex;
             this.ground_fakeBack.material.alphaMap = tex
@@ -523,6 +521,8 @@ class App {
     }
 
     init() {
+
+        this.textRenderer = new TextRenderer()
 
         this.instanceManager = new InstanceManager(
             new THREE.SphereGeometry(),
@@ -1119,12 +1119,12 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-        const default_focus_tree = this.trees.find(t => {
+        /* const default_focus_tree = this.trees.find(t => {
             return (t.spheres.length > 30)
             return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
         });
         log(default_focus_tree)
-        this.interface.enter_focus(default_focus_tree)
+        this.interface.enter_focus(default_focus_tree) */
     }
 
 
