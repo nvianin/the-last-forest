@@ -51,7 +51,7 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 512,
+    tree_build_limit: 128,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -264,10 +264,15 @@ class App {
                             this.dustParticles.userData.uniforms = {
                                 time: {
                                     value: 0
+                                },
+                                camera: {
+                                    value: this.camera.position
                                 }
+
                             }
                             this.dustParticles.material.onBeforeCompile = shader => {
                                 shader.uniforms.time = this.dustParticles.userData.uniforms.time;
+                                shader.uniforms.camera = this.dustParticles.userData.uniforms.camera;
                                 /* log(shader.fragmentShader) */
                                 let [prelude, main] = frag.split("////")
                                 shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
@@ -473,6 +478,7 @@ class App {
 
     reArrangeTrees(mode) {
         log("Activating " + mode + " mode")
+        this.textRenderer.clear()
 
         /* let i = -this.trees.length * 2.8 */
         let i = 0
@@ -490,7 +496,7 @@ class App {
                 _posts.sort((p, _p) => p.date - _p.date)
                 const t_min = _posts[0].date;
                 const t_max = _posts[_posts.length - 1].date;
-                let lastMonth = -1;
+
                 _posts.forEach(p => {
                     if (p.tree) {
                         const x = Math.map(p.date, t_min, t_max, x_min, x_max);
@@ -499,24 +505,30 @@ class App {
                             x,
                             0,
                             y);
-                        //Build the month labels
-                        const firstMonth = new Date(t_min * 1000).getMonth();
-                        const lastMonth = new Date(t_max * 1000).getMonth();
-                        // Build list of months from t_min to t_max
-                        const months = [];
-                        for (let m = firstMonth; m <= lastMonth; m++) {
-                            months.push(m);
-                        }
-                        for (let m of months) {
-                            const month = this.textRenderer.write(MONTHS[currentMonth], 20)
-                            month.position.x = p.tree.targetPosition.x;
-                            month.rotation.z = Math.PI / 2
-                            log(month)
-                        }
-
-                        i++;
                     }
                 })
+                //Build the month labels
+                const years = new Date(t_max * 1000).getFullYear() - new Date(t_min * 1000).getFullYear()
+                const firstMonth = new Date(t_min * 1000).getMonth();
+                const lastMonth = new Date(t_max * 1000).getMonth() + years * 12;
+                // Build list of months from t_min to t_max
+                const months = [];
+                for (let m = firstMonth; m <= lastMonth; m++) {
+                    /* const month = {
+                        time: 
+                    } */
+                    months.push(m);
+                }
+                log(`Built ${lastMonth-firstMonth} months`, months)
+                for (let i = 0; i < months.length; i++) {
+                    const month = this.textRenderer.write(MONTHS[(months[i]) % 12], 20)
+                    month.position.x = Math.map(months[i], firstMonth, lastMonth, x_min, x_max);
+                    month.rotation.z = Math.PI / 2
+                    log(month)
+                }
+
+                i++;
+
                 this.tsneRenderer.displayPlane.visible = false;
                 break;
             case "score":
@@ -535,6 +547,31 @@ class App {
                     }
                     i++;
                 })
+
+                // Build score labels
+                const score_labels = []
+                for (let s = 0; s <= Math.floor(score_max / 1000) * 1000; s += 1000) {
+                    score_labels.push(s)
+                }
+                score_labels.forEach(s => {
+                    const label = this.textRenderer.write(s + "", 20)
+                    label.position.x = Math.map(s, score_min, score_max, x_min, x_max) + 1800;
+                    label.rotation.z = Math.PI / 2
+                })
+
+                // Build separators
+                for (let i = 0; i < score_labels.length; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        const separator = this.textRenderer.write("|", 10)
+                        separator.position.x = Math.map(i + j * .1, 0, score_labels.length, x_min, x_max);
+                        separator.scale.y.multi
+                        separator.position.y = j * 100;
+                        separator.position.z = 2500
+                        /* separator.rotation.z = Math.PI / 2 */
+                    }
+                }
+
+
                 this.tsneRenderer.displayPlane.visible = false;
                 break;
         }
@@ -759,6 +796,7 @@ class App {
         this.bokehPass.far_aperture = .0000003
         this.bokehPass.close_aperture = .00000025
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
+        this.bokehPass.enabled = false;
 
         /* this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
         this.saoPass.params.saoIntensity = .0003;
@@ -1055,10 +1093,52 @@ class App {
                     removed_trees++;
                 }
             }
+
+
+            // Animate camera for introduction
+            this.camera.position.set(5000, 10000, 100000);
+            this.camera.rotation.set(0, 0, 0);
+            const cam_target = new THREE.Object3D()
+            cam_target.position.set(5000, 10000, 30000);
+            cam_target.rotation.set(-.3, .2, .06);
+            this.thumbnailContainer.style.opacity = 0;
+            document.querySelector("#toggle-container").style.opacity = 0;
+            document.querySelector("#vertical-toggle-container").style.opacity = 0;
+            document.querySelector("#mode-slider-container").style.opacity = 0;
+            this.fog.near = 1000;
+            this.fog.far = 10000;
+            const dt = .0005 * 1;
+            this.camera_intro_interval = setInterval(() => {
+                this.camera.position.lerp(cam_target.position, dt);
+                this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, dt));
+
+                this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, .001);
+                this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, .001);
+
+                this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), .1)
+
+                const dist = this.camera.position.distanceTo(cam_target.position);
+                if (dist < .1) {
+                    clearInterval(this.camera_intro_interval);
+                    this.camera_intro_interval = false;
+                } else {
+                    log(dist)
+                }
+            }, .16)
+
             document.querySelector("#loading-button").style.opacity = 1
             document.querySelector("#loading-screen-background").style.opacity = 0;
             document.querySelector("#loading-button").classList.add("loading-button-flash")
             document.querySelector("#loading-button").onclick = () => {
+                clearInterval(this.camera_intro_interval);
+                this.camera_intro_interval = false;
+
+
+                this.thumbnailContainer.style.opacity = 1;
+                document.querySelector("#toggle-container").style.opacity = 1;
+                document.querySelector("#vertical-toggle-container").style.opacity = 1;
+                document.querySelector("#mode-slider-container").style.opacity = 1;
+
                 /* document.querySelector("#loading-screen-background").style.opacity = 0; */
                 document.querySelector("#loading-bar").style.opacity = 0;
                 document.querySelector("#loading-desc").style.opacity = 0;
@@ -1067,8 +1147,10 @@ class App {
                     this.bg_music.play()
                 }
 
+
                 setTimeout(() => {
-                    document.querySelector("#loading-screen-background").style.display = "none"
+                    log("hiding loading screen")
+                    document.querySelector("#loading-container").style.display = "none"
                     document.querySelector("#loading-bar").style.display = "none"
                     document.querySelector("#loading-desc").style.display = "none"
                     document.querySelector("#loading-button").style.display = "none"
@@ -1198,7 +1280,7 @@ class App {
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
         this.sun.target.updateMatrixWorld();
 
-        if (this.interface) this.interface.update(this.dt)
+        if (this.interface && !this.camera_intro_interval) this.interface.update(this.dt)
         /* this.csm.update(this.camera.matrix) */
 
         if (this.postDom.style.visibility == "visible") {
@@ -1224,7 +1306,10 @@ class App {
 
 
         if (this.built_trees) {
-            if (this.dustParticles) this.dustParticles.userData.uniforms.time.value = this.time
+            if (this.dustParticles) {
+                this.dustParticles.userData.uniforms.time.value = this.time
+                this.dustParticles.userData.uniforms.camera.value = this.camera.position.clone().divideScalar(this.dustParticles.scale.x)
+            }
             if (this.interface.fatMat.uniforms.time) this.interface.fatMat.uniforms.time.value = this.time;
             Object.keys(treeTypes).forEach(type => {
                 if (treeColors[type] && treeColors[type].userData.time) {

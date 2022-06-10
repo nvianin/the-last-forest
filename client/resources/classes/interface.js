@@ -271,7 +271,8 @@ class AppInterface {
         }
         this.domController.focusInterface.nextButton.style.display = "block"
         this.domController.focusInterface.prevButton.style.display = "block"
-        document.querySelector("#toggle-container").style.visibility = "hidden"
+        /* document.querySelector("#toggle-container").style.visibility = "hidden" */
+        document.querySelector("#toggle-container").style.opacity = 0;
 
         /* for (let t of Object.values(app.trees)) {
             app.instanceManager.borrow(
@@ -368,6 +369,7 @@ class AppInterface {
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
 
+                app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, .1)
 
                 app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
@@ -385,7 +387,8 @@ class AppInterface {
         }
         this.domController.focusInterface.nextButton.style.display = "none"
         this.domController.focusInterface.prevButton.style.display = "none"
-        document.querySelector("#toggle-container").style.visibility = "visible"
+        /* document.querySelector("#toggle-container").style.visibility = "visible" */
+        document.querySelector("#toggle-container").style.opacity = 1;
     }
 
     advancePost(direction) {

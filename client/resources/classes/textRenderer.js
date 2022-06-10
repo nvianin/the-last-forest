@@ -13,7 +13,7 @@ class TextRenderer {
 
         this.texts = []
 
-        const test = this.write("Space Grotesk Light Regular")
+        /* const test = this.write("Space Grotesk Light Regular") */
 
         this.textMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
@@ -24,15 +24,37 @@ class TextRenderer {
     }
 
     clear() {
-        this.texts.forEach(t => {
-            app.scene.remove(t)
-        })
-        this.texts = []
+        if (this.texts.length == 0) return -1;
+        if (this.moveInterval) clearInterval(this.moveInterval);
+        const _texts = this.texts.map(t => t);
+        this.moveInterval = setInterval(() => {
+            let dist = 0;
+            const y_target = -500;
+            _texts.forEach(text => {
+                text.position.y = Math.lerp(text.position.y, y_target, .1);
+                dist += Math.abs(text.position.y - y_target);
+            })
+            /* this.textMaterial.opacity = Math.lerp(this.textMaterial.opacity, 0, .1); */
+            /* dist += Math.abs(this.textMaterial.opacity - 0); */
+
+            if (dist < .1) {
+                clearInterval(this.moveInterval);
+                /* this.textMaterial.opacity = 1; */
+                _texts.forEach(t => {
+                    app.scene.remove(t)
+                    this.texts.splice(this.texts.indexOf(t), 1)
+                })
+            }
+        }, 16);
     }
 
     write(string, size = 15) {
         if (font) {
             log(`${string} written using ${font.data.familyName}`)
+
+            const y_base = -500;
+            const y_target = 1000;
+
             const geo = new THREE.TextGeometry(string, {
                 font: font,
                 size: size,
@@ -45,11 +67,20 @@ class TextRenderer {
                 this.textMaterial
             )
             mesh.rotation.x = -Math.PI / 2
-            mesh.position.y = 1000;
+            mesh.position.y = y_base
             mesh.scale.multiplyScalar(100)
 
             this.texts.push(mesh)
             app.scene.add(mesh)
+
+            const intro_interval = setInterval(() => {
+                mesh.position.y = Math.lerp(mesh.position.y, y_target, .1);
+                if (Math.abs(mesh.position.y - y_target) < 100) {
+                    clearInterval(intro_interval);
+                } else {
+                    log(Math.abs(mesh.position.y - y_target))
+                }
+            })
 
             return mesh
         } else {
