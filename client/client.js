@@ -479,6 +479,8 @@ class App {
         const _posts = this.trees.map(t => {
             if (t.userData.post) return t.userData.post
         })
+        const x_min = app.ground.geometry.boundingBox.min.x;
+        const x_max = app.ground.geometry.boundingBox.max.x;
         switch (mode) {
             case "default":
                 this.trees.forEach(t => t.targetPosition = t.defaultPosition)
@@ -488,25 +490,30 @@ class App {
                 _posts.sort((p, _p) => p.date - _p.date)
                 const t_min = _posts[0].date;
                 const t_max = _posts[_posts.length - 1].date;
-                const x_min = app.ground.geometry.boundingBox.min.x;
-                const x_max = app.ground.geometry.boundingBox.max.x;
                 let lastMonth = -1;
                 _posts.forEach(p => {
                     if (p.tree) {
                         const x = Math.map(p.date, t_min, t_max, x_min, x_max);
                         const y = (Math.random() * 2 - 1) * 10000
-                        const currentMonth = new Date(p.date * 1000).getMonth();
                         p.tree.targetPosition = new THREE.Vector3(
                             x,
                             0,
                             y);
-                        if (currentMonth != lastMonth) {
-                            lastMonth = currentMonth
+                        //Build the month labels
+                        const firstMonth = new Date(t_min * 1000).getMonth();
+                        const lastMonth = new Date(t_max * 1000).getMonth();
+                        // Build list of months from t_min to t_max
+                        const months = [];
+                        for (let m = firstMonth; m <= lastMonth; m++) {
+                            months.push(m);
+                        }
+                        for (let m of months) {
                             const month = this.textRenderer.write(MONTHS[currentMonth], 20)
                             month.position.x = p.tree.targetPosition.x;
                             month.rotation.z = Math.PI / 2
                             log(month)
                         }
+
                         i++;
                     }
                 })
@@ -514,10 +521,17 @@ class App {
                 break;
             case "score":
                 _posts.sort((p, _p) => p.score - _p.score)
+                const score_min = _posts[0].score
+                const score_max = _posts[_posts.length - 1].score
                 _posts.forEach(p => {
                     if (p.tree) {
-                        const x = (Math.random() * 2 - 1) * 10000
-                        p.tree.targetPosition = new THREE.Vector3(i * 100 /* *  (1 / p.tree.userData.trueScale) */ - app.ground.geometry.boundingBox.max.x, 0, x)
+                        const x = Math.map(p.score, score_min, score_max, x_min, x_max);
+                        const y = (Math.random() * 2 - 1) * 10000
+                        p.tree.targetPosition = new THREE.Vector3(
+                            x,
+                            0,
+                            y
+                        )
                     }
                     i++;
                 })
