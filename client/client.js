@@ -13,6 +13,8 @@ const loadList = [
     }
 ]
 
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
 const urlParams = new URLSearchParams(window.location.search)
 
 debug_activated = urlParams.get("debug") == ""
@@ -49,7 +51,7 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 128,
+    tree_build_limit: 512,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -484,12 +486,29 @@ class App {
                 break;
             case "time":
                 _posts.sort((p, _p) => p.date - _p.date)
+                const t_min = _posts[0].date;
+                const t_max = _posts[_posts.length - 1].date;
+                const x_min = app.ground.geometry.boundingBox.min.x;
+                const x_max = app.ground.geometry.boundingBox.max.x;
+                let lastMonth = -1;
                 _posts.forEach(p => {
                     if (p.tree) {
-                        const x = (Math.random() * 2 - 1) * 10000
-                        p.tree.targetPosition = new THREE.Vector3(i * 100 /* *  (1 / p.tree.userData.trueScale) */ - app.ground.geometry.boundingBox.max.x, 0, x);
+                        const x = Math.map(p.date, t_min, t_max, x_min, x_max);
+                        const y = (Math.random() * 2 - 1) * 10000
+                        const currentMonth = new Date(p.date * 1000).getMonth();
+                        p.tree.targetPosition = new THREE.Vector3(
+                            x,
+                            0,
+                            y);
+                        if (currentMonth != lastMonth) {
+                            lastMonth = currentMonth
+                            const month = this.textRenderer.write(MONTHS[currentMonth], 20)
+                            month.position.x = p.tree.targetPosition.x;
+                            month.rotation.z = Math.PI / 2
+                            log(month)
+                        }
+                        i++;
                     }
-                    i++;
                 })
                 this.tsneRenderer.displayPlane.visible = false;
                 break;
@@ -515,7 +534,7 @@ class App {
                 dist += this.trees[i].position.distanceTo(this.trees[i].targetPosition);
                 /* if (dist == NaN) log(this.trees[i].position, targetPositions[i]) */
             }
-            log(dist)
+            /* log(dist) */
             if (dist < 50 || dist == NaN) clearInterval(this.arrangeInterval)
         }, 16);
     }
