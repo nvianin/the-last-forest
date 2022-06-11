@@ -36,7 +36,7 @@ class TutorialController {
             case "MAP":
 
                 if (!this.state.map) {
-                    this.tutorialContainer.querySelector("#tutorial-map-guide").style.display = "block"
+                    this.tutorialContainer.querySelector("#tutorial-map").style.display = "block"
                 }
                 if (!this.state.thumbnails) {
                     this.tutorialContainer.querySelector("#tutorial-thumbnails").style.display = "block"
@@ -59,7 +59,7 @@ class TutorialController {
     buildTutorials() {
 
         const tutorial_resources = {
-            "map-guide-01": "map",
+            "map-01": "map",
             "thumbnails-01": "thumbnails",
             "walk-01": "walk",
             "promenade-01": "auto"
