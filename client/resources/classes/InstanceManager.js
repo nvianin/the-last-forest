@@ -63,6 +63,7 @@ class InstanceManager {
             return i;
         } catch (e) {
             if (this.takeOutErrors % 1000 == 0) console.error(e);
+            return -1;
         }
     }
 

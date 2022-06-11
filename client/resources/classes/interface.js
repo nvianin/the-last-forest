@@ -315,21 +315,32 @@ class AppInterface {
         }
 
         for (let s of tree.spheres) {
-            /* log("---")
-            log(s.position, s.scale) */
-            s.position.applyAxisAngle(THREE.UP, tree.rotation.y)
-            s.position.multiplyScalar(tree.userData.scale).add(tree.position);
-            s.scale.multiply(tree.userData.scale).multiplyScalar(1);
-            app.camera.lookAt(s)
-            /* log(s.position, s.scale, s.color) */
+            const position = s.position.clone();
+            const scale = s.scale.clone();
+            position.applyAxisAngle(THREE.UP, tree.rotation.y)
+            position.multiplyScalar(tree.userData.scale).add(tree.position);
+            scale.multiplyScalar(tree.userData.scale).multiplyScalar(1);
+            app.camera.lookAt(position)
 
-            const i = app.instanceManager.borrow(
+            /* log(s, tree.userData)
+            log(position, scale); */
+
+            let i = app.instanceManager.borrow(
                 this.instanceId,
-                s.position,
-                s.scale,
-                s.quaternion)
-            app.instanceManager.instances.setColorAt(i, s.color)
+                position,
+                scale,
+                s.quaternion);
+            i = app.instanceManager.ledger[i].index;
+            log(i)
+            app.instanceManager.instances.setColorAt(i, s.color);
             app.instanceManager.instances.instanceColor.needsUpdate = true;
+            app.instanceManager.instances.instanceMatrix.needsUpdate = true;
+
+
+            log(s.color)
+            let c = new THREE.Color()
+            app.instanceManager.instances.getColorAt(i, c);
+            log(c)
         }
 
         this.fatTree.geometry.setPositions(positions)

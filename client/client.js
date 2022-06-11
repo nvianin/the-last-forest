@@ -49,9 +49,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: false,
+    autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 512,
+    tree_build_limit: 64,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -594,16 +594,19 @@ class App {
 
         this.textRenderer = new TextRenderer()
 
+        this.instanceMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xf1f1f1,
+            transmission: .8,
+            roughness: .5,
+            thickness: 1,
+            opacity: .5,
+            transparent: true,
+        });
+        /* this.instanceMaterial = new THREE.MeshBasicMaterial() */
+
         this.instanceManager = new InstanceManager(
             new THREE.SphereGeometry(),
-            new THREE.MeshPhysicalMaterial({
-                color: 0xf1f1f1,
-                transmission: .8,
-                roughness: .5,
-                thickness: 1,
-                opacity: .5,
-                transparent: true,
-            }),
+            this.instanceMaterial,
             10000
         );
 
@@ -1234,12 +1237,12 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-        /* const default_focus_tree = this.trees.find(t => {
+        const default_focus_tree = this.trees.find(t => {
             return (t.spheres.length > 30)
             return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
         });
         log(default_focus_tree)
-        this.interface.enter_focus(default_focus_tree) */
+        this.interface.enter_focus(default_focus_tree)
     }
 
 
