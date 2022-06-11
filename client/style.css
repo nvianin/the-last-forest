@@ -356,7 +356,7 @@ canvas .text-input {
   font-size: 10vh;
   text-align: center;
   line-height: 100vh;
-  transition: 1.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: 7s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 #loading-screen-text {
@@ -462,7 +462,7 @@ canvas .text-input {
   position: absolute;
   z-index: 1001;
   right: 50%;
-  bottom: 19%;
+  bottom: 10%;
   transform: translate(50%, 100%);
   /* width: 120px; */
   padding: 0px 20px 0px 20px;

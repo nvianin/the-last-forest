@@ -49,9 +49,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: true,
+    autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 128,
+    tree_build_limit: 512,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -781,9 +781,9 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            .2, // strength
-            1.6, // radius
-            .12 // threshold
+            .4, // strength
+            .7, // radius
+            .09 // threshold
         );
 
         this.bokehPass = new THREE.BokehPass(this.scene, this.camera, {
@@ -796,7 +796,7 @@ class App {
         this.bokehPass.far_aperture = .0000003
         this.bokehPass.close_aperture = .00000025
         this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
-        this.bokehPass.enabled = false;
+        /* this.bokehPass.enabled = false; */
 
         /* this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
         this.saoPass.params.saoIntensity = .0003;
