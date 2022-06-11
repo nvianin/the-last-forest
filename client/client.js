@@ -51,7 +51,7 @@ const debug = {
     postprocessing: true,
     autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 64,
+    tree_build_limit: 128,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -99,7 +99,7 @@ class App {
             fog_offset: 40000,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
-            focused_max_raycast_dist: 500,
+            focused_max_raycast_dist: 1500,
             tsne_scale_multiplier: 39
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
@@ -146,7 +146,7 @@ class App {
         if (debug.sun_helper) this.sun.add(new THREE.DirectionalLightHelper(this.sun))
         this.scene.add(this.sun)
 
-        this.ambientLight = new THREE.AmbientLight(0xff0167)
+        this.ambientLight = new THREE.AmbientLight( /* 0xff0167 */ 0xFFCADF)
         this.scene.add(this.ambientLight);
 
         this.test = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial());
@@ -331,7 +331,9 @@ class App {
         ] */
         this.pearlPalette = [
             0x000000,
+            0x5F0F17,
             0xbe1e2d,
+            0xDF7E22,
             0xffde17,
             0xffffff,
             0x21409a
@@ -595,13 +597,19 @@ class App {
         this.textRenderer = new TextRenderer()
 
         this.instanceMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xf1f1f1,
-            transmission: .8,
-            roughness: .5,
+            color: new THREE.Color(0xffffff),
+            transmission: .7,
+            roughness: .15,
             thickness: 1,
-            opacity: .5,
             transparent: true,
+            emissive: new THREE.Color(0xffffff),
+            emissiveIntensity: .01
         });
+        const colorMultiplier = 1
+        this.instanceMaterial.color.r *= colorMultiplier;
+        this.instanceMaterial.color.g *= colorMultiplier;
+        this.instanceMaterial.color.b *= colorMultiplier;
+
         /* this.instanceMaterial = new THREE.MeshBasicMaterial() */
 
         this.instanceManager = new InstanceManager(

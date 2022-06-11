@@ -29,11 +29,13 @@ class InstanceManager {
         this.nil.compose(new THREE.Vector3(9000, 9000, 9000), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1));
         for (let i = 0; i < this.instances.count; i++) {
             this.instances.setMatrixAt(i, this.nil)
+            this.instances.setColorAt(i, new THREE.Color(app.pearlPalette[Math.floor(Math.random() * app.pearlPalette.length)]))
         }
         app.scene.add(this.instances)
         this.ledger = {}
         this.lendees = {}
         this.takeOutErrors = 0;
+
     }
 
     register(owner) {
@@ -109,6 +111,10 @@ class InstanceManager {
             if (this.ledger[i]) count++;
         }
         return count;
+    }
+
+    set_color_at(index, color) {
+        this.instances.setColorAt(index, color);
     }
 
     debug_display() {

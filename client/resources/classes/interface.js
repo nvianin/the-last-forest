@@ -319,7 +319,7 @@ class AppInterface {
             const scale = s.scale.clone();
             position.applyAxisAngle(THREE.UP, tree.rotation.y)
             position.multiplyScalar(tree.userData.scale).add(tree.position);
-            scale.multiplyScalar(tree.userData.scale).multiplyScalar(1);
+            scale.multiplyScalar(tree.userData.scale).multiplyScalar(.5);
             app.camera.lookAt(position)
 
             /* log(s, tree.userData)
@@ -332,15 +332,16 @@ class AppInterface {
                 s.quaternion);
             i = app.instanceManager.ledger[i].index;
             log(i)
-            app.instanceManager.instances.setColorAt(i, s.color);
-            app.instanceManager.instances.instanceColor.needsUpdate = true;
-            app.instanceManager.instances.instanceMatrix.needsUpdate = true;
 
+            /* app.instanceManager.instances.setColorAt(i, s.color);
+            app.instanceManager.instances.instanceColor.needsUpdate = true; */
 
-            log(s.color)
+            app.instanceManager.set_color_at(i, s.color);
+
+            /* log(s.color)
             let c = new THREE.Color()
             app.instanceManager.instances.getColorAt(i, c);
-            log(c)
+            log(c) */
         }
 
         this.fatTree.geometry.setPositions(positions)
@@ -363,6 +364,8 @@ class AppInterface {
         this.focused_lerping = true;
         this.fatTree.visible = false;
         this.target_focus = this.focused_backup.focus
+
+        app.instanceManager.return_all(this.instanceId)
 
         if (this.focus_exit_interval) {
             clearInterval(this.focus_exit_interval)
