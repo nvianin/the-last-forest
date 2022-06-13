@@ -51,7 +51,7 @@ const debug = {
     postprocessing: true,
     autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 0,
+    tree_build_limit: 128,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -78,7 +78,7 @@ class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
             logarithmicDepthBuffer: true,
-            antialias: true
+            antialias: false
         });
         this.renderer.info.autoReset = false;
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -101,7 +101,8 @@ class App {
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
             focused_max_raycast_dist: 1500,
-            tsne_scale_multiplier: 39
+            tsne_scale_multiplier: 39,
+            score_label_offset: 4750
         }
         /* this.renderer.setClearColor(new THREE.Color(0x000000), .9) */
 
@@ -542,7 +543,7 @@ class App {
                 const score_max = _posts[_posts.length - 1].score
                 _posts.forEach(p => {
                     if (p.tree) {
-                        const x = Math.map(p.score, score_min, score_max, x_min, x_max);
+                        const x = Math.map(p.score, 0, Math.floor(score_max / 1000) * 1000, x_min, x_max);
                         const y = (Math.random() * 2 - 1) * 10000
                         p.tree.targetPosition = new THREE.Vector3(
                             x,
@@ -552,7 +553,6 @@ class App {
                     }
                     i++;
                 })
-
                 // Build score labels
                 const score_labels = []
                 for (let s = 0; s <= Math.floor(score_max / 1000) * 1000; s += 1000) {
@@ -560,7 +560,7 @@ class App {
                 }
                 score_labels.forEach(s => {
                     const label = this.textRenderer.write(s + "", 20)
-                    label.position.x = Math.map(s, score_min, score_max, x_min, x_max) + 1800;
+                    label.position.x = Math.map(s, score_min, score_max, x_min, x_max) + this.settings.score_label_offset;
                     label.rotation.z = Math.PI / 2
                 })
 
@@ -738,7 +738,7 @@ class App {
 
                 /* log(this.activeTree) */
                 this.interface.enter_focus(this.activeTree)
-            } else {
+            } else if (false) {
                 log("is not lerping:", this.interface.state != "LERPING")
                 log("postdom visible:", this.postDom.style.visibility == "visible")
                 log("left click:", e.button == 0)
@@ -783,8 +783,13 @@ class App {
         });
         this.bokehPass.far_aperture = .0000003
         this.bokehPass.close_aperture = .00000025
-        this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
+        /* this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader); */
         /* this.bokehPass.enabled = false; */
+
+        /* this.SMAAPass = new THREE.SMAAPass(
+            innerWidth * this.renderer.getPixelRatio(),
+            innerHeight * this.renderer.getPixelRatio()
+        ) */
 
         /* this.saoPass = new THREE.SAOPass(this.scene, this.camera, false, true);
         this.saoPass.params.saoIntensity = .0003;
@@ -796,7 +801,7 @@ class App {
         /* this.outlinePass = new THREE.OutlinePass(new THREE.Vector2(innerWidth, innerHeight), this.scene, this.camera); */
 
 
-        this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight);
+        /* this.ssaoPass = new THREE.SSAOPass(this.scene, this.camera, innerWidth, innerHeight); */
         /* this.ssaoPass. */
 
 
@@ -807,10 +812,12 @@ class App {
         /* this.composer.addPass(this.taaPass); */
 
         this.composer.addPass(this.renderPass);
+        /* this.composer.addPass(this.SMAAPass); */
+        /* this.composer.addPass(this.ssaoPass); */
         this.composer.addPass(this.bloomPass);
         this.composer.addPass(this.bokehPass);
+
         /* this.composer.addPass(this.taaPass); */
-        /* this.composer.addPass(this.ssaoPass); */
         /* this.composer.addPass(this.fxaaPass) */
         /* this.composer.addPass(this.saoPass); */
         /* this.composer.addPass(this.outlinePass) */
@@ -951,7 +958,7 @@ class App {
         const _posts = Object.values(this.posts).map(p => p);
         _posts.sort((a, b) => a.date - b.date);
         const tree_timespan = new Date(_posts[_posts.length - 1].date - _posts[0].date);
-        document.querySelector("#loading-stats").innerHTML = `${tree_number} trees have grown in the forest. <br> They represent ${Math.floor(tree_timespan / 60 / 60 / 24)} days of posting on r/collapse.`;
+        document.querySelector("#loading-stats").innerHTML = `${tree_number} trees have grown in the forest. <br> They represent a span of ${Math.floor(tree_timespan / 60 / 60 / 24)} days (${Math.round(tree_timespan/60/60/24/30.5/12 * 10) /10} years) of posting on r/collapse.`;
     }
 
     async buildTreesFromPosts() {
@@ -1120,7 +1127,7 @@ class App {
                     clearInterval(this.camera_intro_interval);
                     this.camera_intro_interval = false;
                 } else {
-                    log(dist)
+                    if (this.frameCount % 20 == 0) log(dist)
                 }
             }, .16)
 
@@ -1142,6 +1149,7 @@ class App {
                 document.querySelector("#loading-desc").style.opacity = 0;
                 document.querySelector("#loading-button").style.opacity = 0;
                 document.querySelector("#loading-stats").style.opacity = 0;
+                document.querySelector("#loading-container").style.pointerEvents = "none"
                 if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                     this.bg_music.play()
                 }
@@ -1331,7 +1339,8 @@ class App {
         }
         this.frameCount++;
         this.renderer.info.reset()
-        this.dt = this.clock.getDelta()
+        this.dt = Math.clamp(this.clock.getDelta(), 0, 1)
+        /* this.dt = this.clock.getDelta(); */
     }
 
     MouseCast() {
@@ -1619,8 +1628,10 @@ class App {
         if (this.composer) {
             this.composer.setSize(innerWidth, innerHeight);
             this.bloomPass.setSize(innerWidth, innerHeight)
-            this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
-            this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio();
+            /* this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio();
+            this.fxaaPass.material.uniforms.resolution.value.x = 1 / innerHeight * this.renderer.getPixelRatio(); */
+
+            /* this.SMAAPass.material.uniforms.resolution.value.x = 1 / innerWidth * this.renderer.getPixelRatio(); */
 
             this.bokehPass.uniforms.aspect.value = innerWidth / innerHeight;
             this.bokehPass.renderTargetDepth.setSize(innerWidth, innerHeight);

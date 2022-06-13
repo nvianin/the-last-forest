@@ -6,6 +6,11 @@ pimp loading screen
 	meilleur transition noir -> app
 	particules partent ;spring up de la map; petit travelling/spin puis controle
 
+
+auto mode
+
+---DONE---
+
 enlever tutoriels au start
 	walk controls tro obtus
 	bouton info pour activer tuto
@@ -20,6 +25,7 @@ focus mode:
 	NON
 	picto image/video
 	bouton next tree
+
 
 corriger bug fat line
 

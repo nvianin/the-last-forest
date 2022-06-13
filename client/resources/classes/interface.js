@@ -85,7 +85,7 @@ class AppInterface {
 
         this.fatMat = new THREE.LineMaterial({
             color: 0xffffff,
-            linewidth: 10,
+            linewidth: 35,
             worldUnits: true,
             vertexColors: false,
 
@@ -273,6 +273,7 @@ class AppInterface {
         this.domController.focusInterface.prevButton.style.display = "block"
         /* document.querySelector("#toggle-container").style.visibility = "hidden" */
         document.querySelector("#toggle-container").style.opacity = 0;
+        document.querySelector("#info-toggle").opacity = 0;
 
         /* for (let t of Object.values(app.trees)) {
             app.instanceManager.borrow(
@@ -403,6 +404,7 @@ class AppInterface {
         this.domController.focusInterface.prevButton.style.display = "none"
         /* document.querySelector("#toggle-container").style.visibility = "visible" */
         document.querySelector("#toggle-container").style.opacity = 1;
+        document.querySelector("#info-toggle").opacity = 1;
     }
 
     advancePost(direction) {

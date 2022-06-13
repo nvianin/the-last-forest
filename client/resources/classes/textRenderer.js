@@ -31,7 +31,7 @@ class TextRenderer {
             let dist = 0;
             const y_target = -500;
             _texts.forEach(text => {
-                text.position.y = Math.lerp(text.position.y, y_target, .1);
+                text.position.y = Math.lerp(text.position.y, y_target, .15);
                 dist += Math.abs(text.position.y - y_target);
             })
             /* this.textMaterial.opacity = Math.lerp(this.textMaterial.opacity, 0, .1); */
@@ -74,11 +74,11 @@ class TextRenderer {
             app.scene.add(mesh)
 
             const intro_interval = setInterval(() => {
-                mesh.position.y = Math.lerp(mesh.position.y, y_target, .1);
+                mesh.position.y = Math.lerp(mesh.position.y, y_target, .18);
                 if (Math.abs(mesh.position.y - y_target) < 100) {
                     clearInterval(intro_interval);
                 } else {
-                    log(Math.abs(mesh.position.y - y_target))
+                    /* log(Math.abs(mesh.position.y - y_target)) */
                 }
             })
 
