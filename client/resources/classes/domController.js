@@ -355,7 +355,7 @@ class FocusInterface {
         window.open(
             url,
             "external",
-            `width=${screen.width / 3},height=${screen.height},top=0,left=${screen.width/3 * 2}`
+            `width=${screen.width / 2},height=${screen.height},top=0,left=${screen.width/2}`
         )
     }
 }

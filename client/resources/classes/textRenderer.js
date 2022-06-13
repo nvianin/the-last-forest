@@ -29,7 +29,7 @@ class TextRenderer {
         const _texts = this.texts.map(t => t);
         this.moveInterval = setInterval(() => {
             let dist = 0;
-            const y_target = -500;
+            const y_target = -90000;
             _texts.forEach(text => {
                 text.position.y = Math.lerp(text.position.y, y_target, .15);
                 dist += Math.abs(text.position.y - y_target);

@@ -95,7 +95,7 @@ class App {
         this.settings = {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
-            draw_distance: 130000,
+            draw_distance: 200000,
             fog_offset: 80000,
             sun_intensity: 1.3,
             walking_fog_multiplier: .1,
@@ -246,6 +246,45 @@ class App {
             this.ground.material.needsUpdate = true;
             this.ground_fakeBack.material.needsUpdate = true
         })
+        const starShaders = []
+
+        fetch("./resources/shaders/starsFrag.glsl").then(res => res.text()).then(text => {
+            starShaders[0] = text
+            fetch("./resources/shaders/starsVert.glsl").then(res => res.text()).then(text => {
+                starShaders[1] = text
+                this.stars = new THREE.Points(
+                    new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, 16, 16),
+                    new THREE.PointsMaterial({
+                        transparent: true,
+                        fog: true
+                    })
+                )
+                this.stars.rotation.x = -Math.HALF_PI;
+                this.stars.userData.uniforms = {
+                    time: {
+                        value: 0
+                    }
+                }
+                this.stars.material.onBeforeCompile = (shader) => {
+                    const [vertPrelude, vertMain] = starShaders[1].split("////");
+                    const [fragPrelude, fragMain] = starShaders[0].split("////");
+                    shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common> \n" + vertPrelude)
+                    shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>", "#include <fog_vertex> \n" + vertMain)
+
+                    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + fragPrelude)
+                    shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + fragMain)
+
+                    shader.uniforms.time = this.stars.userData.uniforms.time;
+
+                    log(shader.fragmentShader)
+                    log(shader.vertexShader)
+                }
+
+
+                this.stars.scale.multiplyScalar(this.settings.ground_scale)
+                this.scene.add(this.stars);
+            })
+        })
 
         if (debug.particle) {
             fetch("/resources/shaders/dustFrag.glsl").then(resp => {
@@ -378,19 +417,25 @@ class App {
 
         }
 
+        this.ambience = document.querySelector("#ambience")
+        this.ambience.volume = .7
+        this.ambience.loop = true
+        this.ambience.play();
 
         this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
         this.bg_music = document.querySelector("#bg-music")
-        this.bg_music.volume = .8
+        this.bg_music.volume = .6
         if (document.querySelector("#sound-toggle").innerText == "volume_off") document.querySelector("#sound-toggle").classList.add("toggle-button-active")
         document.querySelector("#sound-toggle").onclick = () => {
             if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                 document.querySelector("#sound-toggle").classList.add("toggle-button-active")
                 document.querySelector("#sound-toggle").innerText = "volume_off"
                 this.bg_music.pause()
+                this.ambience.pause()
             } else {
                 document.querySelector("#sound-toggle").innerText = "volume_up"
-                this.bg_music.play()
+                this.bg_music.play();
+                this.ambience.play();
             }
         }
 
@@ -751,7 +796,10 @@ class App {
         })
         window.addEventListener("pointerdown", e => {
             this.pointer_is_down = true;
-            if (document.querySelector("#sound-toggle").innerText.includes("volume_up") && (!this.bg_music.currentTime)) this.bg_music.play()
+            if (document.querySelector("#sound-toggle").innerText.includes("volume_up") && (!this.bg_music.currentTime)) {
+                this.bg_music.play()
+                this.ambience.play()
+            }
 
         })
         window.addEventListener("wheel", e => {
@@ -958,7 +1006,7 @@ class App {
         const _posts = Object.values(this.posts).map(p => p);
         _posts.sort((a, b) => a.date - b.date);
         const tree_timespan = new Date(_posts[_posts.length - 1].date - _posts[0].date);
-        document.querySelector("#loading-stats").innerHTML = `${tree_number} trees have grown in the forest. <br> They represent a span of ${Math.floor(tree_timespan / 60 / 60 / 24)} days (${Math.round(tree_timespan/60/60/24/30.5/12 * 10) /10} years) of posting on r/collapse.`;
+        document.querySelector("#loading-stats").innerHTML = `${tree_number} trees have grown in the forest, <br> representing ${Math.floor(tree_timespan / 60 / 60 / 24)} days (${Math.round(tree_timespan/60/60/24/30.5/12 * 10) /10} years) of posting on r/collapse.`;
     }
 
     async buildTreesFromPosts() {
@@ -1104,7 +1152,7 @@ class App {
             this.camera.position.set(5000, 10000, 100000);
             this.camera.rotation.set(0, 0, 0);
             const cam_target = new THREE.Object3D()
-            cam_target.position.set(5000, 10000, 30000);
+            cam_target.position.set(5000, 15000, 30000);
             cam_target.rotation.set(-.3, .2, .06);
             this.thumbnailContainer.style.opacity = 0;
             document.querySelector("#toggle-container").style.opacity = 0;
@@ -1152,6 +1200,7 @@ class App {
                 document.querySelector("#loading-container").style.pointerEvents = "none"
                 if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                     this.bg_music.play()
+                    this.ambience.play()
                 }
 
 
@@ -1316,6 +1365,9 @@ class App {
             if (this.dustParticles) {
                 this.dustParticles.userData.uniforms.time.value = this.time
                 this.dustParticles.userData.uniforms.camera.value = this.camera.position.clone().divideScalar(this.dustParticles.scale.x)
+            }
+            if (this.stars) {
+                this.stars.userData.uniforms.time.value = this.time
             }
             if (this.interface.fatMat.uniforms.time) this.interface.fatMat.uniforms.time.value = this.time;
             Object.keys(treeTypes).forEach(type => {
@@ -1659,7 +1711,7 @@ class App {
 
         /* let pos = new THREE.Vector3(x, y, z); */
 
-        const sc = .0005;
+        const sc = .0003;
 
         const disp = new THREE.Vector3(
             0,

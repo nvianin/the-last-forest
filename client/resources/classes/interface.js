@@ -15,7 +15,7 @@ class AppInterface {
         this.nextState = CONTROLLER_STATES.MAP
 
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
-        this.mapControls.maxPolarAngle = Math.HALF_PI * .8
+        this.mapControls.maxPolarAngle = /* Math.HALF_PI * .8 */ 1.5
         this.mapControls.minPolarAngle = .05
         this.mapControls.maxDistance = app.settings.draw_distance - app.settings.fog_offset - 1000;
         this.mapControls.minDistance = 1;
@@ -48,7 +48,7 @@ class AppInterface {
             fov: {
                 walk: 110,
                 map: 35,
-                focused: 60,
+                focused: 90,
             },
             camera_ground_offset: 160,
             focused_fog_multiplier: .13
@@ -85,7 +85,7 @@ class AppInterface {
 
         this.fatMat = new THREE.LineMaterial({
             color: 0xffffff,
-            linewidth: 35,
+            linewidth: 20,
             worldUnits: true,
             vertexColors: false,
 
@@ -102,6 +102,8 @@ class AppInterface {
         /* this.fatTree.scale.multiplyScalar(1000) */
         /* this.load_shader() */
         app.scene.add(this.fatTree);
+
+        this.autoWalk = new AutoWalk(app.camera);
     }
     setupListeners() {
         this.mouse = new THREE.Vector2;
@@ -432,7 +434,9 @@ class AppInterface {
         this.domController.update()
 
         app.bokehPass.uniforms.focus.value = Math.lerp(app.bokehPass.uniforms.focus.value, this.target_focus, dt * 2);
-        const aperture_t = Math.clamp(app.camera.position.y / (app.settings.draw_distance - app.settings.fog_offset), 0, 1);
+        const aperture_t = this.state == "MAP" ?
+            Math.clamp(app.camera.position.distanceTo(this.mapControls.target) / (app.settings.draw_distance - app.settings.fog_offset), 0, 1) :
+            Math.clamp(app.camera.position.y / (app.settings.draw_distance - app.settings.fog_offset), 0, 1);
         app.bokehPass.uniforms.aperture.value = Math.lerp(app.bokehPass.close_aperture, app.bokehPass.far_aperture, aperture_t);
 
 
@@ -668,20 +672,26 @@ class AppInterface {
                     app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset) * app.settings.walking_fog_multiplier, dt)
                     app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance * app.settings.walking_fog_multiplier, dt)
 
-                    let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
-                    x = Math.clamp(x, -.2, .2);
-                    app.camera.rotateOnWorldAxis(THREE.UP, x * -.02)
+                    /*  let x = this.simplex.noise(app.clock.getElapsedTime() * .01, app.camera.position.x * .01);
+                     x = Math.clamp(x, -.2, .2);
+                     app.camera.rotateOnWorldAxis(THREE.UP, x * -.02) */
                     /* const y = this.simplex.noise(app.camera.position.y * .1, app.clock.getElapsedTime() * .01); */
 
-                    app.camera.translateZ(-1.2)
+                    /* app.camera.translateZ(-1.2)
                     app.camera.position.lerp(this.target.target.clone().normalize().add(app.camera.position), .1);
                     if (app.camera.position.distanceTo(this.target.target) < 2) {
                         this.target.target = this.findPointOnGround();
-                    }
+                    } */
 
+                    this.autoWalk.walk(dt);
+                    /* log(this.autoWalk.direction, this.autoWalk.speed); */
+                    app.camera.translateZ(-1000 * this.autoWalk.speed);
+                    app.camera.rotation.y = Math.lerp(app.camera.rotation.y, 1 * this.autoWalk.direction, dt);
                     this.target_focus = 6000
 
                     /* log(x, y) */
+
+                    // Ground the camera by casting a ray to the ground
                     this.raycaster.set(app.camera.position, THREE.DOWN)
                     const i = this.raycaster.intersectObject(app.ground)
                     if (i.length > 0) {
@@ -707,7 +717,7 @@ class AppInterface {
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, dt))
 
 
-                            this.target_focus = this.map_transform.position.distanceTo(this.mapControls.target);
+                            this.target_focus = this.map_transform.position.distanceTo(new THREE.Vector3());
 
                             /* const currentzoom = this.domController.getDistance()
                             this.domController.setZoomLevel(Math.lerp(currentzoom, this.map_transform.zoom, .1)); */
