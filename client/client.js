@@ -525,8 +525,8 @@ class App {
                 log(`Built ${lastMonth-firstMonth} months`, months)
                 for (let i = 0; i < months.length; i++) {
                     let text = MONTHS[(months[i]) % 12];
-                    if (text == "December") text += " " + (new Date(t_min * 1000).getFullYear() + Math.floor(months[i] / 12));
-                    const month = this.textRenderer.write(text, 20)
+                    if (text == "January") text += " " + (new Date(t_min * 1000).getFullYear() + Math.floor(months[i] / 12));
+                    const month = this.textRenderer.write(text, 14)
                     month.position.x = Math.map(months[i], firstMonth, lastMonth, x_min, x_max);
                     month.rotation.z = Math.PI / 2
                     log(month)
