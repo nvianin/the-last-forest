@@ -95,9 +95,9 @@ class App {
         this.settings = {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
-            draw_distance: 100000,
-            fog_offset: 40000,
-            sun_intensity: .5,
+            draw_distance: 130000,
+            fog_offset: 80000,
+            sun_intensity: 1.3,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
             focused_max_raycast_dist: 1500,
@@ -524,7 +524,9 @@ class App {
                 }
                 log(`Built ${lastMonth-firstMonth} months`, months)
                 for (let i = 0; i < months.length; i++) {
-                    const month = this.textRenderer.write(MONTHS[(months[i]) % 12], 20)
+                    let text = MONTHS[(months[i]) % 12];
+                    if (text == "December") text += " " + (new Date(t_min * 1000).getFullYear() + Math.floor(months[i] / 12));
+                    const month = this.textRenderer.write(text, 20)
                     month.position.x = Math.map(months[i], firstMonth, lastMonth, x_min, x_max);
                     month.rotation.z = Math.PI / 2
                     log(month)
@@ -659,40 +661,6 @@ class App {
         this.ruleset.addRule("[", "[LUFLUF[FFUUF]RUFF") */
         /* this.ruleset.addRule("U", "F") */
 
-
-        /* this.input.dispatchEvent(new Event("input")) */
-        /* this.translation_output.textContent = this.tree.turtle.alphConv(this.sentence) */
-        document.body.addEventListener("keypress", e => {
-            switch (e.key.toLowerCase()) {
-                case " ":
-                    /* if (this.lastInstructions.length < 100000) {
-                        this.lastInstructions = this.tree.turtle.evolve(this.lastInstructions, this.ruleset);
-                        this.tree.build_instructions(this.lastInstructions);
-                    } else {
-                        log("Next evolution too big !")
-                    }
-                    break; */
-                case "r":
-                    /* this.ruleset.randomize();
-                    this.lastInstructions = this.tree.turtle.evolve(
-                        this.tree.turtl
-                        e.alphConv(this.sentence),
-                        this.ruleset
-                    
-                        )
-                    this.tree.build_instructions(
-                        this.lastInstructions
-                    ) */
-                    /* this.ruleset.randomize()
-                    this.tree.build_generations(this.sentence, 30, this.ruleset) */
-
-                    break;
-                case "c":
-                    this.orbitControls.reset();
-                    break;
-            }
-        })
-
         this.activeTree = 0;
         document.body.addEventListener("keydown", e => {
             /* log(e) */
@@ -783,6 +751,7 @@ class App {
         })
         window.addEventListener("pointerdown", e => {
             this.pointer_is_down = true;
+            if (document.querySelector("#sound-toggle").innerText.includes("volume_up") && (!this.bg_music.currentTime)) this.bg_music.play()
 
         })
         window.addEventListener("wheel", e => {
@@ -1138,13 +1107,13 @@ class App {
             this.fog.far = 10000;
             const dt = .0005 * 1;
             this.camera_intro_interval = setInterval(() => {
-                this.camera.position.lerp(cam_target.position, dt);
-                this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, dt));
+                this.camera.position.lerp(cam_target.position, this.dt * .1);
+                this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1));
+                this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), this.dt * .1)
 
-                this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, .001);
-                this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, .001);
+                this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, this.dt * .1);
+                this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, this.dt * .1);
 
-                this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), .1)
 
                 const dist = this.camera.position.distanceTo(cam_target.position);
                 if (dist < .1) {
@@ -1172,6 +1141,7 @@ class App {
                 document.querySelector("#loading-bar").style.opacity = 0;
                 document.querySelector("#loading-desc").style.opacity = 0;
                 document.querySelector("#loading-button").style.opacity = 0;
+                document.querySelector("#loading-stats").style.opacity = 0;
                 if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                     this.bg_music.play()
                 }
@@ -1183,13 +1153,13 @@ class App {
                     document.querySelector("#loading-bar").style.display = "none"
                     document.querySelector("#loading-desc").style.display = "none"
                     document.querySelector("#loading-button").style.display = "none"
-                }, 1300)
+                }, 5000)
                 setTimeout(() => {
                     document.querySelector("#loading-screen-text").style.opacity = 0
                 }, 700)
                 setTimeout(() => {
                     document.querySelector("#loading-screen-text").style.display = "none"
-                }, 3700)
+                }, 4000)
             }
 
             if (debug.autostart) document.querySelector("#loading-button").click()

@@ -70,6 +70,8 @@ canvas .text-input {
   font-size: 20pt;
   color: #888;
   transition: 1.5s ease-in-out;
+  opacity: 1;
+  z-index: 1000001;
 }
 
 .toggle-button {
@@ -342,7 +344,7 @@ canvas .text-input {
   left: 0px;
   width: 100%;
   height: 100%;
-  z-index: 10000000;
+  z-index: 1000000;
 }
 
 #loading-screen-background {
@@ -363,7 +365,7 @@ canvas .text-input {
   font-family: Avarablack;
   position: relative;
   /* width: 100%; */
-  padding: 60px 0px 40px 0px;
+  padding: 80px 0px 40px 0px;
 
   z-index: 1000;
   /* top: 10%; */
@@ -488,10 +490,11 @@ canvas .text-input {
   font-size: 18pt;
   line-height: 44pt;
   color: white;
-  box-shadow: 0 0 16px 16px #333;
-  backdrop-filter: blur(20px);
+  box-shadow: 0 0 16px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(32px);
+  background-color: rgba(0, 0, 0, 0);
 
-  transition: 10s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: 3s cubic-bezier(0.19, 1, 0.22, 1);
 
   user-select: none;
   cursor: pointer;
@@ -508,10 +511,12 @@ canvas .text-input {
 
 @keyframes load-loop {
   from {
-    box-shadow: 0 0 10px 10px #888;
+    box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0);
+    backdrop-filter: blur(4px);
   }
   to {
-    box-shadow: 0 0 12px 12px #eee;
+    box-shadow: 0 0 12px 12px rgba(255, 255, 255, 0.17);
+    backdrop-filter: blur(32px);
   }
 }
 
@@ -528,7 +533,7 @@ canvas .text-input {
 
 #loading-button:active {
   transition: 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
-  background-color: white;
+  /* background-color: white; */
   box-shadow: 0 0 16px 16px #fff;
 }
 
@@ -795,6 +800,20 @@ canvas .text-input {
   100% {
     opacity: 1;
   }
+}
+
+#focus-picto {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48pt;
+  font-weight: 400;
+  opacity: 0.9;
+  /* text-shadow: 0px 0px 3px white; */
+
+  color: black;
+  mix-blend-mode: multiply;
 }
 
 #focus-selftext {

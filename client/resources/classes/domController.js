@@ -213,7 +213,7 @@ class FocusInterface {
         this.redditButton.textContent = "reddit"
         this.container.appendChild(this.redditButton)
         this.redditButton.onclick = () => {
-            window.open("https://reddit.com" + this.post.permalink, "external", `width=${innerWidth / 2},height=${innerHeight},top=${innerHeight/4},left=${innerWidth/ 4}`)
+            this.openPopup("https://reddit.com" + this.post.permalink);
         }
 
         /* this.linkContainer = document.createElement("div");
@@ -235,6 +235,11 @@ class FocusInterface {
         this.focusText.id = "focus-selftext"
         this.postContainer.appendChild(this.focusText)
 
+        this.focusPicto = document.createElement("div");
+        this.focusPicto.id = "focus-picto"
+        this.focusPicto.className = "material-symbols-outlined"
+        this.postContainer.appendChild(this.focusPicto)
+
 
         document.body.appendChild(this.container)
         this.container.style.left = "-10000px"
@@ -254,6 +259,7 @@ class FocusInterface {
         this.flairContainer.innerText = post.flair
         this.flairContainer.style.backgroundColor = this.postContainer.style.backgroundColor = "#" + treeColors[post.flair].color.getHexString()
         this.focusText.innerText = ""
+        this.focusPicto.innerText = ""
 
         const d = new Date(post.date * 1000)
         /* this.dateContainer.innerText = d.toLocaleString() */
@@ -266,31 +272,31 @@ class FocusInterface {
 
 
         if (post.is_video) {
-            this.focusText.innerText = "\n This post is a video."
+            /* this.focusText.innerText = "\n This post is a video." */
+            this.focusPicto.innerText = "movie"
         } else if (post.media) {
             log("post has media", post.media)
         } else if (post.has_media) {
             if (multiCludes(post.url, [".jpg", ".png", ".webp", ".gif"])) {
-                this.focusText.innerText = "This post is an image."
+                /* this.focusText.innerText = "This post is an image." */
+                this.focusPicto.innerText = "image"
             }
             if (multiCludes(post.url, [".mp4", ".webm", ".avi"])) {
-                this.focusText.innerText = "This post is a video."
+                /* this.focusText.innerText = "This post is a video." */
+                this.focusPicto.innerText = "movie"
             } else if (post.url.includes("v.redd.it")) {
-                this.focusText.innerText = "This post is a video."
+                /* this.focusText.innerText = "This post is a video." */
+                this.focusPicto.innerText = "movie"
             }
         } else if (post.selftext && post.selftext.length > 0) {
             this.focusText.innerText = post.selftext
         } else if (!post.url.includes("/r/")) {
-            this.focusText.innerText = "This post is a link."
+            this.focusPicto.innerText = "link"
         }
         this.postContainer.onclick = () => {
-            window.open(
-                post.url.includes("/r/") ?
+            this.openPopup(post.url.includes("/r/") ?
                 "https://reddit.com" + post.permalink :
-                post.url,
-                "external",
-                `width=${innerWidth / 2},height=${innerHeight},top=${innerHeight / 4},left=${innerWidth / 4}`
-            )
+                post.url);
         }
         /* this.linkButton.style.visibility = "visible" */
         if (post.url.includes("/r/")) {
@@ -298,8 +304,6 @@ class FocusInterface {
         } else {
             this.redditButton.style.display = "block"
         }
-
-        this.postContainer.innerText
     }
 
     formatPost(text) {
@@ -345,5 +349,13 @@ class FocusInterface {
         /* urls = */
 
         return text;
+    }
+
+    openPopup(url) {
+        window.open(
+            url,
+            "external",
+            `width=${screen.width / 3},height=${screen.height},top=0,left=${screen.width/3 * 2}`
+        )
     }
 }

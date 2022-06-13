@@ -46,9 +46,9 @@ class AppInterface {
 
         this.settings = {
             fov: {
-                walk: 90,
-                map: 50,
-                focused: 50,
+                walk: 110,
+                map: 35,
+                focused: 60,
             },
             camera_ground_offset: 160,
             focused_fog_multiplier: .13
