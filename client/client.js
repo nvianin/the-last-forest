@@ -49,9 +49,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: true,
+    autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 128,
+    tree_build_limit: 0,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -97,6 +97,7 @@ class App {
             ground_scale: 128 * 6,
             draw_distance: 100000,
             fog_offset: 40000,
+            sun_intensity: .5,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
             focused_max_raycast_dist: 1500,
@@ -136,7 +137,7 @@ class App {
         /* this.sun = new THREE.HemisphereLight(0xa28173, 0x4466ff, 1) */
         /* this.skylight = new THREE.HemisphereLight(0x4ac0ff, 0x521c18, 1);
         this.scene.add(this.skylight); */
-        this.sun = new THREE.DirectionalLight(0xffffaa, 2);
+        this.sun = new THREE.DirectionalLight(0xffffaa, this.settings.sun_intensity);
         this.sun.position.set(50, 100, 50);
         this.sun_target_offset = new THREE.Vector3(-20, -10, -40);
         /* this.sun.lookAt(0, 0, 0); */
@@ -732,6 +733,7 @@ class App {
         this.pointer_moved_while_down = false;
 
         window.addEventListener("pointermove", e => {
+            /* log(e.movementX, e.movementY) */
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
             this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
             /* log(this.pointer) */
@@ -740,7 +742,7 @@ class App {
 
             if (this.frameCount % 10 == 0) this.MouseCast()
 
-            if (this.pointer_is_down) this.pointer_moved_while_down = true;
+            if (this.pointer_is_down && (e.movementX != 0 || e.movementY != 0)) this.pointer_moved_while_down = true;
         })
 
         window.addEventListener("pointerup", e => {
@@ -768,6 +770,12 @@ class App {
 
                 /* log(this.activeTree) */
                 this.interface.enter_focus(this.activeTree)
+            } else {
+                log("is not lerping:", this.interface.state != "LERPING")
+                log("postdom visible:", this.postDom.style.visibility == "visible")
+                log("left click:", e.button == 0)
+                log("pointer hasnt moved:", !this.pointer_moved_while_down)
+                log("pointer targeting ui element:", this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
             }
             /* log("Pointer moved while down: " + this.pointer_moved_while_down) */
             this.pointer_is_down = false;
@@ -911,6 +919,7 @@ class App {
 
                 this.interface.domController.focusInterface.build(Object.values(posts)[0])
 
+                this.buildLoadingScreenStats()
                 this.connection_conditions_count++;
                 this.buildTreesFromPosts();
 
@@ -965,6 +974,15 @@ class App {
                 }
             })
         })
+    }
+
+    buildLoadingScreenStats() {
+        const tree_number = Object.values(this.posts).length;
+
+        const _posts = Object.values(this.posts).map(p => p);
+        _posts.sort((a, b) => a.date - b.date);
+        const tree_timespan = new Date(_posts[_posts.length - 1].date - _posts[0].date);
+        document.querySelector("#loading-stats").innerHTML = `${tree_number} trees have grown in the forest. <br> They represent ${Math.floor(tree_timespan / 60 / 60 / 24)} days of posting on r/collapse.`;
     }
 
     async buildTreesFromPosts() {
@@ -1245,12 +1263,12 @@ class App {
             );
             this.scene.add(this.aggregate)
         }
-        const default_focus_tree = this.trees.find(t => {
+        /* const default_focus_tree = this.trees.find(t => {
             return (t.spheres.length > 30)
             return (t.userData.post.selftext && t.userData.post.selftext.length > 1)
         });
         log(default_focus_tree)
-        this.interface.enter_focus(default_focus_tree)
+        this.interface.enter_focus(default_focus_tree) */
     }
 
 

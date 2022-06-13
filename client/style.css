@@ -363,7 +363,7 @@ canvas .text-input {
   font-family: Avarablack;
   position: relative;
   /* width: 100%; */
-  padding: 120px 0px 40px 0px;
+  padding: 60px 0px 40px 0px;
 
   z-index: 1000;
   /* top: 10%; */
@@ -385,7 +385,7 @@ canvas .text-input {
   max-width: 600px;
   /* width: ; */
   left: 50%;
-  font-size: 1vw;
+  font-size: 14pt;
   /* margin-top: 40px; */
   /* top: 30%; */
   /* height: 40%; */
@@ -430,6 +430,19 @@ canvas .text-input {
   animation: load-anim 2s;
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
   animation-fill-mode: forwards;
+}
+
+#loading-stats {
+  font-family: Robotomono;
+  color: white;
+  opacity: 0.75;
+  text-align: center;
+
+  position: relative;
+  left: 50%;
+  /* top: 30%; */
+  margin-top: 30px;
+  transform: translate(-50%);
 }
 
 @keyframes load-anim {
