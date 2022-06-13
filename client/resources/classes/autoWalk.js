@@ -24,7 +24,7 @@ class AutoWalk {
             this.currentVista = this.vistas.pop();
         } else {
             const angle = Math.atan2(this.camera.position.x - this.currentVista.position.x, this.camera.position.z - this.currentVista.position.z);
-            this.direction = Math.lerp(this.direction, angle, dt);
+            this.direction = Math.lerp(this.direction, angle, dt * .1);
 
             const dist = this.currentVista.position.distanceTo(this.camera.position);
             this.speed = Math.lerp(this.speed, Math.clamp(dist / 1000, 0, this.maxSpeed), dt);

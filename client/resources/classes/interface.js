@@ -435,7 +435,7 @@ class AppInterface {
 
         app.bokehPass.uniforms.focus.value = Math.lerp(app.bokehPass.uniforms.focus.value, this.target_focus, dt * 2);
         const aperture_t = this.state == "MAP" ?
-            Math.clamp(app.camera.position.distanceTo(this.mapControls.target) / (app.settings.draw_distance - app.settings.fog_offset), 0, 1) :
+            Math.clamp(app.camera.position.distanceTo(new THREE.Vector3()) / (app.settings.draw_distance - app.settings.fog_offset), 0, 1) :
             Math.clamp(app.camera.position.y / (app.settings.draw_distance - app.settings.fog_offset), 0, 1);
         app.bokehPass.uniforms.aperture.value = Math.lerp(app.bokehPass.close_aperture, app.bokehPass.far_aperture, aperture_t);
 
@@ -658,7 +658,10 @@ class AppInterface {
                     app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
                     app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt)
 
-                    this.target_focus = app.camera.position.distanceTo(this.mapControls.target);
+                    const mapControlsDist = app.camera.position.distanceTo(this.mapControls.target);
+                    const distFac = mapControlsDist / (app.settings.draw_distance - app.settings.fog_offset)
+
+                    this.target_focus = mapControlsDist < 40000 ? mapControlsDist : (mapControlsDist - 40000) * -.007;
 
                     /* if (app.camera.position.distanceTo(this.mapControls.target) > 2) {
                         this.mapControls.enabled = false;

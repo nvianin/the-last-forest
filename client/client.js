@@ -51,7 +51,7 @@ const debug = {
     postprocessing: true,
     autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 128,
+    tree_build_limit: 512,
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -489,9 +489,9 @@ class App {
             } else {
                 this.tutorial_button.classList.add("toggle-button-active");
                 Object.keys(this.tutorialController.state).forEach(key => {
-                    if (this.tutorialController.state[key] === true) {
-                        this.tutorialController.state[key] = false;
-                    }
+                    /* if (this.tutorialController.state[key] == true) { */
+                    this.tutorialController.state[key] = false;
+                    /* } */
                 })
                 this.tutorialController.changeState(this.interface.state)
             }
@@ -829,7 +829,7 @@ class App {
             width: innerWidth,
             height: innerHeight,
         });
-        this.bokehPass.far_aperture = .0000003
+        this.bokehPass.far_aperture = .000002
         this.bokehPass.close_aperture = .00000025
         /* this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader); */
         /* this.bokehPass.enabled = false; */
