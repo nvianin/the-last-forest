@@ -240,7 +240,7 @@ class App {
         this.ground_fakeBack.position.y -= .2
         this.scene.add(this.ground_fakeBack)
 
-        texLoader.loadAsync("./resources/textures/squware vignette.jpg").then(tex => {
+        texLoader.loadAsync("./resources/textures/squware_vignette.jpg").then(tex => {
             this.ground.material.alphaMap = tex;
             this.ground_fakeBack.material.alphaMap = tex
             this.ground.material.needsUpdate = true;

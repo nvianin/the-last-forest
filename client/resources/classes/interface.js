@@ -51,7 +51,8 @@ class AppInterface {
                 focused: 90,
             },
             camera_ground_offset: 160,
-            focused_fog_multiplier: .13
+            focused_fog_multiplier: .13,
+            far_focus_multiplier: -.6
         }
 
 
@@ -661,7 +662,7 @@ class AppInterface {
                     const mapControlsDist = app.camera.position.distanceTo(this.mapControls.target);
                     const distFac = mapControlsDist / (app.settings.draw_distance - app.settings.fog_offset)
 
-                    this.target_focus = mapControlsDist < 40000 ? mapControlsDist : (mapControlsDist - 40000) * -.007;
+                    this.target_focus = mapControlsDist < 40000 ? mapControlsDist : (mapControlsDist) + ((mapControlsDist - 40000) * this.settings.far_focus_multiplier);
 
                     /* if (app.camera.position.distanceTo(this.mapControls.target) > 2) {
                         this.mapControls.enabled = false;
