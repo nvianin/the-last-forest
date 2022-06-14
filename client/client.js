@@ -922,8 +922,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            this.socket = io("last-forest.ddns.net")
-            /* this.socket = io() */
+            /* this.socket = io("last-forest.ddns.net") */
+            this.socket = io()
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
