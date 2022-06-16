@@ -18,6 +18,7 @@ class TutorialController {
     }
 
     tickTutorial(tutorialName) {
+        return -1;
         this.state[tutorialName] = true;
         localStorage.setItem("tutorial", JSON.stringify(this.state))
     }
@@ -80,14 +81,14 @@ class TutorialController {
             tutorial_img.src = "./resources/tutorials/" + resource + ".svg"
             tutorial.appendChild(tutorial_img)
 
-            tutorial.onclick = () => {
+            /* tutorial.onclick = () => {
                 this.tickTutorial(state)
                 tutorial.style.transition = ".7s cubic-bezier(0.165, 0.84, 0.44, 1)"
                 tutorial.style.opacity = 0;
                 setTimeout(() => {
                     tutorial.style.display = "none"
                 }, 700)
-            }
+            } */
             this.tutorialContainer.appendChild(tutorial)
         })
 

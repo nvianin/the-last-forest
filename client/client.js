@@ -16,6 +16,7 @@ const loadList = [
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 const urlParams = new URLSearchParams(window.location.search)
+log(urlParams)
 
 debug_activated = urlParams.get("debug") == ""
 if (debug_activated) {
@@ -38,7 +39,12 @@ const debug = {
     fog: true,
     line_markers: false,
     line_show: false,
+
     half_res_renderer: false,
+    ignore_pixel_ratio: false || localStorage.getItem("ignore_pixel_ratio"),
+    custom_pixel_ratio: 0 || parseFloat(localStorage.getItem("custom_pixel_ratio")),
+    sun_intensity_override: 0 || parseFloat(localStorage.getItem("sun_intensity_override")),
+
     debug_target_frameRate: {
         enabled: false,
         value: 5
@@ -49,9 +55,9 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: false,
+    autostart: true,
     max_generation_level: 6,
-    tree_build_limit: 512,
+    tree_build_limit: 0 || parseFloat(localStorage.getItem("tree_build_limit")),
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -81,7 +87,9 @@ class App {
             antialias: false
         });
         this.renderer.info.autoReset = false;
-        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.pixelRatio = debug.ignore_pixel_ratio ? 1 : window.devicePixelRatio;
+        this.pixelRatio = debug.custom_pixel_ratio > 0 ? debug.custom_pixel_ratio : this.pixelRatio;
+        this.renderer.setPixelRatio(this.pixelRatio);
 
         if (debug.half_res_renderer) this.renderer.pixelRatio = .5;
 
@@ -95,9 +103,9 @@ class App {
         this.settings = {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
-            draw_distance: 200000,
-            fog_offset: 80000,
-            sun_intensity: 1.3,
+            draw_distance: 100000,
+            fog_offset: 50000,
+            sun_intensity: debug.sun_intensity_override > 0 ? debug.sun_intensity_override : 1.3,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
             focused_max_raycast_dist: 1500,
@@ -253,13 +261,22 @@ class App {
             fetch("./resources/shaders/starsVert.glsl").then(res => res.text()).then(text => {
                 starShaders[1] = text
                 this.stars = new THREE.Points(
-                    new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, 16, 16),
+                    new THREE.PlaneBufferGeometry(this.settings.ground_side * 2, this.settings.ground_side * 2, 64, 64),
                     new THREE.PointsMaterial({
                         transparent: true,
-                        fog: true
+                        fog: true,
+                        /* depthTest: false,
+                        depthWrite: false, */
                     })
                 )
+                const random = new Float32Array(this.stars.geometry.attributes.position.count)
+                for (let i = 0; i < this.stars.geometry.attributes.position.count; i++) {
+                    random[i] = Math.random();
+                }
+                this.stars.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
                 this.stars.rotation.x = -Math.HALF_PI;
+                this.stars.position.y = 15000;
+                this.stars.scale.z /= 2;
                 this.stars.userData.uniforms = {
                     time: {
                         value: 0
@@ -308,12 +325,16 @@ class App {
                                 },
                                 camera: {
                                     value: this.camera.position
+                                },
+                                pixelSize: {
+                                    value: this.pixelRatio
                                 }
 
                             }
                             this.dustParticles.material.onBeforeCompile = shader => {
                                 shader.uniforms.time = this.dustParticles.userData.uniforms.time;
                                 shader.uniforms.camera = this.dustParticles.userData.uniforms.camera;
+                                shader.uniforms.pixelSize = this.dustParticles.userData.uniforms.pixelSize;
                                 /* log(shader.fragmentShader) */
                                 let [prelude, main] = frag.split("////")
                                 shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common> \n" + prelude)
@@ -534,8 +555,11 @@ class App {
         const _posts = this.trees.map(t => {
             if (t.userData.post) return t.userData.post
         })
-        const x_min = app.ground.geometry.boundingBox.min.x;
-        const x_max = app.ground.geometry.boundingBox.max.x;
+        const margin = 10000;
+        const x_min = app.ground.geometry.boundingBox.min.x + margin;
+        const x_max = app.ground.geometry.boundingBox.max.x - margin;
+        const base_x = 20000;
+        const base_y = -14000;
         switch (mode) {
             case "default":
                 this.trees.forEach(t => t.targetPosition = t.defaultPosition)
@@ -548,7 +572,7 @@ class App {
 
                 _posts.forEach(p => {
                     if (p.tree) {
-                        const x = Math.map(p.date, t_min, t_max, x_min, x_max);
+                        const x = base_x + Math.map(p.date, t_min, t_max, x_min, x_max);
                         const y = (Math.random() * 2 - 1) * 10000
                         p.tree.targetPosition = new THREE.Vector3(
                             x,
@@ -573,7 +597,8 @@ class App {
                     let text = MONTHS[(months[i]) % 12];
                     if (text == "January") text += " " + (new Date(t_min * 1000).getFullYear() + Math.floor(months[i] / 12));
                     const month = this.textRenderer.write(text, 14)
-                    month.position.x = Math.map(months[i], firstMonth, lastMonth, x_min, x_max);
+                    month.position.x = base_x + Math.map(months[i], firstMonth, lastMonth, x_min, x_max);
+                    month.position.z = base_y;
                     month.rotation.z = Math.PI / 2
                     log(month)
                 }
@@ -606,6 +631,7 @@ class App {
                 score_labels.forEach(s => {
                     const label = this.textRenderer.write(s + "", 20)
                     label.position.x = Math.map(s, score_min, score_max, x_min, x_max) + this.settings.score_label_offset;
+                    label.position.z = base_y;
                     label.rotation.z = Math.PI / 2
                 })
 
@@ -614,9 +640,10 @@ class App {
                     for (let j = 0; j < 10; j++) {
                         const separator = this.textRenderer.write("|", 10)
                         separator.position.x = Math.map(i + j * .1, 0, score_labels.length, x_min, x_max);
+                        separator.position.z = base_y;
                         separator.scale.y.multi
                         separator.position.y = j * 100;
-                        separator.position.z = 2500
+                        separator.position.z += 2500
                         /* separator.rotation.z = Math.PI / 2 */
                     }
                 }
@@ -745,7 +772,10 @@ class App {
         this.pointer_is_down = false;
         this.pointer_moved_while_down = false;
 
+        this.pointer_disappearance_timeout = false;
+
         window.addEventListener("pointermove", e => {
+            document.body.style.cursor = "default"
             /* log(e.movementX, e.movementY) */
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
             this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
@@ -756,6 +786,13 @@ class App {
             if (this.frameCount % 10 == 0) this.MouseCast()
 
             if (this.pointer_is_down && (e.movementX != 0 || e.movementY != 0)) this.pointer_moved_while_down = true;
+
+            // Hide cursor if it's not moving for a long time
+            if (this.pointer_disappearance_timeout) clearTimeout(this.pointer_disappearance_timeout);
+            this.pointer_disappearance_timeout = setTimeout(() => {
+                document.body.style.cursor = "none"
+
+            }, 3000)
         })
 
         window.addEventListener("pointerup", e => {
@@ -829,10 +866,12 @@ class App {
             width: innerWidth,
             height: innerHeight,
         });
-        this.bokehPass.far_aperture = .000002
+        this.bokehPass.far_aperture = .0000004
         this.bokehPass.close_aperture = .00000025
-        /* this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader); */
+
         /* this.bokehPass.enabled = false; */
+
+        /* this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader); */
 
         /* this.SMAAPass = new THREE.SMAAPass(
             innerWidth * this.renderer.getPixelRatio(),
@@ -922,8 +961,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            /* this.socket = io("last-forest.ddns.net") */
-            this.socket = io()
+            this.socket = io("last-forest.ddns.net")
+            /* this.socket = io() */
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
@@ -1674,6 +1713,7 @@ class App {
 
     setSize() {
         this.renderer.setSize(innerWidth, innerHeight);
+        this.renderer.setPixelRatio(this.pixelRatio);
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
 

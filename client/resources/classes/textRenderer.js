@@ -4,7 +4,7 @@ let font = false;
     log(f)
     font = f
 }); */
-fontLoader.load("./resources/fonts/Space Grotesk Light_Regular.json", f => {
+fontLoader.load("./resources/fonts/Space_Grotesk_Light_Regular.json", f => {
     log(f)
     font = f
 });

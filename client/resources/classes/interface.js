@@ -111,6 +111,7 @@ class AppInterface {
         this.mouse_is_in_screen = true;
         this.mouse_target_element = null;
         window.addEventListener("pointermove", e => {
+            if (this.autoWalk) this.autoWalk.userInputDuringVista = true;
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
             this.mouse_target_element = e.target
@@ -265,6 +266,8 @@ class AppInterface {
 
     enter_focus(tree) {
 
+
+        tree.userData.post.visited = true;
         const sound = crunchy_sounds[Math.floor(crunchy_sounds.length * Math.random())];
         sound.playbackRate = .5 + Math.random() * .6
         sound.play()
@@ -335,12 +338,12 @@ class AppInterface {
                 scale,
                 s.quaternion);
             i = app.instanceManager.ledger[i].index;
-            log(i)
+            /* log(i) */
 
             /* app.instanceManager.instances.setColorAt(i, s.color);
             app.instanceManager.instances.instanceColor.needsUpdate = true; */
 
-            app.instanceManager.set_color_at(i, s.color);
+            /* app.instanceManager.set_color_at(i, new THREE.Color("pink")); */
 
             /* log(s.color)
             let c = new THREE.Color()
@@ -387,7 +390,7 @@ class AppInterface {
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
 
-                app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, .1)
+                app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, .05)
 
                 app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
@@ -689,9 +692,15 @@ class AppInterface {
 
                     this.autoWalk.walk(dt);
                     /* log(this.autoWalk.direction, this.autoWalk.speed); */
-                    app.camera.translateZ(-1000 * this.autoWalk.speed);
-                    app.camera.rotation.y = Math.lerp(app.camera.rotation.y, 1 * this.autoWalk.direction, dt);
-                    this.target_focus = 6000
+                    app.camera.translateZ(-100 * this.autoWalk.speed);
+                    const originalRotation = app.camera.rotation.y % Math.TWO_PI;
+                    /* app.camera.rotateOnWorldAxis(THREE.UP, (this.autoWalk.direction - app.camera.rotation.y) * (dt / 10)); */
+                    app.camera.rotation.y = Math.lerp(app.camera.rotation.y, this.autoWalk.direction % Math.TWO_PI, dt / 7);
+                    app.camera.rotation.x = Math.lerp(app.camera.rotation.x, 0, dt / 10);
+                    app.camera.rotation.z = Math.lerp(app.camera.rotation.z, 0, dt / 10);
+                    if (this.autoWalk.currentVista) {
+                        this.target_focus = app.camera.position.distanceTo(this.autoWalk.currentVista.position);
+                    }
 
                     /* log(x, y) */
 
@@ -763,14 +772,24 @@ class AppInterface {
             case "WALKING":
                 if (app.show_tutorials) app.tutorialController.changeState(state)
                 document.querySelector("#toggle-container").style.display = "none"
+
+                document.querySelector("#thumbnail-container").style.opacity = 0;
+                document.querySelector("#thumbnail-container").style.pointerEvents = "none"
+
                 break;
             case "MAP":
                 if (app.show_tutorials) app.tutorialController.changeState(state)
                 document.querySelector("#toggle-container").style.display = "flex"
+
+                document.querySelector("#thumbnail-container").style.opacity = 1;
+                document.querySelector("#thumbnail-container").style.pointerEvents = "all"
                 break;
             case "PROMENADE":
                 if (app.show_tutorials) app.tutorialController.changeState(state)
                 document.querySelector("#toggle-container").style.display = "none"
+
+                document.querySelector("#thumbnail-container").style.opacity = 1;
+                document.querySelector("#thumbnail-container").style.pointerEvents = "all"
                 break;
         }
     }

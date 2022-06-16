@@ -137,6 +137,7 @@ vec3 snoiseAtPos(vec3 pos, float sc, float t, vec3 wind) {
 
 uniform float time;
 uniform vec3 camera;
+uniform float pixelSize;
 attribute float random;
 varying vec3 vPos;
 varying float sin_time;
@@ -149,9 +150,16 @@ vertex_random = random;
 
 float sc = 10. * random;
 float time_scale = .02;
-float t = time * .8 * random + random * 1000.;
+/* float t = time * .8 * random + random * 1000.; */
+float t = pixelSize;
 
 vec3 pos = position;
+
+if(vertex_random > 0.5) {
+pos.z *= 10.;
+} else if(vertex_random > .8) {
+pos.z *= 30.;
+}
 
 /* vec3 noise = vec3(snoise((position.xy * sc) + (time * time_scale)), snoise((position.yz * sc) + (time * time_scale)), snoise((position.zx * sc) + (time * time_scale))); */
 vec3 wind = snoiseAtPos(position * 10., .01, time * .2, vec3(.4, .6, 0.));
@@ -167,10 +175,12 @@ pos += movement; */
 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos + wind, 1.0);
 vPos = gl_Position.xyz;
 
-distance_factor = 1. - distance(camera, vPos) / 140000.;
+distance_factor = 1. - distance(camera, vPos) / 100000.;
 distance_factor = clamp(distance_factor, 0., 1.);
 
 sin_time = (sin(t) + (sin(t * 3.) / 3.) + (sin(t * 5.) / 5.) + 1.) / 2.;
-gl_PointSize = sin_time - gl_Position.w;
-gl_PointSize *= distance_factor;
-gl_PointSize = clamp(gl_PointSize, 0., 4.);
+/* gl_PointSize = sin_time; */
+/* gl_PointSize *= distance_factor;
+gl_PointSize = clamp(gl_PointSize, 0., 4.) * pixelSize; */
+gl_PointSize = distance_factor * pixelSize * 3. * sin_time;
+/* gl_PointSize = 4. * pixelSize; */

@@ -9,7 +9,7 @@ const {
 const {
     UserManager
 } = require("./usermanager")
-const language = require("@google-cloud/language");
+/* const language = require("@google-cloud/language"); */
 const PoissonDiskSampling = require("poisson-disk-sampling");
 const {
     spawn
@@ -32,9 +32,9 @@ class Server {
 
         this.points = poisson.fill();
         this.posts = {}
-        this.language_client = new language.LanguageServiceClient();
+        /* this.language_client = new language.LanguageServiceClient(); */
 
-        this.credentials = fs.readFileSync("./credentials_2", "utf-8");
+        this.credentials = fs.readFileSync("./credentials", "utf-8");
         /* try {
             this.git_credentials = fs.readFileSync("./git_credentials", "utf-8");
             this.remote = "https://nvianin:" + this.git_credentials + "@github.com/nvianin/the-last-forest";
@@ -68,7 +68,7 @@ class Server {
             this.login_db = await this.db.collection("login")
 
             this.userman = new UserManager(this.posts, this.temperature_data, this.points, this.login_db);
-            this.userman.io.addEvent
+            /* this.userman.io.addEvent */
             log(await this.reddit_db.countDocuments())
         });
         this.sub = this.r.getSubreddit("collapse");
