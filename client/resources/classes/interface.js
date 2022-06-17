@@ -86,7 +86,7 @@ class AppInterface {
 
         this.fatMat = new THREE.LineMaterial({
             color: 0xffffff,
-            linewidth: 20,
+            linewidth: 30,
             worldUnits: true,
             vertexColors: false,
 
@@ -766,32 +766,34 @@ class AppInterface {
     }
 
     changeState(state) {
-        this.prevState = this.state;
-        this.nextState = state;
-        switch (state) {
-            case "WALKING":
-                if (app.show_tutorials) app.tutorialController.changeState(state)
-                document.querySelector("#toggle-container").style.display = "none"
+        try {
+            this.prevState = this.state;
+            this.nextState = state;
+            switch (state) {
+                case "WALKING":
+                    if (app.show_tutorials) app.tutorialController.changeState(state)
+                    document.querySelector("#toggle-container").style.display = "none"
 
-                document.querySelector("#thumbnail-container").style.opacity = 0;
-                document.querySelector("#thumbnail-container").style.pointerEvents = "none"
+                    document.querySelector("#thumbnail-container").style.opacity = 0;
+                    document.querySelector("#thumbnail-container").style.pointerEvents = "none"
 
-                break;
-            case "MAP":
-                if (app.show_tutorials) app.tutorialController.changeState(state)
-                document.querySelector("#toggle-container").style.display = "flex"
+                    break;
+                case "MAP":
+                    if (app.show_tutorials) app.tutorialController.changeState(state)
+                    document.querySelector("#toggle-container").style.display = "flex"
 
-                document.querySelector("#thumbnail-container").style.opacity = 1;
-                document.querySelector("#thumbnail-container").style.pointerEvents = "all"
-                break;
-            case "PROMENADE":
-                if (app.show_tutorials) app.tutorialController.changeState(state)
-                document.querySelector("#toggle-container").style.display = "none"
+                    document.querySelector("#thumbnail-container").style.opacity = 1;
+                    document.querySelector("#thumbnail-container").style.pointerEvents = "all"
+                    break;
+                case "PROMENADE":
+                    if (app.show_tutorials) app.tutorialController.changeState(state)
+                    document.querySelector("#toggle-container").style.display = "none"
 
-                document.querySelector("#thumbnail-container").style.opacity = 1;
-                document.querySelector("#thumbnail-container").style.pointerEvents = "all"
-                break;
-        }
+                    document.querySelector("#thumbnail-container").style.opacity = 0;
+                    document.querySelector("#thumbnail-container").style.pointerEvents = "all"
+                    break;
+            }
+        } catch {}
     }
 
     setFog(state) {

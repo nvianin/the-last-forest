@@ -67,7 +67,7 @@ class AutoWalk {
             log(crossProd)
             this.speed = Math.lerp(
                 this.speed,
-                Math.clamp((dist - 1400) / 1000, 0, this.maxSpeed) * (crossProd >= 0 ? crossProd : 0),
+                Math.clamp((dist - 1290) / 1000, 0, this.maxSpeed) * (crossProd >= 0 ? crossProd : 0),
                 dt / 80
             );
 

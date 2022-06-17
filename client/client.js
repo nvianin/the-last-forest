@@ -55,7 +55,7 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: true,
+    autostart: false,
     max_generation_level: 6,
     tree_build_limit: 0 || parseFloat(localStorage.getItem("tree_build_limit")),
 
@@ -275,8 +275,8 @@ class App {
                 }
                 this.stars.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
                 this.stars.rotation.x = -Math.HALF_PI;
-                this.stars.position.y = 15000;
-                this.stars.scale.z /= 2;
+                this.stars.position.y = 22000;
+                this.stars.scale.z /= 3.4;
                 this.stars.userData.uniforms = {
                     time: {
                         value: 0
@@ -309,7 +309,7 @@ class App {
                     fetch("/resources/shaders/dustVert.glsl").then(resp => {
                         resp.text().then(vert => {
                             this.dustParticles = new THREE.Points(
-                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 2, this.settings.ground_side * 2),
+                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 1, this.settings.ground_side * 1),
                                 /* new THREE.ShaderMaterial({
                                     vertexShader: vert,
                                     fragmentShader: frag
@@ -327,7 +327,7 @@ class App {
                                     value: this.camera.position
                                 },
                                 pixelSize: {
-                                    value: this.pixelRatio
+                                    value: this.pixelRatio * 1.75
                                 }
 
                             }
@@ -359,7 +359,7 @@ class App {
                             this.dustParticles.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
 
                             this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
-                            this.dustParticles.position.y = 2000;
+                            this.dustParticles.position.y = 46000;
                             this.scene.add(this.dustParticles)
                         })
                     })
@@ -773,9 +773,10 @@ class App {
         this.pointer_moved_while_down = false;
 
         this.pointer_disappearance_timeout = false;
+        this.prev_cursor_style = "default"
 
         window.addEventListener("pointermove", e => {
-            document.body.style.cursor = "default"
+            this.renderer.domElement.style.cursor = this.prev_cursor_style;
             /* log(e.movementX, e.movementY) */
             this.pointer.x = (e.clientX / innerWidth) * 2 - 1;
             this.pointer.y = -(e.clientY / innerHeight) * 2 + 1;
@@ -790,9 +791,11 @@ class App {
             // Hide cursor if it's not moving for a long time
             if (this.pointer_disappearance_timeout) clearTimeout(this.pointer_disappearance_timeout);
             this.pointer_disappearance_timeout = setTimeout(() => {
-                document.body.style.cursor = "none"
+                this.prev_cursor_style = this.renderer.domElement.style.cursor;
+                this.renderer.domElement.style.cursor = "none"
+                this.postDom.style.visibility = "hidden"
 
-            }, 3000)
+            }, 9000)
         })
 
         window.addEventListener("pointerup", e => {
@@ -866,7 +869,7 @@ class App {
             width: innerWidth,
             height: innerHeight,
         });
-        this.bokehPass.far_aperture = .0000004
+        this.bokehPass.far_aperture = .0000002
         this.bokehPass.close_aperture = .00000025
 
         /* this.bokehPass.enabled = false; */
@@ -961,8 +964,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            this.socket = io("last-forest.ddns.net")
-            /* this.socket = io() */
+            /* this.socket = io("last-forest.ddns.net") */
+            this.socket = io()
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
@@ -1474,6 +1477,7 @@ class App {
             const post = object.userData.post;
             this.renderer.domElement.style.cursor = "pointer"
             this.postDom.style.cursor = "pointer"
+            this.prev_cursor_style = "pointer"
 
             /* log(Math.round_to_decimal(post.sentiment.score)) */
 
@@ -1488,6 +1492,7 @@ class App {
         } else {
             this.renderer.domElement.style.cursor = "default";
             this.postDom.style.cursor = "default";
+            this.prev_cursor_style = "default"
             /* if (this.outlinePass.selectedObjects[0]) {
                 this.outlinePass.selectedObjects[0].active = false;
             } */
@@ -1656,18 +1661,18 @@ class App {
                 e.target.parentElement.style.boxShadow = "0 0 12px #" + treeColors[e.target.innerText].color.getHexString()
             }
 
-            if (this.selectedCategories.length > 0) {
-                this.showOnlyCategories(this.selectedCategories)
+            // if (this.selectedCategories.length > 0) {
+            //     this.showOnlyCategories(this.selectedCategories)
 
-                // Focus tree & region when single category is selected
-                if (this.selectedCategories.length == 1 && !this.thumbnail_dont_focus) {
-                    this.interface.enter_focus(
-                        this.trees_by_category[type]
-                        [Math.floor(this.trees_by_category[type].length * Math.random())])
-                }
-            } else {
-                this.showAllTrees()
-            }
+            //     // Focus tree & region when single category is selected
+            //     if (this.selectedCategories.length == 1 && !this.thumbnail_dont_focus) {
+            //         this.interface.enter_focus(
+            //             this.trees_by_category[type]
+            //             [Math.floor(this.trees_by_category[type].length * Math.random())])
+            //     }
+            // } else {
+            //     this.showAllTrees()
+            // }
         }
 
 
