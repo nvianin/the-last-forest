@@ -51,7 +51,7 @@ class AppInterface {
                 focused: 90,
             },
             camera_ground_offset: 160,
-            focused_fog_multiplier: .13,
+            focused_fog_multiplier: .1,
             far_focus_multiplier: -.6
         }
 
@@ -266,8 +266,26 @@ class AppInterface {
 
     enter_focus(tree) {
 
-
+        app.contrastSort(false)
+        app.contrast_enabled = false;
+        document.querySelector("#contrast-toggle").classList.remove("toggle-button-active")
         tree.userData.post.visited = true;
+
+        if (this.focus_enter_interval) clearInterval(this.focus_enter_interval)
+        if (this.focus_exit_interval) clearInterval(this.focus_exit_interval)
+        this.focus_enter_interval = setInterval(() => {
+            /* let dist = 0; */
+            const new_scale = new THREE.Vector3(10, 5, 10);
+            app.trees.forEach(tree => {
+                if (tree != this.focused_tree) {
+                    tree.scale.lerp(new_scale, .16);
+                    /* dist += tree.scale.x - new_scale.x; */
+                }
+            })
+        }, 16)
+        setTimeout(clearInterval(this.focus_enter_interval), 1000)
+
+
         const sound = crunchy_sounds[Math.floor(crunchy_sounds.length * Math.random())];
         sound.playbackRate = .5 + Math.random() * .6
         sound.play()
@@ -297,6 +315,25 @@ class AppInterface {
         /* app.camera.position.copy(tree.position.clone().add(new THREE.Vector3(0, 5000, 5000)))
         app.camera.rotation.set(-.4, 0, 0); */
         this.mapControls.enabled = false;
+
+        this.focused_barycenter = new THREE.Object3D();
+
+        for (let i = 0; i < tree.children[0].geometry.attributes.position.count; i++) {
+            this.focused_barycenter.position.add(
+                new THREE.Vector3(
+                    tree.children[0].geometry.attributes.position.array[i * 3],
+                    tree.children[0].geometry.attributes.position.array[i * 3 + 1],
+                    tree.children[0].geometry.attributes.position.array[i * 3 + 2]
+                )
+            )
+        }
+        this.focused_barycenter.rotateOnWorldAxis(THREE.UP, tree.rotation.y)
+        this.focused_barycenter.position
+            .divideScalar(tree.children[0].geometry.attributes.position.count)
+            .multiplyScalar(100)
+        this.focused_barycenter.position.add(tree.position)
+
+
 
 
 
@@ -374,18 +411,25 @@ class AppInterface {
 
         app.instanceManager.return_all(this.instanceId)
 
-        if (this.focus_exit_interval) {
-            clearInterval(this.focus_exit_interval)
-        }
+        if (this.focus_exit_interval) clearInterval(this.focus_exit_interval)
+        if (this.focus_enter_interval) clearInterval(this.focus_enter_interval)
         this.focus_exit_interval = setInterval(() => {
             log("lerping exit focus")
+            let scale_dist = 0;
+            const new_scale = new THREE.Vector3(50, 50, 50)
+            app.trees.forEach(tree => {
+                tree.scale.lerp(new_scale, .12);
+                scale_dist += tree.scale.x - new_scale.x;
+            })
             const dist =
                 this.focused_backup.position.distanceTo(app.camera.position) +
                 Math.abs(app.scene.fog.far - this.target.fog.far) +
-                Math.abs(app.camera.fov - this.target.fov)
+                Math.abs(app.camera.fov - this.target.fov) +
+                scale_dist
             if (dist > 10) {
                 app.camera.position.lerp(this.focused_backup.position, .1);
                 app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.focused_backup.rotation, .1))
+
 
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
@@ -474,7 +518,7 @@ class AppInterface {
                     2,
                     Math.sin(app.time * .1 + this.focused_angle) * target_distance
                 )
-                .add(this.focused_tree.position)
+                .add(this.focused_barycenter.position)
                 .add(new THREE.Vector3(0, this.focused_target_height + 100, 0))
                 .add(tangent)
 
@@ -485,7 +529,7 @@ class AppInterface {
             app.camera.position.lerp(this.focused_target.position.clone(), dt * 1.5)
             /* log(app.camera.position) */
             /* app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.rotation_dummy.rotation, dt)) */
-            app.camera.lookAt(this.focused_tree.position.clone().add(tangent).add(new THREE.Vector3(0, this.focused_target_height, 0)))
+            app.camera.lookAt(this.focused_barycenter.position.clone().add(tangent).add(new THREE.Vector3(0, this.focused_target_height, 0)))
 
 
             if (app.ground_fakeBack.material.opacity > .1) {

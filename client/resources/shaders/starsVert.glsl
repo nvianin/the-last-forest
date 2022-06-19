@@ -33,6 +33,7 @@ float snoise2(vec2 v) {
 
 uniform float time;
 in float random;
+in float random_size;
 out float vert_random;
 
 ////
@@ -50,6 +51,6 @@ pos += 10000.;
 } */
 
 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos * 100., 1.);
-gl_PointSize = clamp((1. - random) * 6., 2., 5.) * (1. - distance(position.xxx, vec3(0.)) / 14000.);
+gl_PointSize = clamp((1. - random_size) * 6., 1., 3.) * (1. - distance(position.xxx, vec3(0.)) / 14000.);
 
 vert_random = random;

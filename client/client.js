@@ -57,10 +57,11 @@ const debug = {
     postprocessing: true,
     autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 0 || parseFloat(localStorage.getItem("tree_build_limit")),
+    tree_build_limit: 256 || parseFloat(localStorage.getItem("tree_build_limit")),
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
+    wait_till_input: true || localStorage.getItem("wait_till_input"),
 
     enable: () => {
         for (let key of Object.keys(debug)) {
@@ -78,13 +79,16 @@ for ([key, debug_parameter] of Object.entries(debug)) {
     if (debug_parameter && typeof (debug_parameter) == "boolean") log("debug setting " + key + " enabled")
 }
 
+let scene = null;
+
 const simplex = new THREE.SimplexNoise()
 let waiting_to_release_tooltip = false;
 class App {
     constructor() {
         this.renderer = new THREE.WebGLRenderer({
             logarithmicDepthBuffer: true,
-            antialias: false
+            antialias: false,
+            tonemapping: true,
         });
         this.renderer.info.autoReset = false;
         this.pixelRatio = debug.ignore_pixel_ratio ? 1 : window.devicePixelRatio;
@@ -122,6 +126,7 @@ class App {
         this.camera.position.set(5000, 10000, 30000)
         this.camera.rotation.set(-.3, .2, .06)
         this.scene = new THREE.Scene();
+        scene = this.scene;
         this.clock = new THREE.Clock();
 
         /* let bgCol = new THREE.Color(0x000510); */
@@ -270,10 +275,13 @@ class App {
                     })
                 )
                 const random = new Float32Array(this.stars.geometry.attributes.position.count)
+                const random_size = new Float32Array(this.stars.geometry.attributes.position.count)
                 for (let i = 0; i < this.stars.geometry.attributes.position.count; i++) {
                     random[i] = Math.random();
+                    random_size[i] = Math.random();
                 }
                 this.stars.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
+                this.stars.geometry.setAttribute("random_size", new THREE.BufferAttribute(random_size, 1))
                 this.stars.rotation.x = -Math.HALF_PI;
                 this.stars.position.y = 22000;
                 this.stars.scale.z /= 3.4;
@@ -359,7 +367,7 @@ class App {
                             this.dustParticles.geometry.setAttribute("random", new THREE.BufferAttribute(random, 1))
 
                             this.dustParticles.scale.multiplyScalar(this.settings.ground_scale)
-                            this.dustParticles.position.y = 46000;
+                            this.dustParticles.position.y = 6400;
                             this.scene.add(this.dustParticles)
                         })
                     })
@@ -555,10 +563,11 @@ class App {
         const _posts = this.trees.map(t => {
             if (t.userData.post) return t.userData.post
         })
-        const margin = 10000;
+        const margin = 20000;
         const x_min = app.ground.geometry.boundingBox.min.x + margin;
         const x_max = app.ground.geometry.boundingBox.max.x - margin;
-        const base_x = 20000;
+        /* const base_x = 20000; */
+        const base_x = 0;
         const base_y = -14000;
         switch (mode) {
             case "default":
@@ -736,6 +745,7 @@ class App {
         this.activeTree = 0;
         document.body.addEventListener("keydown", e => {
             /* log(e) */
+
             switch (e.key) {
                 case "ArrowLeft":
                     if (this.activeTree == 0) {
@@ -750,6 +760,9 @@ class App {
                     } else {
                         this.activeTree = 0;
                     }
+                    break;
+                case " ":
+                    this.handle_intro_inputs()
                     break;
             }
 
@@ -803,13 +816,13 @@ class App {
             /* log(e.button) */
             const URL = this.activeUrl;
             /* log(URL); */
-            log((
+            /* log((
                 this.interface.state != "LERPING" &&
                 this.postDom.style.visibility == "visible" &&
                 e.button == 0 &&
                 !this.pointer_moved_while_down &&
                 (this.interface.mouse_target_element == this.renderer.domElement || this.interface.mouse_target_element == this.postDom)
-            ))
+            )) */
             if (
                 this.interface.state != "LERPING" &&
                 this.postDom.style.visibility == "visible" &&
@@ -823,6 +836,7 @@ class App {
 
                 /* log(this.activeTree) */
                 this.interface.enter_focus(this.activeTree)
+                this.postDom.style.visibility = "hidden"
             } else if (false) {
                 log("is not lerping:", this.interface.state != "LERPING")
                 log("postdom visible:", this.postDom.style.visibility == "visible")
@@ -837,8 +851,12 @@ class App {
         window.addEventListener("pointerdown", e => {
             this.pointer_is_down = true;
             if (document.querySelector("#sound-toggle").innerText.includes("volume_up") && (!this.bg_music.currentTime)) {
+                this.bg_music.currentTime = 7
                 this.bg_music.play()
                 this.ambience.play()
+            }
+            if (e.button == 2 || true) {
+                this.handle_intro_inputs()
             }
 
         })
@@ -846,6 +864,72 @@ class App {
             /* this.preventAutoRotate(); */
         })
 
+    }
+
+    handle_intro_inputs() {
+        if (this.waited_for_input < 2) {
+            this.waited_for_input++;
+            if (this.waited_for_input == 1) {
+                this.intro_first()
+            } else if (this.waited_for_input == 2) {
+                this.intro_second()
+            }
+        }
+    }
+
+    intro_camera() {
+        // Animate camera for introduction
+        this.camera.position.set(5000, 10000, 100000);
+        this.camera.rotation.set(0, 0, 0);
+        const cam_target = new THREE.Object3D()
+        cam_target.position.set(5000, 15000, 30000);
+        cam_target.rotation.set(-.3, .2, .06);
+        this.thumbnailContainer.style.opacity = 0;
+        document.querySelector("#toggle-container").style.opacity = 0;
+        document.querySelector("#vertical-toggle-container").style.opacity = 0;
+        document.querySelector("#mode-slider-container").style.opacity = 0;
+        this.fog.near = 1000;
+        this.fog.far = 10000;
+        const dt = .0005 * 1;
+        this.camera_intro_interval = setInterval(() => {
+            this.camera.position.lerp(cam_target.position, this.dt * .1);
+            this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1));
+            this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), this.dt * .1)
+
+            this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, this.dt * .1);
+            this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, this.dt * .1);
+
+
+            const dist = this.camera.position.distanceTo(cam_target.position);
+            /* if (dist < .1) {
+                clearInterval(this.camera_intro_interval);
+                this.camera_intro_interval = false;
+            } else {
+                if (this.frameCount % 20 == 0) log(dist)
+            } */
+        }, .16)
+    }
+
+    intro_first() {
+
+        document.querySelector("#loading-screen-text").style.top = "-50%"
+        document.querySelector("#loading-screen-text").style.transform = "translate(0, 0%)"
+
+        document.querySelector("#loading-desc").style.opacity = 1;
+        document.querySelector("#loading-desc").style.top = "50%";
+        /* document.querySelector("#loading-desc").style.top = "unset"; */
+        /* document.querySelector("#loading-desc").style.opacity = 1; */
+
+    }
+
+    intro_second() {
+        document.querySelector("#loading-button").style.opacity = 1
+        document.querySelector("#loading-button").classList.add("loading-button-flash")
+        document.querySelector("#loading-desc").style.opacity = 0;
+
+        document.querySelector("#loading-screen-background").style.opacity = 0;
+        document.querySelector("#loading-container").style.cursor = "default";
+        this.intro_camera()
     }
 
     initPostprocess() {
@@ -857,7 +941,7 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            .4, // strength
+            .54, // strength
             .7, // radius
             .09 // threshold
         );
@@ -869,8 +953,8 @@ class App {
             width: innerWidth,
             height: innerHeight,
         });
-        this.bokehPass.far_aperture = .0000002
-        this.bokehPass.close_aperture = .00000025
+        this.bokehPass.far_aperture = .00000002
+        this.bokehPass.close_aperture = .00000001
 
         /* this.bokehPass.enabled = false; */
 
@@ -904,8 +988,8 @@ class App {
         this.composer.addPass(this.renderPass);
         /* this.composer.addPass(this.SMAAPass); */
         /* this.composer.addPass(this.ssaoPass); */
+        /* this.composer.addPass(this.bokehPass); */
         this.composer.addPass(this.bloomPass);
-        this.composer.addPass(this.bokehPass);
 
         /* this.composer.addPass(this.taaPass); */
         /* this.composer.addPass(this.fxaaPass) */
@@ -964,8 +1048,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            /* this.socket = io("last-forest.ddns.net") */
-            this.socket = io()
+            this.socket = io("last-forest.ddns.net")
+            /* this.socket = io() */
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
@@ -1189,44 +1273,17 @@ class App {
                 }
             }
 
+            this.waited_for_input = false;
+            document.querySelector("#loading-container").style.cursor = "alias";
 
-            // Animate camera for introduction
-            this.camera.position.set(5000, 10000, 100000);
-            this.camera.rotation.set(0, 0, 0);
-            const cam_target = new THREE.Object3D()
-            cam_target.position.set(5000, 15000, 30000);
-            cam_target.rotation.set(-.3, .2, .06);
-            this.thumbnailContainer.style.opacity = 0;
-            document.querySelector("#toggle-container").style.opacity = 0;
-            document.querySelector("#vertical-toggle-container").style.opacity = 0;
-            document.querySelector("#mode-slider-container").style.opacity = 0;
-            this.fog.near = 1000;
-            this.fog.far = 10000;
-            const dt = .0005 * 1;
-            this.camera_intro_interval = setInterval(() => {
-                this.camera.position.lerp(cam_target.position, this.dt * .1);
-                this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1));
-                this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), this.dt * .1)
-
-                this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, this.dt * .1);
-                this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, this.dt * .1);
-
-
-                const dist = this.camera.position.distanceTo(cam_target.position);
-                if (dist < .1) {
-                    clearInterval(this.camera_intro_interval);
-                    this.camera_intro_interval = false;
-                } else {
-                    if (this.frameCount % 20 == 0) log(dist)
-                }
-            }, .16)
-
-            document.querySelector("#loading-button").style.opacity = 1
-            document.querySelector("#loading-screen-background").style.opacity = 0;
-            document.querySelector("#loading-button").classList.add("loading-button-flash")
+            if (!debug.wait_till_input) {
+                this.intro_first();
+            }
             document.querySelector("#loading-button").onclick = () => {
                 clearInterval(this.camera_intro_interval);
                 this.camera_intro_interval = false;
+
+                clearInterval(this.camera_intro_interval);
 
 
                 this.thumbnailContainer.style.opacity = 1;
@@ -1240,10 +1297,10 @@ class App {
                 document.querySelector("#loading-button").style.opacity = 0;
                 document.querySelector("#loading-stats").style.opacity = 0;
                 document.querySelector("#loading-container").style.pointerEvents = "none"
-                if (document.querySelector("#sound-toggle").innerText == "volume_up") {
+                /* if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                     this.bg_music.play()
                     this.ambience.play()
-                }
+                } */
 
 
                 setTimeout(() => {
@@ -1661,18 +1718,18 @@ class App {
                 e.target.parentElement.style.boxShadow = "0 0 12px #" + treeColors[e.target.innerText].color.getHexString()
             }
 
-            // if (this.selectedCategories.length > 0) {
-            //     this.showOnlyCategories(this.selectedCategories)
+            if (this.selectedCategories.length > 0) {
+                this.showOnlyCategories(this.selectedCategories)
 
-            //     // Focus tree & region when single category is selected
-            //     if (this.selectedCategories.length == 1 && !this.thumbnail_dont_focus) {
-            //         this.interface.enter_focus(
-            //             this.trees_by_category[type]
-            //             [Math.floor(this.trees_by_category[type].length * Math.random())])
-            //     }
-            // } else {
-            //     this.showAllTrees()
-            // }
+                // Focus tree & region when single category is selected
+                if (this.selectedCategories.length == 1 && !this.thumbnail_dont_focus) {
+                    this.interface.enter_focus(
+                        this.trees_by_category[type]
+                        [Math.floor(this.trees_by_category[type].length * Math.random())])
+                }
+            } else {
+                this.showAllTrees()
+            }
         }
 
 

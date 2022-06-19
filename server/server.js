@@ -182,7 +182,7 @@ class Server {
                         }).catch(err => {
                             /* log(err.message) */
                         })
-                    log(post_sentiment_exists ? "Sentiment analysis exists, skipping..." : "Analysis post sentiment");
+                    log(post_sentiment_exists ? "Sentiment analysis exists, skipping..." : "Analyzing post sentiment");
                     let requests_this_month = (await this.control_db.findOne({
                         "name": "gapi"
                     })).requests_this_month

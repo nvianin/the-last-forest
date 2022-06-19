@@ -10,6 +10,9 @@ class AutoWalk {
         this.vistas = [];
         this.maxVistas = 32;
 
+        this.switchTimeout = 3000;
+        this.dateAtLastTimeout = new Date();
+
         /* this.vistaBufferingInterval = setInterval(() => {
            
         }, 100); */
@@ -34,12 +37,14 @@ class AutoWalk {
             } */
             /* this.vistas.splice(0, 1) */
         } else {
-            this.vistas.sort((a, b) => {
-                return (
-                    a.position.distanceTo(this.camera.position) -
-                    b.position.distanceTo(this.camera.position)
-                )
-            })
+            if (!this.currentVista || this.switchTimeout < new Date() - this.dateAtLastTimeout) {
+                this.vistas.sort((a, b) => {
+                    return (
+                        a.position.distanceTo(this.camera.position) -
+                        b.position.distanceTo(this.camera.position)
+                    )
+                })
+            }
             this.currentVista = this.vistas[0];
 
             const angle = Math.atan2(
