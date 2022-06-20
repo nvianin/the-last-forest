@@ -57,7 +57,10 @@ const debug = {
     postprocessing: true,
     autostart: false,
     max_generation_level: 6,
-    tree_build_limit: 256 || parseFloat(localStorage.getItem("tree_build_limit")),
+    tree_build_limit: 0 || parseFloat(localStorage.getItem("tree_build_limit")),
+
+    play_music: false || parseFloat(localStorage.getItem("play_music")),
+    play_ambient: false || parseFloat(localStorage.getItem("play_ambient")),
 
     save_tutorial_state: false,
     thumbnails_during_focus: false,
@@ -449,12 +452,12 @@ class App {
         this.ambience = document.querySelector("#ambience")
         this.ambience.volume = .7
         this.ambience.loop = true
-        this.ambience.play();
+        if (debug.play_ambient) this.ambience.play();
 
         this.bg_music_active = document.querySelector("#sound-toggle").innerText == "volume_up"
         this.bg_music = document.querySelector("#bg-music")
         this.bg_music.volume = .6
-        if (document.querySelector("#sound-toggle").innerText == "volume_off") document.querySelector("#sound-toggle").classList.add("toggle-button-active")
+        if (document.querySelector("#sound-toggle").innerText == "volume_off" && !debug.play_music) document.querySelector("#sound-toggle").classList.add("toggle-button-active")
         document.querySelector("#sound-toggle").onclick = () => {
             if (document.querySelector("#sound-toggle").innerText == "volume_up") {
                 document.querySelector("#sound-toggle").classList.add("toggle-button-active")
@@ -463,8 +466,9 @@ class App {
                 this.ambience.pause()
             } else {
                 document.querySelector("#sound-toggle").innerText = "volume_up"
-                this.bg_music.play();
-                this.ambience.play();
+                if (debug.play_music) this.bg_music.play();
+                if (debug.play_ambient) this.ambience.play();
+
             }
         }
 
@@ -852,8 +856,8 @@ class App {
             this.pointer_is_down = true;
             if (document.querySelector("#sound-toggle").innerText.includes("volume_up") && (!this.bg_music.currentTime)) {
                 this.bg_music.currentTime = 7
-                this.bg_music.play()
-                this.ambience.play()
+                if (debug.play_music) this.bg_music.play()
+                if (debug.play_ambient) this.ambience.play()
             }
             if (e.button == 2 || true) {
                 this.handle_intro_inputs()
@@ -1048,8 +1052,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            this.socket = io("last-forest.ddns.net")
-            /* this.socket = io() */
+            /* this.socket = io("last-forest.ddns.net") */
+            this.socket = io()
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
