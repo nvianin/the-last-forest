@@ -74,8 +74,10 @@ const debug = {
     custom_exposure: 0 || localStorage.getItem("custom_exposure"),
     show_stats: 0,
 
-    load_specs: false, // controls if the specs are loaded in accordance to is_low_spec
-    is_low_spec: false || localStorage.getItem("is_low_spec"),
+    is_secondary: false || localStorage.getItem("is_secondary"), // is the machine used as secondary to the presentation one ?
+
+    load_specs: false, // controls if the settings are loaded in accordance to is_low_spec
+    is_low_spec: false || localStorage.getItem("is_low_spec") || localStorage.getItem("is_secondary"),
 
     debug_target_frameRate: {
         enabled: false,
@@ -110,10 +112,11 @@ const debug = {
     },
 }
 
-if (debug.is_low_spec && debug.load_specs) {
-    load_low_settings();
-} else {
-    load_high_settings();
+if (debug.is_secondary) {
+
+}
+if (debug.load_specs) {
+    debug.is_low_spec ? load_low_settings() : load_high_settings()
 }
 
 for ([key, debug_parameter] of Object.entries(debug)) {
@@ -717,7 +720,7 @@ class App {
 
         const barycenter = new THREE.Vector3();
         this.trees.forEach(t => {
-            barycenter.add(t.position);
+            barycenter.add(t.targetPosition);
         })
         barycenter.divideScalar(this.trees.length);
         barycenter.y = this.camera.position.y;
@@ -936,11 +939,16 @@ class App {
 
     handle_intro_inputs() {
         if (this.waited_for_input < 2) {
-            this.waited_for_input++;
-            if (this.waited_for_input == 1) {
+            if (debug.is_secondary) {
                 this.intro_first()
-            } else if (this.waited_for_input == 2) {
                 this.intro_second()
+            } else {
+                this.waited_for_input++;
+                if (this.waited_for_input == 1) {
+                    this.intro_first()
+                } else if (this.waited_for_input == 2) {
+                    this.intro_second()
+                }
             }
         }
     }
@@ -1505,7 +1513,7 @@ class App {
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
         this.sun.target.updateMatrixWorld();
 
-        if (this.interface && !this.camera_intro_interval) this.interface.update(this.dt)
+        if (this.interface && (!this.camera_intro_interval || !this.arrangeInterval)) this.interface.update(this.dt)
         /* this.csm.update(this.camera.matrix) */
 
         if (this.postDom.style.visibility == "visible") {
@@ -1997,4 +2005,9 @@ let app;
 window.addEventListener("load", () => {
     app = window.app = new App;
     app.init()
+
+    if (debug.is_secondary) {
+        log(document.querySelector("#loading-screen-text"))
+        document.querySelector("#loading-screen-text").style.display = "none"
+    }
 })
