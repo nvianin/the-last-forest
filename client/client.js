@@ -718,15 +718,18 @@ class App {
         }
         log(_posts)
 
-        const barycenter = new THREE.Vector3();
-        this.trees.forEach(t => {
-            barycenter.add(t.targetPosition);
-        })
-        barycenter.divideScalar(this.trees.length);
+
+
+
+
         barycenter.y = this.camera.position.y;
 
         this.interface.mapControls.enabled = false;
         if (this.arrangeInterval) clearInterval(this.arrangeInterval)
+        setTimeout(() => {
+            clearInterval(this.arrangeInterval)
+            this.interface.mapControls.enabled = true;
+        }, 1000)
         this.arrangeInterval = setInterval(() => {
             let dist = 0;
             for (let i = 0; i < this.trees.length; i++) {
@@ -939,11 +942,12 @@ class App {
 
     handle_intro_inputs() {
         if (this.waited_for_input < 2) {
+            this.waited_for_input++;
             if (debug.is_secondary) {
+                if (this.waited_for_input > 1) return
                 this.intro_first()
                 this.intro_second()
             } else {
-                this.waited_for_input++;
                 if (this.waited_for_input == 1) {
                     this.intro_first()
                 } else if (this.waited_for_input == 2) {
