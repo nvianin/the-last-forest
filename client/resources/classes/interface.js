@@ -716,7 +716,7 @@ class AppInterface {
                         app.camera.position.lerp(this.mapControls.target, dt)
                     } else {
                     } */
-                    this.mapControls.update()
+                    /* this.mapControls.update() */
                     break;
 
                 case CONTROLLER_STATES.PROMENADE:

@@ -719,17 +719,27 @@ class App {
         log(_posts)
 
 
-
+        const barycenter = new THREE.Vector3();
+        /* const x_positions = [] */
+        app.trees.forEach(t => {
+            /* x_positions.push(t.position.x) */
+            barycenter.add(t.position)
+        })
+        barycenter.divideScalar(app.trees.length)
+        /* x_positions.sort()
+        barycenter.x = x_positions.length % 2 == 0 ?
+            x_positions[x_positions.length / 2] :
+            (x_positions[Math.floor(x_positions.length / 2)] + x_positions[Math.floor(x_positions.length / 2) - 1]) / 2 */
 
 
         barycenter.y = this.camera.position.y;
 
-        this.interface.mapControls.enabled = false;
+        /* this.interface.mapControls.enabled = false; */
         if (this.arrangeInterval) clearInterval(this.arrangeInterval)
-        setTimeout(() => {
+        /* setTimeout(() => {
             clearInterval(this.arrangeInterval)
             this.interface.mapControls.enabled = true;
-        }, 1000)
+        }, 1000) */
         this.arrangeInterval = setInterval(() => {
             let dist = 0;
             for (let i = 0; i < this.trees.length; i++) {
@@ -737,13 +747,14 @@ class App {
                 dist += this.trees[i].position.distanceTo(this.trees[i].targetPosition);
                 /* if (dist == NaN) log(this.trees[i].position, targetPositions[i]) */
             }
-
-            this.camera.position.lerp(barycenter, .1)
-            dist += this.camera.position.distanceTo(barycenter);
+            this.interface.mapControls.target.x = Math.lerp(this.interface.mapControls.target.x, barycenter.x, .1)
+            this.interface.mapControls.update()
+            /* this.camera.position.lerp(barycenter, .1) */
+            dist += Math.abs(this.interface.mapControls.target.x - barycenter.x);
             /* log(dist) */
             if (dist < 50 || dist == NaN) {
                 clearInterval(this.arrangeInterval)
-                this.interface.mapControls.enabled = true;
+                /* this.interface.mapControls.enabled = true; */
             } else {
                 log(dist)
             }
