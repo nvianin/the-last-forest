@@ -720,7 +720,9 @@ class App {
             barycenter.add(t.position);
         })
         barycenter.divideScalar(this.trees.length);
+        barycenter.y = this.camera.position.y;
 
+        this.interface.mapControls.enabled = false;
         if (this.arrangeInterval) clearInterval(this.arrangeInterval)
         this.arrangeInterval = setInterval(() => {
             let dist = 0;
@@ -729,11 +731,13 @@ class App {
                 dist += this.trees[i].position.distanceTo(this.trees[i].targetPosition);
                 /* if (dist == NaN) log(this.trees[i].position, targetPositions[i]) */
             }
+
             this.camera.position.lerp(barycenter, .1)
             dist += this.camera.position.distanceTo(barycenter);
             /* log(dist) */
             if (dist < 50 || dist == NaN) {
                 clearInterval(this.arrangeInterval)
+                this.interface.mapControls.enabled = true;
             } else {
                 log(dist)
             }
