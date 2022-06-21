@@ -75,7 +75,7 @@ class UserManager {
         });
         this.io = require("socket.io")(this.server, {
             cors: {
-                origin: "http://localhost:5555",
+                origin: "http://192.168.1.106:5555",
                 methods: ["GET", "POST"]
             }
         });

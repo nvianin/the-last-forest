@@ -44,6 +44,7 @@ const debug = {
     ignore_pixel_ratio: false || localStorage.getItem("ignore_pixel_ratio"),
     custom_pixel_ratio: 0 || parseFloat(localStorage.getItem("custom_pixel_ratio")),
     sun_intensity_override: 0 || parseFloat(localStorage.getItem("sun_intensity_override")),
+    custom_draw_distance: 0 || parseFloat(localStorage.getItem("custom_draw_distance")),
 
     debug_target_frameRate: {
         enabled: false,
@@ -110,7 +111,7 @@ class App {
         this.settings = {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
-            draw_distance: 100000,
+            draw_distance: debug.custom_draw_distance > 0 ? debug.custom_draw_distance : 100000,
             fog_offset: 50000,
             sun_intensity: debug.sun_intensity_override > 0 ? debug.sun_intensity_override : 1.3,
             walking_fog_multiplier: .1,
@@ -1052,8 +1053,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            /* this.socket = io("last-forest.ddns.net") */
-            this.socket = io()
+            this.socket = io("last-forest.ddns.net")
+            /* this.socket = io() */
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
