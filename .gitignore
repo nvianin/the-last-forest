@@ -5,8 +5,6 @@ stations_measurements.json
 stations_measurements_formatted.json
 media/presentation-last-forest/presentation.indd
 client/resources/classes/Utils
-client/resources/classes/Utils
-client/resources/classes/Utils
 media/*
 server/node_modules/*
 node_modules\*

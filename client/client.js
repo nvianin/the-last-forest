@@ -32,6 +32,31 @@ for (let i = 0; i < 4; i++) {
     crunchy_sounds.push(new Audio(`./resources/sounds/crunchy_wood-0${i+1}.ogg`))
 }
 
+const log_graphics_settings = () => {
+    log("Draw distance: " + localStorage.getItem("custom_draw_distance"))
+    log("Fog offset: " + localStorage.getItem("custom_fog_offset"))
+    log("Pixel ratio: " + localStorage.getItem("custom_pixel_ratio"))
+    log("Tree build limit: " + localStorage.getItem("tree_build_limit"))
+    log("Exposure: " + localStorage.getItem("custom_exposure"))
+}
+
+
+const load_low_settings = () => {
+    localStorage.setItem("custom_draw_distance", 50000);
+    localStorage.setItem("custom_fog_offset", 8000);
+    localStorage.setItem("custom_pixel_ratio", 1);
+    localStorage.setItem("tree_build_limit", 383);
+    log_graphics_settings()
+}
+
+const load_high_settings = () => {
+    localStorage.setItem("custom_draw_distance", 100000);
+    localStorage.setItem("custom_fog_offset", 50000);
+    localStorage.setItem("custom_pixel_ratio", 0);
+    localStorage.setItem("tree_build_limit", 0);
+    log_graphics_settings()
+}
+
 const debug = {
     shadow_helper: false,
     sun_helper: false,
@@ -45,6 +70,12 @@ const debug = {
     custom_pixel_ratio: 0 || parseFloat(localStorage.getItem("custom_pixel_ratio")),
     sun_intensity_override: 0 || parseFloat(localStorage.getItem("sun_intensity_override")),
     custom_draw_distance: 0 || parseFloat(localStorage.getItem("custom_draw_distance")),
+    custom_fog_offset: 0 || parseFloat(localStorage.getItem("custom_fog_offset")),
+    custom_exposure: 0 || localStorage.getItem("custom_exposure"),
+    show_stats: 0,
+
+    load_specs: false, // controls if the specs are loaded in accordance to is_low_spec
+    is_low_spec: false || localStorage.getItem("is_low_spec"),
 
     debug_target_frameRate: {
         enabled: false,
@@ -79,6 +110,12 @@ const debug = {
     },
 }
 
+if (debug.is_low_spec && debug.load_specs) {
+    load_low_settings();
+} else {
+    load_high_settings();
+}
+
 for ([key, debug_parameter] of Object.entries(debug)) {
     if (debug_parameter && typeof (debug_parameter) == "boolean") log("debug setting " + key + " enabled")
 }
@@ -94,10 +131,20 @@ class App {
             antialias: false,
             tonemapping: true,
         });
+        this.renderer.toneMappingExposure = debug.custom_exposure > 0 ? debug.custom_exposure : 1
+        if (this.renderer.toneMappingExposure != 1) this.renderer.toneMapping = 1;
         this.renderer.info.autoReset = false;
         this.pixelRatio = debug.ignore_pixel_ratio ? 1 : window.devicePixelRatio;
         this.pixelRatio = debug.custom_pixel_ratio > 0 ? debug.custom_pixel_ratio : this.pixelRatio;
         this.renderer.setPixelRatio(this.pixelRatio);
+
+        this.stats = new Stats();
+        this.stats.showPanel(0);
+        document.body.appendChild(this.stats.dom)
+        if (!debug.show_stats) this.stats.dom.style.display = "none"
+        this.stats.show = () => {
+            this.stats.dom.style.display = "block"
+        }
 
         if (debug.half_res_renderer) this.renderer.pixelRatio = .5;
 
@@ -112,7 +159,7 @@ class App {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
             draw_distance: debug.custom_draw_distance > 0 ? debug.custom_draw_distance : 100000,
-            fog_offset: 50000,
+            fog_offset: debug.custom_fog_offset > 0 ? debug.custom_fog_offset : 50000,
             sun_intensity: debug.sun_intensity_override > 0 ? debug.sun_intensity_override : 1.3,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
@@ -305,8 +352,8 @@ class App {
 
                     shader.uniforms.time = this.stars.userData.uniforms.time;
 
-                    log(shader.fragmentShader)
-                    log(shader.vertexShader)
+                    /* log(shader.fragmentShader)
+                    log(shader.vertexShader) */
                 }
 
 
@@ -321,7 +368,7 @@ class App {
                     fetch("/resources/shaders/dustVert.glsl").then(resp => {
                         resp.text().then(vert => {
                             this.dustParticles = new THREE.Points(
-                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, this.settings.ground_side * 1, this.settings.ground_side * 1),
+                                new THREE.PlaneBufferGeometry(this.settings.ground_side, this.settings.ground_side, Math.floor(this.settings.ground_side * .5), Math.floor(this.settings.ground_side * .5)),
                                 /* new THREE.ShaderMaterial({
                                     vertexShader: vert,
                                     fragmentShader: frag
@@ -667,8 +714,14 @@ class App {
                 break;
         }
         log(_posts)
-        if (this.arrangeInterval) clearInterval(this.arrangeInterval)
 
+        const barycenter = new THREE.Vector3();
+        this.trees.forEach(t => {
+            barycenter.add(t.position);
+        })
+        barycenter.divideScalar(this.trees.length);
+
+        if (this.arrangeInterval) clearInterval(this.arrangeInterval)
         this.arrangeInterval = setInterval(() => {
             let dist = 0;
             for (let i = 0; i < this.trees.length; i++) {
@@ -676,8 +729,14 @@ class App {
                 dist += this.trees[i].position.distanceTo(this.trees[i].targetPosition);
                 /* if (dist == NaN) log(this.trees[i].position, targetPositions[i]) */
             }
+            this.camera.position.lerp(barycenter, .1)
+            dist += this.camera.position.distanceTo(barycenter);
             /* log(dist) */
-            if (dist < 50 || dist == NaN) clearInterval(this.arrangeInterval)
+            if (dist < 50 || dist == NaN) {
+                clearInterval(this.arrangeInterval)
+            } else {
+                log(dist)
+            }
         }, 16);
     }
 
@@ -813,7 +872,7 @@ class App {
                 this.renderer.domElement.style.cursor = "none"
                 this.postDom.style.visibility = "hidden"
 
-            }, 9000)
+            }, this.postDom.style.visibility == "hidden" ? 2500 : 9000)
         })
 
         window.addEventListener("pointerup", e => {
@@ -1161,7 +1220,8 @@ class App {
                 visible: debug.show_imposters,
                 wireframe: true
             })
-            log(Object.keys(this.posts).length)
+            /* log(Object.keys(this.posts).length) */
+            log(debug.tree_build_limit > 0 ? debug.tree_build_limit : Object.keys(this.posts).length + " trees will be built")
             for (let post of Object.values(this.posts)) {
                 if ( /* post.sentiment && post.sentiment.score */ post.tsne_coordinates) {
                     /* const t = Math.floor((i / Object.keys(this.posts).length) * this.points.length); */
@@ -1415,6 +1475,7 @@ class App {
     }
 
     async render() {
+        this.stats.begin();
         this.frame_time = Date.now();
         this.time = this.clock.getElapsedTime()
 
@@ -1484,6 +1545,8 @@ class App {
         }
 
 
+        this.stats.end();
+
         /* this.lastFrame = frame_time; */
         this.frameRate = 1000 / (Date.now() - this.frame_time)
         if (debug.frameRate) this.frameRateDom.innerText = Math.floor(this.frameRate) + "fps"
@@ -1517,8 +1580,8 @@ class App {
                     nearbyTrees.splice(nearbyTrees.indexOf(t), 1)
                 }
             })
+            /* log(nearbyTrees.length) */
         }
-        log(nearbyTrees.length)
 
 
         this.mousecast.setFromCamera(this.pointer, this.camera);
@@ -1642,7 +1705,7 @@ class App {
 
         for (let i = 0; i < typeInfos.length; i++) {
             const info = typeInfos[i]
-            log(info.name)
+            /* log(info.name) */
             /* const img = document.createElement("img");
             img.src = t
             img.className = "thumbnail-image"

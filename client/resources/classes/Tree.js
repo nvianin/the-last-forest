@@ -198,12 +198,12 @@ const load_colors = async () => {
         const col = new THREE.Color("#" + hexpalette[(i + paletteShift) % hexpalette.length])
         const hsl = new THREE.Color()
         col.getHSL(hsl)
-        log(hsl)
+        /* log(hsl) */
         col.setHSL(hsl.h, hsl.s * 1.3, hsl.l * (.86 + hsl.l ** 2))
-        log(col)
+        /* log(col) */
 
         treeTypes[key].color = "#" + col.getHexString()
-        log(treeTypes[key].color)
+        /* log(treeTypes[key].color) */
 
         /* log(treeTypes[key]) */
         i++;

@@ -10,9 +10,9 @@ const CONTROLLER_STATES = {
 class AppInterface {
     constructor() {
 
-        this.state = CONTROLLER_STATES.MAP
-        this.prevState = CONTROLLER_STATES.MAP
-        this.nextState = CONTROLLER_STATES.MAP
+        this.state = CONTROLLER_STATES.WALKING
+        this.prevState = CONTROLLER_STATES.WALKING
+        this.nextState = CONTROLLER_STATES.WALKING
 
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
         this.mapControls.maxPolarAngle = /* Math.HALF_PI * .8 */ 1.5
@@ -434,7 +434,7 @@ class AppInterface {
                 app.scene.fog.near = Math.lerp(app.scene.fog.near, this.target.fog.near, .1)
                 app.scene.fog.far = Math.lerp(app.scene.fog.far, this.target.fog.far, .1)
 
-                app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, .05)
+                /* app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, .05) */
 
                 app.camera.fov = Math.lerp(app.camera.fov, this.target.fov, .1);
                 app.camera.updateProjectionMatrix()
@@ -532,21 +532,21 @@ class AppInterface {
             app.camera.lookAt(this.focused_barycenter.position.clone().add(tangent).add(new THREE.Vector3(0, this.focused_target_height, 0)))
 
 
-            if (app.ground_fakeBack.material.opacity > .1) {
+            /* if (app.ground_fakeBack.material.opacity > .1) {
                 app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 0, dt)
             } else {
                 app.ground_fakeBack.material.opacity = 0;
                 app.ground_fakeBack.visible = false;
-            }
+            } */
         } else if (!this.focused_mode) {
 
-            if (!app.ground_fakeBack.visible) app.ground_fakeBack.visible = true;
+            /* if (!app.ground_fakeBack.visible) app.ground_fakeBack.visible = true;
 
             if (app.ground_fakeBack.material.opacity < .9) {
                 app.ground_fakeBack.material.opacity = Math.lerp(app.ground_fakeBack.material.opacity, 1, dt)
             } else {
                 app.ground_fakeBack.material.opacity = 1;
-            }
+            } */
 
             /* app.scene.fog.near = Math.lerp(app.scene.fog.near, (app.settings.draw_distance - app.settings.fog_offset), dt)
             app.scene.fog.far = Math.lerp(app.scene.fog.far, app.settings.draw_distance, dt) */

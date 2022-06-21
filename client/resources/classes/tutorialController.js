@@ -71,7 +71,7 @@ class TutorialController {
         document.body.appendChild(this.tutorialContainer);
 
         Object.entries(tutorial_resources).forEach(([resource, state]) => {
-            log(`Building tutorial entry for ${state} with resource ${resource}`)
+            /* log(`Building tutorial entry for ${state} with resource ${resource}`) */
 
             const tutorial = document.createElement("div")
             tutorial.className = "tutorial-element"

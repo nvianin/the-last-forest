@@ -51,6 +51,6 @@ pos += 10000.;
 } */
 
 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos * 100., 1.);
-gl_PointSize = clamp((1. - random_size) * 6., 1., 3.) * (1. - distance(position.xxx, vec3(0.)) / 14000.);
+gl_PointSize = clamp((1. - random_size) * 6., .3, 1.3) * (1. - distance(position.xxx, vec3(0.)) / 14000.);
 
 vert_random = random;
