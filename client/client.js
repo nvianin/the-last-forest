@@ -72,7 +72,7 @@ const debug = {
     custom_draw_distance: 0 || parseFloat(localStorage.getItem("custom_draw_distance")),
     custom_fog_offset: 0 || parseFloat(localStorage.getItem("custom_fog_offset")),
     custom_exposure: 0 || localStorage.getItem("custom_exposure"),
-    show_stats: 0,
+    show_stats: 1,
 
     is_secondary: false || localStorage.getItem("is_secondary"), // is the machine used as secondary to the presentation one ?
 
