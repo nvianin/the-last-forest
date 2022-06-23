@@ -10,9 +10,9 @@ const CONTROLLER_STATES = {
 class AppInterface {
     constructor() {
 
-        this.state = CONTROLLER_STATES.WALKING
-        this.prevState = CONTROLLER_STATES.WALKING
-        this.nextState = CONTROLLER_STATES.WALKING
+        this.state = CONTROLLER_STATES.MAP
+        this.prevState = CONTROLLER_STATES.MAP
+        this.nextState = CONTROLLER_STATES.MAP
 
         this.mapControls = new THREE.MapControls(app.camera, app.renderer.domElement);
         this.mapControls.maxPolarAngle = /* Math.HALF_PI * .8 */ 1.5
@@ -21,6 +21,8 @@ class AppInterface {
         this.mapControls.minDistance = 1;
         this.mapControls.screenSpacePanning = false;
         this.mapControls.enabled = true;
+        this.mapControls.enableDamping = false;
+        this.mapControls.dampingFactor = .4;
 
         this.instanceId = app.instanceManager.register(this);
 
@@ -480,6 +482,7 @@ class AppInterface {
         dt = Math.clamp(dt * 100, .01, .1)
         /* this.mapControls.target.y = 0; */
         this.domController.update()
+        /* this.mapControls.update() */
 
         app.bokehPass.uniforms.focus.value = Math.lerp(app.bokehPass.uniforms.focus.value, this.target_focus, dt * 2);
         const aperture_t = this.state == "MAP" ?
@@ -560,6 +563,7 @@ class AppInterface {
 
             // Enter Next State initialization
             if (this.nextState != this.state) {
+                this.prevState = this.state;
                 this.state = this.nextState;
                 log("Entering state " + this.nextState + " from " + this.prevState)
                 switch (this.nextState) {
@@ -596,6 +600,18 @@ class AppInterface {
                         this.target.fov = this.settings.fov.map
                         this.target.fog = this.MAP_FOG
                         this.mapControls.enabled = true;
+
+                        if (this.prevState == "WALKING" || this.prevState == "PROMENADE") {
+                            this.target.position.copy(app.camera.position).add(new THREE.Vector3(0, 10000, 0))
+                            this.map_transform.position.copy(this.target.position).add(new THREE.Vector3(0, 100000, 0))
+                            this.target.rotation.copy(app.camera.rotation)
+                            log("FUCK")
+                            this.mapControls.target.set(
+                                app.camera.position.x,
+                                this.mapControls.target.y,
+                                app.camera.position.z
+                            )
+                        }
 
                         if (this.prevState != "LERPING") {
                             this.changeState("LERPING")
@@ -759,7 +775,7 @@ class AppInterface {
                     // State-to-state lerping
                 case CONTROLLER_STATES.LERPING:
                     log("lerping to state " + this.target.state)
-                    this.mapControls.maxDistance = this.target.maxDistance;
+                    /* this.mapControls.maxDistance = this.target.maxDistance; */
                     switch (this.target.state) {
                         case "WALKING":
                             app.camera.position.lerp(this.target.position, dt)
@@ -772,10 +788,10 @@ class AppInterface {
 
                             break;
                         case "MAP":
-                            /* app.camera.position.lerp(this.map_transform.position, dt) */
+                            app.camera.position.lerp(this.map_transform.position, dt)
                             this.mapControls.target.lerp(this.target.position, dt)
-                            this.mapControls.update()
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, dt))
+                            /* this.mapControls.update() */
 
 
                             this.target_focus = this.map_transform.position.distanceTo(new THREE.Vector3());

@@ -179,7 +179,7 @@ pos += movement; */
 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos + wind, 1.0);
 vPos = gl_Position.xyz;
 
-distance_factor = 1. - distance(camera, vPos) / 340000.;
+distance_factor = 1. - distance(camera, vPos) / 10000.;
 distance_factor = clamp(distance_factor, 0., 1.);
 
 sin_time = (sin(t) + (sin(t * 3.) / 3.) + (sin(t * 5.) / 5.) + 1.) / 2.;

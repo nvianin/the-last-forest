@@ -54,8 +54,8 @@ const load_mid_settings = () => {
 }
 
 const load_high_settings = () => {
-    localStorage.setItem("custom_draw_distance", 100000);
-    localStorage.setItem("custom_fog_offset", 50000);
+    localStorage.setItem("custom_draw_distance", 60000);
+    localStorage.setItem("custom_fog_offset", 20000);
     localStorage.setItem("custom_pixel_ratio", 0);
     localStorage.setItem("tree_build_limit", 0);
     log_graphics_settings()
@@ -76,7 +76,7 @@ const debug = {
     custom_draw_distance: 0 || parseFloat(localStorage.getItem("custom_draw_distance")),
     custom_fog_offset: 0 || parseFloat(localStorage.getItem("custom_fog_offset")),
     custom_exposure: 0 || localStorage.getItem("custom_exposure"),
-    show_stats: 1,
+    show_stats: 0 || localStorage.getItem("show_stats"),
 
     is_secondary: false || localStorage.getItem("is_secondary"), // is the machine used as secondary to the presentation one ?
 
@@ -96,6 +96,8 @@ const debug = {
     autostart: false,
     max_generation_level: 6,
     tree_build_limit: 0 || parseFloat(localStorage.getItem("tree_build_limit")),
+
+    bloomPass_strength: 0 || parseFloat(localStorage.getItem("bloomPass_strength")),
 
     play_music: false || parseFloat(localStorage.getItem("play_music")),
     play_ambient: false || parseFloat(localStorage.getItem("play_ambient")),
@@ -165,8 +167,8 @@ class App {
         this.settings = {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
-            draw_distance: debug.custom_draw_distance > 0 ? debug.custom_draw_distance : 100000,
-            fog_offset: debug.custom_fog_offset > 0 ? debug.custom_fog_offset : 50000,
+            draw_distance: debug.custom_draw_distance > 0 ? debug.custom_draw_distance : 60000,
+            fog_offset: debug.custom_fog_offset > 0 ? debug.custom_fog_offset : 20000,
             sun_intensity: debug.sun_intensity_override > 0 ? debug.sun_intensity_override : 1.3,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
@@ -328,6 +330,7 @@ class App {
                     new THREE.PointsMaterial({
                         transparent: true,
                         fog: true,
+                        alphaTest: 1
                         /* depthTest: false,
                         depthWrite: false, */
                     })
@@ -335,6 +338,9 @@ class App {
                 const random = new Float32Array(this.stars.geometry.attributes.position.count)
                 const random_size = new Float32Array(this.stars.geometry.attributes.position.count)
                 for (let i = 0; i < this.stars.geometry.attributes.position.count; i++) {
+                    this.stars.geometry.attributes.position.array[i * 3] += (Math.random() * 2 - 1) * 100;
+                    this.stars.geometry.attributes.position.array[i * 3 + 1] += (Math.random() * 2 - 1) * 100;
+                    this.stars.geometry.attributes.position.array[i * 3 + 2] += (Math.random() * 2 - 1) * 100;
                     random[i] = Math.random();
                     random_size[i] = Math.random();
                 }
@@ -346,6 +352,9 @@ class App {
                 this.stars.userData.uniforms = {
                     time: {
                         value: 0
+                    },
+                    camera: {
+                        value: new THREE.Vector3()
                     }
                 }
                 this.stars.material.onBeforeCompile = (shader) => {
@@ -358,6 +367,7 @@ class App {
                     shader.fragmentShader = shader.fragmentShader.replace("#include <premultiplied_alpha_fragment>", "#include <premultiplied_alpha_fragment> \n" + fragMain)
 
                     shader.uniforms.time = this.stars.userData.uniforms.time;
+                    shader.uniforms.camera = this.stars.userData.uniforms.camera;
 
                     /* log(shader.fragmentShader)
                     log(shader.vertexShader) */
@@ -390,7 +400,7 @@ class App {
                                     value: 0
                                 },
                                 camera: {
-                                    value: this.camera.position
+                                    value: new THREE.Vector3()
                                 },
                                 pixelSize: {
                                     value: this.pixelRatio * 1.75
@@ -978,30 +988,30 @@ class App {
 
     intro_camera() {
         // Animate camera for introduction
-        this.camera.position.set(5000, 10000, 100000);
-        this.interface.mapControls.target.set(5000, 10000, 100000 - 8000)
-        this.camera.rotation.set(0, 0, 0);
+        this.camera.position.set(5000, 1000, 25000);
+        this.interface.mapControls.target.set(5000, this.interface.mapControls.target.y, 20000)
+        /* this.camera.rotation.set(Math.HALF_PI, 0, 0); */
         const cam_target = new THREE.Object3D()
-        cam_target.position.set(5000, 15000, 30000);
+        cam_target.position.set(5000, 15000, 5000);
         cam_target.position.y = this.interface.mapControls.target.y;
         cam_target.rotation.set(-.3, .2, .06);
         this.thumbnailContainer.style.opacity = 0;
         document.querySelector("#toggle-container").style.opacity = 0;
         document.querySelector("#vertical-toggle-container").style.opacity = 0;
         document.querySelector("#mode-slider-container").style.opacity = 0;
-        this.fog.near = 1000;
-        this.fog.far = 10000;
+        this.fog.near = 100;
+        this.fog.far = 1000;
         const dt = .0005 * 1;
         this.interface.mapControls.enabled = false
-        this.interface.mapControls.maxDistance = 8000
+        this.interface.mapControls.maxDistance = 5500
         this.camera_intro_interval = setInterval(() => {
             this.interface.mapControls.target.lerp(cam_target.position, this.dt * .1);
-            this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1));
+            /* this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1)); */
             this.interface.mapControls.update()
             this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), this.dt * .1)
 
-            this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, this.dt * .1);
-            this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, this.dt * .1);
+            this.fog.near = Math.lerp(this.fog.near, (this.settings.draw_distance - this.settings.fog_offset) * this.settings.walking_fog_multiplier, this.dt * .1);
+            this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance * this.settings.walking_fog_multiplier, this.dt * .1);
 
 
             /* const dist = this.camera.position.distanceTo(cam_target.position);
@@ -1045,7 +1055,7 @@ class App {
                 innerWidth,
                 innerHeight
             ),
-            .54, // strength
+            debug.bloomPass_strength > 0 ? debug.bloomPass_strength : .54, // strength
             .7, // radius
             .09 // threshold
         );
@@ -1387,11 +1397,11 @@ class App {
             document.querySelector("#loading-button").onclick = () => {
                 clearInterval(this.camera_intro_interval);
                 this.camera_intro_interval = false;
-                this.interface.mapControls.enabled = true
+                /* this.interface.mapControls.enabled = true */
 
 
 
-                this.thumbnailContainer.style.opacity = 1;
+                /* this.thumbnailContainer.style.opacity = 1; */
                 document.querySelector("#toggle-container").style.opacity = 1;
                 document.querySelector("#vertical-toggle-container").style.opacity = 1;
                 document.querySelector("#mode-slider-container").style.opacity = 1;
@@ -1541,7 +1551,7 @@ class App {
         this.sun.target.position.copy(this.camera.position).add(this.sun_target_offset);
         this.sun.target.updateMatrixWorld();
 
-        if (this.interface && (!this.camera_intro_interval || !this.arrangeInterval)) this.interface.update(this.dt)
+        if (this.interface && !this.camera_intro_interval && !this.arrangeInterval) this.interface.update(this.dt)
         /* this.csm.update(this.camera.matrix) */
 
         if (this.postDom.style.visibility == "visible") {
@@ -1573,12 +1583,12 @@ class App {
             }
             if (this.stars) {
                 this.stars.userData.uniforms.time.value = this.time
+                this.stars.userData.uniforms.camera.value = this.camera.position.clone().divideScalar(this.stars.scale.x)
             }
             if (this.interface.fatMat.uniforms.time) this.interface.fatMat.uniforms.time.value = this.time;
             Object.keys(treeTypes).forEach(type => {
                 if (treeColors[type] && treeColors[type].userData.time) {
                     treeColors[type].userData.time.value = this.time
-
                 }
             })
 

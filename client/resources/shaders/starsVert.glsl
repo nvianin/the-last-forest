@@ -32,6 +32,7 @@ float snoise2(vec2 v) {
 }
 
 uniform float time;
+uniform vec3 camera;
 in float random;
 in float random_size;
 out float vert_random;
@@ -50,7 +51,9 @@ pos.z *= .5;
 pos += 10000.;
 } */
 
+float dist = .1 - distance(camera, pos);
 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos * 100., 1.);
-gl_PointSize = clamp((1. - random_size) * 6., .3, 1.3) * (1. - distance(position.xxx, vec3(0.)) / 14000.);
+gl_PointSize = clamp((1. - random_size) * 6., .3, 1.3) * .2;
+/* gl_PointSize = dist; */
 
 vert_random = random;

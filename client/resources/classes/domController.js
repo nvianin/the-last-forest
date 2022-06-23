@@ -25,6 +25,8 @@ class DomController {
         })
         this.modeSlider.dom.default = 500
 
+        setTimeout(document.querySelector("#slider-step-0").click(), 1000);
+
         const images = ["walk", "map", "auto"]
         let j = 0;
         for (let i of images) {
