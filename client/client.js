@@ -853,6 +853,10 @@ class App {
                 case " ":
                     this.handle_intro_inputs()
                     break;
+                case "Enter":
+                    if (document.querySelector("#loading-button").style.opacity == 1) {
+                        document.querySelector("#loading-button").click()
+                    }
             }
 
             /* log(this.activeTree); */
@@ -975,6 +979,7 @@ class App {
     intro_camera() {
         // Animate camera for introduction
         this.camera.position.set(5000, 10000, 100000);
+        this.interface.mapControls.target.set(5000, 10000, 100000 - 8000)
         this.camera.rotation.set(0, 0, 0);
         const cam_target = new THREE.Object3D()
         cam_target.position.set(5000, 15000, 30000);
@@ -988,17 +993,19 @@ class App {
         this.fog.far = 10000;
         const dt = .0005 * 1;
         this.interface.mapControls.enabled = false
+        this.interface.mapControls.maxDistance = 8000
         this.camera_intro_interval = setInterval(() => {
             this.interface.mapControls.target.lerp(cam_target.position, this.dt * .1);
             this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1));
+            this.interface.mapControls.update()
             this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), this.dt * .1)
 
             this.fog.near = Math.lerp(this.fog.near, this.settings.draw_distance - this.settings.fog_offset, this.dt * .1);
             this.fog.far = Math.lerp(this.fog.far, this.settings.draw_distance, this.dt * .1);
 
 
-            const dist = this.camera.position.distanceTo(cam_target.position);
-            /* if (dist < .1) {
+            /* const dist = this.camera.position.distanceTo(cam_target.position);
+             if (dist < .1) {
                 clearInterval(this.camera_intro_interval);
                 this.camera_intro_interval = false;
             } else {

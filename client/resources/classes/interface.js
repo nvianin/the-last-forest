@@ -567,7 +567,7 @@ class AppInterface {
                         this.target.state = "WALKING"
                         this.target.fov = this.settings.fov.walk
                         this.target.fog = this.WALKING_FOG
-                        this.target_
+                        /* this.target_ */
                         /* app.renderer.domElement.requestPointerLock() */
 
                         if (this.prevState == "MAP") {
@@ -759,9 +759,11 @@ class AppInterface {
                     // State-to-state lerping
                 case CONTROLLER_STATES.LERPING:
                     log("lerping to state " + this.target.state)
+                    this.mapControls.maxDistance = this.target.maxDistance;
                     switch (this.target.state) {
                         case "WALKING":
                             app.camera.position.lerp(this.target.position, dt)
+                            /* this.mapControls.target.lerp(this.target.position, dt) */
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
 
                             this.target_focus = 6000
@@ -770,7 +772,9 @@ class AppInterface {
 
                             break;
                         case "MAP":
-                            app.camera.position.lerp(this.map_transform.position, dt)
+                            /* app.camera.position.lerp(this.map_transform.position, dt) */
+                            this.mapControls.target.lerp(this.target.position, dt)
+                            this.mapControls.update()
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.map_transform.rotation, dt))
 
 
@@ -787,6 +791,7 @@ class AppInterface {
                         case "PROMENADE":
                             this.target.rotation.set(0, 0, 0)
                             app.camera.position.lerp(this.target.position, dt);
+                            /* this.mapControls.target.lerp(this.target.position, dt) */
                             app.camera.rotation.copy(THREE.Euler.lerp(app.camera.rotation, this.target.rotation, dt))
 
                             this.target_focus = 6000
