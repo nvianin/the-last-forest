@@ -49,6 +49,10 @@ const load_low_settings = () => {
     log_graphics_settings()
 }
 
+const load_mid_settings = () => {
+
+}
+
 const load_high_settings = () => {
     localStorage.setItem("custom_draw_distance", 100000);
     localStorage.setItem("custom_fog_offset", 50000);
