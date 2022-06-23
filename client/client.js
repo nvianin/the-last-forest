@@ -978,6 +978,7 @@ class App {
         this.camera.rotation.set(0, 0, 0);
         const cam_target = new THREE.Object3D()
         cam_target.position.set(5000, 15000, 30000);
+        cam_target.position.y = this.interface.mapControls.target.y;
         cam_target.rotation.set(-.3, .2, .06);
         this.thumbnailContainer.style.opacity = 0;
         document.querySelector("#toggle-container").style.opacity = 0;
@@ -986,8 +987,9 @@ class App {
         this.fog.near = 1000;
         this.fog.far = 10000;
         const dt = .0005 * 1;
+        this.interface.mapControls.enabled = false
         this.camera_intro_interval = setInterval(() => {
-            this.camera.position.lerp(cam_target.position, this.dt * .1);
+            this.interface.mapControls.target.lerp(cam_target.position, this.dt * .1);
             this.camera.rotation.copy(THREE.Euler.lerp(this.camera.rotation, cam_target.rotation, this.dt * .1));
             this.bokehPass.uniforms.focus.value = Math.lerp(this.bokehPass.uniforms.focus.value, this.camera.position.distanceTo(new THREE.Vector3()), this.dt * .1)
 
@@ -1378,8 +1380,8 @@ class App {
             document.querySelector("#loading-button").onclick = () => {
                 clearInterval(this.camera_intro_interval);
                 this.camera_intro_interval = false;
+                this.interface.mapControls.enabled = true
 
-                clearInterval(this.camera_intro_interval);
 
 
                 this.thumbnailContainer.style.opacity = 1;
