@@ -43,7 +43,7 @@ const log_graphics_settings = () => {
 
 const load_low_settings = () => {
     localStorage.setItem("custom_draw_distance", 50000);
-    localStorage.setItem("custom_fog_offset", 8000);
+    localStorage.setItem("custom_fog_offset", 40000);
     localStorage.setItem("custom_pixel_ratio", 1);
     localStorage.setItem("tree_build_limit", 383);
     log_graphics_settings()
@@ -55,7 +55,7 @@ const load_mid_settings = () => {
 
 const load_high_settings = () => {
     localStorage.setItem("custom_draw_distance", 60000);
-    localStorage.setItem("custom_fog_offset", 20000);
+    localStorage.setItem("custom_fog_offset", 50000);
     localStorage.setItem("custom_pixel_ratio", 0);
     localStorage.setItem("tree_build_limit", 0);
     log_graphics_settings()
@@ -80,7 +80,7 @@ const debug = {
 
     is_secondary: false || localStorage.getItem("is_secondary"), // is the machine used as secondary to the presentation one ?
 
-    load_specs: false, // controls if the settings are loaded in accordance to is_low_spec
+    load_specs: true, // controls if the settings are loaded in accordance to is_low_spec
     is_low_spec: false || localStorage.getItem("is_low_spec") || localStorage.getItem("is_secondary"),
 
     debug_target_frameRate: {
@@ -168,7 +168,7 @@ class App {
             ground_side: 128 * 2,
             ground_scale: 128 * 6,
             draw_distance: debug.custom_draw_distance > 0 ? debug.custom_draw_distance : 60000,
-            fog_offset: debug.custom_fog_offset > 0 ? debug.custom_fog_offset : 20000,
+            fog_offset: debug.custom_fog_offset > 0 ? debug.custom_fog_offset : 40000,
             sun_intensity: debug.sun_intensity_override > 0 ? debug.sun_intensity_override : 1.3,
             walking_fog_multiplier: .1,
             walking_speed_multiplier: 4,
@@ -326,7 +326,7 @@ class App {
             fetch("./resources/shaders/starsVert.glsl").then(res => res.text()).then(text => {
                 starShaders[1] = text
                 this.stars = new THREE.Points(
-                    new THREE.PlaneBufferGeometry(this.settings.ground_side * 2, this.settings.ground_side * 2, 64, 64),
+                    new THREE.PlaneBufferGeometry(this.settings.ground_side * 4, this.settings.ground_side * 4, 32, 32),
                     new THREE.PointsMaterial({
                         transparent: true,
                         fog: true,
@@ -951,14 +951,21 @@ class App {
             this.pointer_is_down = false;
             this.pointer_moved_while_down = false;
         })
+        this.soundlaunch = 0;
         window.addEventListener("pointerdown", e => {
             this.pointer_is_down = true;
             if (document.querySelector("#sound-toggle").innerText.includes("volume_up") && (!this.bg_music.currentTime)) {
-                this.bg_music.currentTime = 7
-                if (debug.play_music) this.bg_music.play()
-                if (debug.play_ambient) this.ambience.play()
+                if (this.soundlaunch < 1) {
+                    if (debug.play_ambient) this.ambience.play()
+
+                } else {
+                    this.bg_music.currentTime = 7
+                    if (debug.play_music) this.bg_music.play()
+
+                }
+                this.soundlaunch++;
             }
-            if (e.button == 2 || true) {
+            if (e.button == 0) {
                 this.handle_intro_inputs()
             }
 
@@ -992,7 +999,7 @@ class App {
         this.interface.mapControls.target.set(5000, this.interface.mapControls.target.y, 20000)
         /* this.camera.rotation.set(Math.HALF_PI, 0, 0); */
         const cam_target = new THREE.Object3D()
-        cam_target.position.set(5000, 15000, 5000);
+        cam_target.position.set(0, 0, 0);
         cam_target.position.y = this.interface.mapControls.target.y;
         cam_target.rotation.set(-.3, .2, .06);
         this.thumbnailContainer.style.opacity = 0;
@@ -1001,7 +1008,7 @@ class App {
         document.querySelector("#mode-slider-container").style.opacity = 0;
         this.fog.near = 100;
         this.fog.far = 1000;
-        const dt = .0005 * 1;
+        const dt = .00002 * 1;
         this.interface.mapControls.enabled = false
         this.interface.mapControls.maxDistance = 5500
         this.camera_intro_interval = setInterval(() => {
@@ -1162,8 +1169,8 @@ class App {
             this.connection_conditions_count = 0;
             this.connection_conditions_threshold = 1;
 
-            this.socket = io("last-forest.ddns.net")
-            /* this.socket = io() */
+            /* this.socket = io("last-forest.ddns.net") */
+            this.socket = io()
             this.connectionFailed = false;
             this.socket.on("connect", () => {
                 log("Connected");
