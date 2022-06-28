@@ -80,7 +80,10 @@ class AutoWalk {
                 app.interface.enter_focus(this.currentVista)
 
                 this.currentVista.userData.post.visited = true;
-                setTimeout(() => {})
+                const tree_backup = this.currentVista.userData.post;
+                setTimeout(() => {
+                    tree_backup.visited = false;
+                }, 60000 * 7)
                 this.vistas.splice(0, 1)
                 this.userInputDuringVista = false;
                 if (this.exitFocusTimeout) clearTimeout(this.exitFocusTimeout);
