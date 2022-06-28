@@ -80,6 +80,7 @@ class AutoWalk {
                 app.interface.enter_focus(this.currentVista)
 
                 this.currentVista.userData.post.visited = true;
+                setTimeout(() => {})
                 this.vistas.splice(0, 1)
                 this.userInputDuringVista = false;
                 if (this.exitFocusTimeout) clearTimeout(this.exitFocusTimeout);
