@@ -53,7 +53,7 @@ class Server {
             recentCommentThreshold: 12 //hours
         }
 
-        this.client = new MongoClient("mongodb://localhost:27017");
+        this.client = new MongoClient("mongodb://192.168.1.106:27017");
         this.client.connect().then(async client => {
             this.db = this.client.db("last-forest");
             this.reddit_db = this.db.collection("reddit");

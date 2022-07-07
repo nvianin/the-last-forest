@@ -42,10 +42,13 @@ const log_graphics_settings = () => {
 
 
 const load_low_settings = () => {
-    localStorage.setItem("custom_draw_distance", 50000);
-    localStorage.setItem("custom_fog_offset", 40000);
+    /* localStorage.setItem("custom_draw_distance", 50000);
+    localStorage.setItem("custom_fog_offset", 40000); */
+    localStorage.setItem("custom_draw_distance", 100000);
+    localStorage.setItem("custom_fog_offset", 80000);
     localStorage.setItem("custom_pixel_ratio", 1);
     localStorage.setItem("tree_build_limit", 383);
+    log("Loaded low settings")
     log_graphics_settings()
 }
 
@@ -54,10 +57,11 @@ const load_mid_settings = () => {
 }
 
 const load_high_settings = () => {
-    localStorage.setItem("custom_draw_distance", 60000);
-    localStorage.setItem("custom_fog_offset", 50000);
+    localStorage.setItem("custom_draw_distance", 100000);
+    localStorage.setItem("custom_fog_offset", 80000);
     localStorage.setItem("custom_pixel_ratio", 0);
     localStorage.setItem("tree_build_limit", 0);
+    log("Loaded high settings")
     log_graphics_settings()
 }
 
@@ -619,7 +623,10 @@ class App {
                 t.scale.lerp(t.userData.targetScale, .1)
                 dist += t.scale.distanceTo(t.userData.targetScale)
             })
-            if (dist < 10) clearInterval(this.contrastInterval)
+            if (dist < 10) {
+                clearInterval(this.contrastInterval)
+                this.contrastInterval = false;
+            }
         }, 16)
     }
 
@@ -750,10 +757,11 @@ class App {
 
         /* this.interface.mapControls.enabled = false; */
         if (this.arrangeInterval) clearInterval(this.arrangeInterval)
-        /* setTimeout(() => {
+        setTimeout(() => {
             clearInterval(this.arrangeInterval)
+            this.arrangeInterval = false;
             this.interface.mapControls.enabled = true;
-        }, 1000) */
+        }, 5000)
         this.arrangeInterval = setInterval(() => {
             let dist = 0;
             for (let i = 0; i < this.trees.length; i++) {
