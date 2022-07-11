@@ -35,6 +35,7 @@ class Server {
         /* this.language_client = new language.LanguageServiceClient(); */
 
         this.credentials = fs.readFileSync("./credentials", "utf-8");
+        /* this.credentials = "fuck" */
         /* try {
             this.git_credentials = fs.readFileSync("./git_credentials", "utf-8");
             this.remote = "https://nvianin:" + this.git_credentials + "@github.com/nvianin/the-last-forest";
