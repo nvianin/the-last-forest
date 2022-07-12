@@ -237,7 +237,7 @@ const load_colors = async () => {
         col.setHSL(hsl.h, hsl.s * 1.3, hsl.l * (.86 + hsl.l ** 2))
         /* log(col) */
 
-        treeTypes[key].color = "#" + col.getHexString()
+        treeTypes[key].color = /* "#" + */ col.getHexString()
         /* log(treeTypes[key].color) */
 
         /* log(treeTypes[key]) */
