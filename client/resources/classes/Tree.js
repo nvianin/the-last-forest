@@ -191,7 +191,41 @@ const load_colors = async () => {
     const vertexShader = await (await fetch("/resources/shaders/lineVertex.glsl")).text()
     /*     log(vertexShader) */
     const paletteShift = 12;
-    const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\n")
+    /* const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\n") */
+    const hexpalette = [
+        "#2b3f41",
+        "#3a5356",
+        "#57797d",
+        "#8ca697",
+        "#3f3e20",
+        "#555735",
+        "#767f45",
+        "#a4ab79",
+        "#593234",
+        "#734141",
+        "#8c504d",
+        "#b87a66",
+        "#c1b05c",
+        "#a2c391",
+        "#907067",
+        "#71554a",
+        "#3c3c3c",
+        "#544a44",
+        "#a1623b",
+        "#b68241",
+        "#e2b55f",
+        "#b2b2f2",
+        "#00ac7c",
+        "#4ba453",
+        "#3c603f",
+        "#4e3c5c",
+        "#6e4d7e",
+        "#8f619a",
+        "#20415b",
+        "#235b7c",
+        "#2d80a6",
+        "#5eb3bc",
+    ]
     log(hexpalette)
     hexpalette.reverse()
     let i = 0;
