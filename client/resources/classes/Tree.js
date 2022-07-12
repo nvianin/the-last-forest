@@ -191,7 +191,8 @@ const load_colors = async () => {
     const vertexShader = await (await fetch("/resources/shaders/lineVertex.glsl")).text()
     /*     log(vertexShader) */
     const paletteShift = 12;
-    const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\r\n")
+    const hexpalette = (await (await fetch("/resources/palettes/marshmellow32.hex")).text()).split("\n")
+    log(hexpalette)
     hexpalette.reverse()
     let i = 0;
     for (key of Object.keys(treeTypes)) {
