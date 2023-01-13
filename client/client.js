@@ -97,7 +97,7 @@ const debug = {
     show_imposters: true,
     particle: true,
     postprocessing: true,
-    autostart: false,
+    autostart: true,
     max_generation_level: 6,
     tree_build_limit: 0 || parseFloat(localStorage.getItem("tree_build_limit")),
 
