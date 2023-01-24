@@ -91,7 +91,7 @@ class UserManager {
                 delete this.users[client.user.id];
             });
         });
-        this.server.listen(80);
+        this.server.listen(6666);
 
 
         log("User manager online");
